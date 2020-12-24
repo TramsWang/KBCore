@@ -3,11 +3,12 @@ package compressor;
 import common.JplRule;
 import org.jpl7.*;
 import utils.AmieRuleLoader;
+import utils.graph.BaseGraphNode;
+import utils.graph.Tarjan;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
 
 public class NaiveCompressor {
@@ -25,16 +26,37 @@ public class NaiveCompressor {
         }
     }
 
+    private class GraphNode4Compound extends BaseGraphNode {
+        public Compound compound;
+
+        public GraphNode4Compound(Compound compound) {
+            this.compound = compound;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            GraphNode4Compound graphNode = (GraphNode4Compound) o;
+            return Objects.equals(compound, graphNode.compound);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(compound);
+        }
+    }
+
     private final String bkPath;
     private final String hypothesisPath;
 
     private final Set<Compound> facts = new HashSet<>();  // <fact, functor>
     private final Set<String> predicates = new HashSet<>();
     private final List<JplRule> rules = new ArrayList<>();
-    private final Map<Compound, Set<Compound>> graph = new HashMap<>();
+    private final Map<GraphNode4Compound, Set<GraphNode4Compound>> graph = new HashMap<>();
     private final Set<Compound> counterExamples = new HashSet<>();
     private final Set<Compound> startSet = new HashSet<>();
-    private final Set<Compound> goalSet = new HashSet<>();
+//    private final Set<Compound> goalSet = new HashSet<>();
 
     public NaiveCompressor(String bkPath, String hypothesisPath) {
         this.bkPath = bkPath;
@@ -59,6 +81,12 @@ public class NaiveCompressor {
         findCore();
         long time_core_found = System.currentTimeMillis();
         System.out.printf("Core found in %fs\n", (time_core_found - time_graph_constructed) / 1000.0);
+
+        validate();
+        long time_validation_finished = System.currentTimeMillis();
+        System.out.printf("Validation finished in %fs\n", (time_validation_finished - time_core_found) / 1000.);
+
+        System.out.printf("Total Time: %fs\n", (time_validation_finished - time_start) / 1000.0);
     }
 
     private void appendKnowledge(PrologModule module, Term knowledge) {
@@ -124,9 +152,13 @@ public class NaiveCompressor {
                 });
                 for (Map<String, Term> binding: q) {
                     Compound head_substituted = substitute(rule.head, binding);
+                    GraphNode4Compound head_node = new GraphNode4Compound(head_substituted);
                     if (facts.contains(head_substituted)) {
-                        Set<Compound> neighbours = graph.computeIfAbsent(head_substituted, k -> new HashSet<>());
-                        neighbours.addAll(Arrays.asList(rule.body));
+                        Set<GraphNode4Compound> neighbours = graph.computeIfAbsent(head_node, k -> new HashSet<>());
+                        for (Compound body: rule.body) {
+                            GraphNode4Compound body_node = new GraphNode4Compound(body);
+                            neighbours.add(body_node);
+                        }
                     } else {
                         counterExamples.add(head_substituted);
                     }
@@ -136,7 +168,7 @@ public class NaiveCompressor {
 
         /* Count Graph */
         int total_edges = 0;
-        for (Set<Compound> neighbours: graph.values()) {
+        for (Set<GraphNode4Compound> neighbours: graph.values()) {
             total_edges += neighbours.size();
         }
         System.out.printf("Graph Constructed: %d edges\n", total_edges);
@@ -151,23 +183,31 @@ public class NaiveCompressor {
         return new Compound(compound.name(), bounded_args);
     }
 
-    // TODO: 需要找环
-    public void findCore() {
+    private void findCore() {
         System.out.println("\n>>> Finding Core...");
+        /* 先把所有没有依赖（出边）的点加入START set */
         for (Compound fact: facts) {
-            if (graph.containsKey(fact)) {
-                goalSet.add(fact);
-            } else {
+            GraphNode4Compound fact_node = new GraphNode4Compound(fact);
+            if (!graph.containsKey(fact_node)) {
                 startSet.add(fact);
             }
         }
+
+        /* TODO: 再分析图上的所有强连通分量，在每一个强连通分量中选取一个点加入START set */
+        final int old_start_set_size = startSet.size();
+        Tarjan<GraphNode4Compound> tarjan = new Tarjan<>(graph);
+        List<Set<GraphNode4Compound>> sccs = tarjan.run();
+        for (Set<GraphNode4Compound> scc: sccs) {
+            startSet.add(scc.iterator().next().compound);
+        }
+
         System.out.printf(
-                "Core Found: %d in START set; %d in GOAL set; %d in COUNTER EXAMPLE set\n",
-                startSet.size(), goalSet.size(), counterExamples.size()
+                "Core Found: %d in START set(%d + %d); %d in COUNTER EXAMPLE set\n",
+                startSet.size(), old_start_set_size, sccs.size(), counterExamples.size()
         );
     }
 
-    public void validate() {
+    private void validate() {
         System.out.println("\n>>> Validating...");
 
         /* Declare all predicates in START_SET module */
@@ -190,25 +230,20 @@ public class NaiveCompressor {
         }
 
         /* Check all facts in GOAL set(for those that cannot be proved, add to START set) */
-        Set<Compound> new_goal_set = new HashSet<>();
-        for (Compound goal: goalSet) {
-            Query q = new Query(new Compound(":", new Term[]{
-                    new Atom(PrologModule.START_SET.getSessionName()), goal
-            }));
+        for (Compound goal: facts) {
+            if (!startSet.contains(goal)) {
+                Query q = new Query(new Compound(":", new Term[]{
+                        new Atom(PrologModule.START_SET.getSessionName()), goal
+                }));
 //            System.out.println(q.toString());
-            if (!q.hasSolution()) {
-                startSet.add(goal);
-                appendKnowledge(PrologModule.START_SET, goal);
-            } else {
-                new_goal_set.add(goal);
+                if (!q.hasSolution()) {
+                    System.err.printf("Goal not provable: %s\n", goal.toString());
+                }
+                q.close();
             }
-            q.close();
         }
 
-        System.out.printf(
-                "Validation Finished: %d in START set; %d in GOAL set; %d in COUNTER EXAMPLE set\n",
-                startSet.size(), new_goal_set.size(), counterExamples.size()
-        );
+        System.out.println("Validation Finished");
     }
 
     public static void main(String[] args) {
@@ -219,23 +254,23 @@ public class NaiveCompressor {
         long finished_time = System.currentTimeMillis();
         System.out.printf("Compressor(Naive) finished in %fs\n", (finished_time - start_time) / 1000.0);
 
-        try {
-            PrintWriter writer = new PrintWriter("startSet.pl");
-            for (Compound compound: compressor.startSet) {
-                writer.print(compound.toString());
-                writer.println('.');
-            }
-            writer.close();
-
-            writer = new PrintWriter("counterExamples.pl");
-            for (Compound compound: compressor.counterExamples) {
-                writer.print(compound.toString());
-                writer.println('.');
-            }
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            PrintWriter writer = new PrintWriter("startSet.pl");
+//            for (Compound compound: compressor.startSet) {
+//                writer.print(compound.toString());
+//                writer.println('.');
+//            }
+//            writer.close();
+//
+//            writer = new PrintWriter("counterExamples.pl");
+//            for (Compound compound: compressor.counterExamples) {
+//                writer.print(compound.toString());
+//                writer.println('.');
+//            }
+//            writer.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         compressor.validate();
         long validated_time = System.currentTimeMillis();

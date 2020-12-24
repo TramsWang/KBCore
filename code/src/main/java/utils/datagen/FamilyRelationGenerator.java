@@ -69,9 +69,9 @@ public class FamilyRelationGenerator {
         }
     }
 
-    class Triple {}
+    static class Triple {}
 
-    class FamilyTriple extends Triple {
+    static class FamilyTriple extends Triple {
         FamilyMember subject;
         FamilyPredicate familyPredicate;
         FamilyMember object;
@@ -83,7 +83,7 @@ public class FamilyRelationGenerator {
         }
     }
 
-    class GenderTripe extends Triple {
+    static class GenderTripe extends Triple {
         FamilyMember subject;
         Gender gender;
 
@@ -96,8 +96,8 @@ public class FamilyRelationGenerator {
     public static double ERROR_PROB = -1;
     public static int FAMILY_CNT = 1;
 
-    public void generateSimple() throws IOException {
-        final String fpath = String.format("FamilyRelationSimple(%dx).tsv", FAMILY_CNT);
+    public static void generateSimple(String path) throws IOException {
+        final String fpath = String.format("%s/FamilyRelationSimple(%f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);
         Random random = new Random();
         PrintWriter writer = new PrintWriter(fpath);
         FamilyMember[] familyMemberValues = FamilyMember.values();
@@ -165,8 +165,8 @@ public class FamilyRelationGenerator {
         writer.close();
     }
 
-    public void generateMedium() throws IOException {
-        final String fpath = String.format("FamilyRelationMedium(%dx).tsv", FAMILY_CNT);
+    public static void generateMedium(String path) throws IOException {
+        final String fpath = String.format("%s/FamilyRelationMedium(%f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);
         Random random = new Random();
         PrintWriter writer = new PrintWriter(fpath);
         FamilyMember[] familyMemberValues = FamilyMember.values();
@@ -277,8 +277,8 @@ public class FamilyRelationGenerator {
             triples.add(new FamilyTriple(FamilyMember.AUNT_B, FamilyPredicate.AUNT, FamilyMember.DAUGHTER));
             triples.add(new FamilyTriple(FamilyMember.UNCLE_B, FamilyPredicate.UNCLE, FamilyMember.BROTHER));
             triples.add(new FamilyTriple(FamilyMember.UNCLE_B, FamilyPredicate.UNCLE, FamilyMember.SISTER));
-            triples.add(new FamilyTriple(FamilyMember.MOTHER, FamilyPredicate.AUNT, FamilyMember.SON));
-            triples.add(new FamilyTriple(FamilyMember.MOTHER, FamilyPredicate.AUNT, FamilyMember.DAUGHTER));
+            triples.add(new FamilyTriple(FamilyMember.MOTHER, FamilyPredicate.AUNT, FamilyMember.BROTHER));
+            triples.add(new FamilyTriple(FamilyMember.MOTHER, FamilyPredicate.AUNT, FamilyMember.SISTER));
 
             /* gender */
             triples.add(new GenderTripe(FamilyMember.GRAND_FATHER, Gender.MALE));
@@ -326,7 +326,7 @@ public class FamilyRelationGenerator {
         writer.close();
     }
 
-    private void writeRelation(PrintWriter writer, Triple triple, int subjId, int objId) {
+    private static void writeRelation(PrintWriter writer, Triple triple, int subjId, int objId) {
         if (triple instanceof FamilyTriple) {
             FamilyTriple triple_family = (FamilyTriple)triple;
             writer.printf(
@@ -343,8 +343,7 @@ public class FamilyRelationGenerator {
     }
 
     public static void main(String[] args) throws IOException {
-        FamilyRelationGenerator generator = new FamilyRelationGenerator();
-//        generator.generateSimple();
-        generator.generateMedium();
+//        generateSimple(".");
+        generateMedium(".");
     }
 }
