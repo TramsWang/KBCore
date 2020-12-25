@@ -134,8 +134,24 @@ public class JplTest {
         System.out.println(q.hasSolution());
     }
 
+    private void testSpecialPredicate() {
+        JPL.init();
+        Term t = Term.textToTerm("=/=(a, b)");
+        System.out.println(t.toString());
+
+        Compound compound = new Compound("\\==", new Term[]{new Atom("c"), new Atom("d")});
+        System.out.println(compound.name());
+        System.out.println(compound.toString());
+
+//        t = Term.textToTerm(compound.toString());
+//        System.out.println(t.toString());
+
+        System.out.println("\\==".length());
+        System.out.println("\\==");
+    }
+
     public static void main(String[] args) {
         JplTest test = new JplTest();
-        test.testCreatePredicate();
+        test.testSpecialPredicate();
     }
 }

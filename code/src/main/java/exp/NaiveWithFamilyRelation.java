@@ -21,7 +21,7 @@ public class NaiveWithFamilyRelation {
 
     private static void runAlg(String bkPath, String hypothesisPath) {
         System.out.println("\n>>> Running Algorithm...");
-        NaiveCompressor compressor = new NaiveCompressor(bkPath, hypothesisPath);
+        NaiveCompressor compressor = new NaiveCompressor(bkPath, hypothesisPath, false);
         compressor.run();
     }
 
