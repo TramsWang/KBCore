@@ -27,12 +27,16 @@ public class MultiSet<T> {
         return cnt;
     }
 
-    public double jaccardDistance(MultiSet<T> another) {
-        return ((double)this.intersection(another).size()) / this.union(another).size();
+    public double jaccardSimilarity(MultiSet<T> another) {
+        MultiSet<T> intersection = this.intersection(another);
+        MultiSet<T> union = this.union(another);
+        double intersection_size = intersection.size();
+        double union_sieze = union.size();
+        return intersection_size / union_sieze;
     }
 
     public MultiSet<T> intersection(MultiSet<T> another) {
-        Map<T, Integer> intersection = new HashMap<>(cntMap);
+        Map<T, Integer> intersection = new HashMap<>();
         Set<Map.Entry<T, Integer>> entry_set;
         Map<T, Integer> compared_map;
         if (this.cntMap.keySet().size() <= another.cntMap.keySet().size()) {

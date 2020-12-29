@@ -93,8 +93,8 @@ public class FamilyRelationGenerator {
         }
     }
 
-    public static double ERROR_PROB = -1;
-    public static int FAMILY_CNT = 1;
+    public static double ERROR_PROB = 0.05;
+    public static int FAMILY_CNT = 10;
 
     public static void generateSimple(String path) throws IOException {
         final String fpath = String.format("%s/FamilyRelationSimple(%f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);
@@ -330,20 +330,20 @@ public class FamilyRelationGenerator {
         if (triple instanceof FamilyTriple) {
             FamilyTriple triple_family = (FamilyTriple)triple;
             writer.printf(
-                    "%s_%d\t%s\t%s_%d\n", triple_family.subject.shortName, subjId, triple_family.familyPredicate.name,
+                    "%s\t%s_%d\t%s_%d\n", triple_family.familyPredicate.name, triple_family.subject.shortName, subjId,
                     triple_family.object.shortName, objId
             );
         } else if (triple instanceof GenderTripe) {
             GenderTripe triple_gender = (GenderTripe)triple;
             writer.printf(
-                    "%s_%d\t%s\t%s\n", triple_gender.subject.shortName, subjId, OtherPredicate.GENDER.name,
+                    "%s\t%s_%d\t%s\n", OtherPredicate.GENDER.name, triple_gender.subject.shortName, subjId,
                     triple_gender.gender.name
             );
         }
     }
 
     public static void main(String[] args) throws IOException {
-//        generateSimple(".");
-        generateMedium(".");
+        generateSimple("testData/familyRelation");
+//        generateMedium("testData/familyRelation");
     }
 }
