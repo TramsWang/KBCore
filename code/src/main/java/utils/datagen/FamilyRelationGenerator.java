@@ -94,10 +94,10 @@ public class FamilyRelationGenerator {
     }
 
     public static double ERROR_PROB = 0.05;
-    public static int FAMILY_CNT = 10;
+    public static int FAMILY_CNT = 100;
 
     public static void generateSimple(String path) throws IOException {
-        final String fpath = String.format("%s/FamilyRelationSimple(%f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);
+        final String fpath = String.format("%s/FamilyRelationSimple(%.2f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);
         Random random = new Random();
         PrintWriter writer = new PrintWriter(fpath);
         FamilyMember[] familyMemberValues = FamilyMember.values();
@@ -166,7 +166,7 @@ public class FamilyRelationGenerator {
     }
 
     public static void generateMedium(String path) throws IOException {
-        final String fpath = String.format("%s/FamilyRelationMedium(%f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);
+        final String fpath = String.format("%s/FamilyRelationMedium(%.2f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);
         Random random = new Random();
         PrintWriter writer = new PrintWriter(fpath);
         FamilyMember[] familyMemberValues = FamilyMember.values();
@@ -343,7 +343,7 @@ public class FamilyRelationGenerator {
     }
 
     public static void main(String[] args) throws IOException {
-        generateSimple("testData/familyRelation");
-//        generateMedium("testData/familyRelation");
+//        generateSimple("testData/familyRelation");
+        generateMedium("testData/familyRelation");
     }
 }
