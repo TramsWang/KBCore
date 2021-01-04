@@ -19,6 +19,10 @@ public class MultiSet<T> {
         cntMap.compute(element, (k, v) -> (null == v) ? 1 : v + 1);
     }
 
+    public void remove(T element) {
+        cntMap.computeIfPresent(element, (k, v) -> (1 < v) ? v - 1 : null);
+    }
+
     public int size() {
         int cnt = 0;
         for (Integer element_cnt: cntMap.values()) {

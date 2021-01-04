@@ -1,9 +1,9 @@
 package compressor;
 
+import common.GraphNode4Compound;
 import common.JplRule;
 import org.jpl7.*;
 import utils.AmieRuleLoader;
-import utils.graph.BaseGraphNode;
 import utils.graph.GraphView;
 import utils.graph.Tarjan;
 
@@ -25,27 +25,6 @@ public class NaiveCompressor {
 
         public String getSessionName() {
             return sessionName;
-        }
-    }
-
-    private static class GraphNode4Compound extends BaseGraphNode {
-        public Compound compound;
-
-        public GraphNode4Compound(Compound compound) {
-            this.compound = compound;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            GraphNode4Compound graphNode = (GraphNode4Compound) o;
-            return Objects.equals(compound, graphNode.compound);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(compound);
         }
     }
 
