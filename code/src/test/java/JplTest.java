@@ -1,5 +1,6 @@
 import org.jpl7.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class JplTest {
@@ -150,8 +151,26 @@ public class JplTest {
         System.out.println("\\==");
     }
 
+    private void testMapEquality() {
+        Map<String, String> m1 = new HashMap<>();
+        m1.put("a", "A");
+        m1.put("b", "B");
+        Map<String, String> m2 = new HashMap<>();
+        m2.put("a", "A");
+        m2.put("b", "B");
+        System.out.println(m1.equals(m2));
+
+        Map<String, Term> m3 = new HashMap<>();
+        m3.put("a", new Atom("A"));
+        m3.put("b", new Atom("B"));
+        Map<String, Term> m4 = new HashMap<>();
+        m4.put("a", new Atom("A"));
+        m4.put("b", new Atom("B"));
+        System.out.println(m3.equals(m4));
+    }
+
     public static void main(String[] args) {
         JplTest test = new JplTest();
-        test.testSpecialPredicate();
+        test.testMapEquality();
     }
 }
