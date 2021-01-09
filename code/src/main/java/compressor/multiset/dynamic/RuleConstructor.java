@@ -1,16 +1,14 @@
 package compressor.multiset.dynamic;
 
 import common.JplRule;
-import org.jpl7.Compound;
-import org.jpl7.Term;
-import org.jpl7.Variable;
+import org.jpl7.*;
 import utils.MultiSet;
 
 import java.util.*;
 
 public class RuleConstructor {
 
-    private static final double THRESHOLD = 0.3;
+    private static final double THRESHOLD = 0.0;
 
     /* Head pred is at index 0; body from 1 to ... */
     int vars_cnt;
@@ -18,15 +16,15 @@ public class RuleConstructor {
     final List<MultiSet<String>[]> ruleArgSetList;
     final Map<String, MultiSet<String>[]> otherPred2ArgSetMap;
 
-    public RuleConstructor(String headPred, int headPredArity, Map<String, MultiSet<String>[]> pred2ArgSetMap) {
-        PredInfo head = new PredInfo(headPred, headPredArity);
+    public RuleConstructor(String headPred, Map<String, MultiSet<String>[]> pred2ArgSetMap) {
+        MultiSet<String>[] head_arg_sets = pred2ArgSetMap.remove(headPred);
+        otherPred2ArgSetMap = new HashMap<>(pred2ArgSetMap);
+        PredInfo head = new PredInfo(headPred, head_arg_sets.length);
         rule = new ArrayList<>();
         rule.add(head);
-        vars_cnt = 0;
-
         ruleArgSetList = new ArrayList<>();
-        otherPred2ArgSetMap = new HashMap<>(pred2ArgSetMap);
-        ruleArgSetList.add(otherPred2ArgSetMap.remove(headPred));
+        ruleArgSetList.add(head_arg_sets);
+        vars_cnt = 0;
     }
 
     public RuleConstructor(
@@ -63,9 +61,11 @@ public class RuleConstructor {
                         if (null == pred_info_i.args[arg_idx_i] || null == pred_info_j.args[arg_idx_j]) {
                             double similarity = pred_arg_sets_i[arg_idx_i]
                                     .jaccardSimilarity(pred_arg_sets_j[arg_idx_j]);
-                            sim_info_list.add(new SimilarityInfo(
-                                    similarity, pred_idx_i, arg_idx_i, pred_idx_j, null, arg_idx_j
-                            ));
+                            if (!Double.isNaN(similarity)) {
+                                sim_info_list.add(new SimilarityInfo(
+                                        similarity, pred_idx_i, arg_idx_i, pred_idx_j, null, arg_idx_j
+                                ));
+                            }
                         }
                     }
                 }
@@ -81,9 +81,11 @@ public class RuleConstructor {
                     for (int arg_idx_j = 0; arg_idx_j < pred_arg_sets_j.length; arg_idx_j++) {
                         double similarity = pred_arg_sets_i[arg_idx_i]
                                 .jaccardSimilarity(pred_arg_sets_j[arg_idx_j]);
-                        sim_info_list.add(new SimilarityInfo(
-                                similarity, pred_idx_i, arg_idx_i, 0, entry.getKey(), arg_idx_j
-                        ));
+                        if (!Double.isNaN(similarity)) {
+                            sim_info_list.add(new SimilarityInfo(
+                                    similarity, pred_idx_i, arg_idx_i, 0, entry.getKey(), arg_idx_j
+                            ));
+                        }
                     }
                 }
             }
@@ -91,8 +93,9 @@ public class RuleConstructor {
 
         /* 给相似度排序，从高到低依次用来构造规则 */
         sim_info_list.sort(Comparator.comparingDouble((SimilarityInfo e) -> e.similarity).reversed());
-        if (THRESHOLD > sim_info_list.get(0).similarity) {
+        if (sim_info_list.isEmpty() || THRESHOLD > sim_info_list.get(0).similarity) {
             /* 如果所有的参数效果都不好，中止 */
+            System.out.println("Abort");
             return result;
         }
         for (SimilarityInfo sim_info: sim_info_list) {
@@ -102,10 +105,10 @@ public class RuleConstructor {
             for (PredInfo pred_info: rule) {
                 tmp_rule.add(new PredInfo(pred_info));
             }
-            List<MultiSet<String>[]> tmp_rule_arg_set_list = new ArrayList<>(ruleArgSetList.size());
-            for (MultiSet<String>[] arg_sets: ruleArgSetList) {
-                tmp_rule_arg_set_list.add(arg_sets.clone());
-            }
+//            List<MultiSet<String>[]> tmp_rule_arg_set_list = new ArrayList<>(ruleArgSetList.size());
+//            for (MultiSet<String>[] arg_sets: ruleArgSetList) {
+//                tmp_rule_arg_set_list.add(arg_sets.clone());
+//            }
             Map<String, MultiSet<String>[]> tmp_other_pred_2_arg_set_map = new HashMap<>(otherPred2ArgSetMap);
 
             /* 将对应的两个参数设置成同一个变量 */
@@ -126,7 +129,7 @@ public class RuleConstructor {
                 MultiSet<String>[] new_pred_args_set = tmp_other_pred_2_arg_set_map.remove(sim_info.pred2);
                 pred_info2 = new PredInfo(sim_info.pred2, new_pred_args_set.length);
                 tmp_rule.add(pred_info2);
-                tmp_rule_arg_set_list.add(new_pred_args_set);
+//                tmp_rule_arg_set_list.add(new_pred_args_set);
 
                 arg_info1 = pred_info1.args[sim_info.argIdx1];
                 arg_info2 = pred_info2.args[sim_info.argIdx2];
@@ -151,8 +154,8 @@ public class RuleConstructor {
                 }
             }
 
-            /* Todo: 更新参数multiset */
-            ?
+            /* 更新参数multiset */
+            List<MultiSet<String>[]> tmp_rule_arg_set_list = calRuleArgSets(tmp_rule);
 
             RuleConstructor next_step = new RuleConstructor(
                     tmp_var_cnt, tmp_rule, tmp_rule_arg_set_list, tmp_other_pred_2_arg_set_map
@@ -191,5 +194,75 @@ public class RuleConstructor {
         }
 
         return new JplRule(head_compound, body_compounds);
+    }
+
+    public List<MultiSet<String>[]> calRuleArgSets(List<PredInfo> rule) {
+        List<Compound> rule_compounds = new ArrayList<>();
+
+        /* 把head转成Prolog String */
+        PredInfo head_pred_info = rule.get(0);
+        Term[] args = new Term[head_pred_info.args.length];
+        int anonymous_var_cnt = 0;
+        for (int arg_idx = 0; arg_idx < args.length; arg_idx++) {
+            if (null == head_pred_info.args[arg_idx]) {
+                args[arg_idx] = new Variable(String.format("Y%d", anonymous_var_cnt++));
+            } else {
+                args[arg_idx] = new Variable(head_pred_info.args[arg_idx].name);
+            }
+        }
+        Compound head_compound = new Compound(head_pred_info.predicate, args);
+        rule_compounds.add(head_compound);
+        StringBuilder builder = new StringBuilder(head_compound.toString());
+
+        /* 把body中的每一个pred都转成Prolog String拼接在后面，并记录所有的已经确定的参数 */
+        for (int pred_idx = 1; pred_idx < rule.size(); pred_idx++) {
+            PredInfo body_pred_info = rule.get(pred_idx);
+            args = new Term[body_pred_info.args.length];
+            for (int arg_idx = 0; arg_idx < args.length; arg_idx++) {
+                if (null == body_pred_info.args[arg_idx]) {
+                    args[arg_idx] = new Variable(String.format("Y%d", anonymous_var_cnt++));
+                } else {
+                    args[arg_idx] = new Variable(body_pred_info.args[arg_idx].name);
+                }
+            }
+            Compound body_compound = new Compound(body_pred_info.predicate, args);
+            builder.append(',').append(body_compound.toString());
+            rule_compounds.add(body_compound);
+        }
+
+        /* 匹配所有参数的取值 */
+        Query q = new Query(":", new Term[]{
+                new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(builder.toString())
+        });
+        Map<String, Term>[] bindings = q.allSolutions();
+        q.close();
+        List<MultiSet<String>[]> pred_arg_sets = new ArrayList<>(rule.size());
+        for (int pred_idx = 0; pred_idx < rule.size(); pred_idx++) {
+            Compound compound = rule_compounds.get(pred_idx);
+            Set<Compound> fact_set = new HashSet<>();
+            MultiSet<String>[] arg_sets = new MultiSet[compound.arity()];
+            for (int set_idx = 0; set_idx < arg_sets.length; set_idx++) {
+                arg_sets[set_idx] = new MultiSet<>();
+            }
+            for (Map<String, Term> binding: bindings) {
+                Compound fact = substitute(compound, binding);
+                if (fact_set.add(fact)) {
+                    for (int arg_idx = 0; arg_idx < fact.arity(); arg_idx++) {
+                        arg_sets[arg_idx].add(fact.arg(arg_idx+1).name());
+                    }
+                }
+            }
+            pred_arg_sets.add(arg_sets);
+        }
+        return pred_arg_sets;
+    }
+
+    private Compound substitute(Compound compound, Map<String, Term> binding) {
+        Term[] bounded_args = new Term[compound.arity()];
+        for (int i = 0; i < bounded_args.length; i++) {
+            Term original = compound.arg(i+1);
+            bounded_args[i] = binding.getOrDefault(original.name(), original);
+        }
+        return new Compound(compound.name(), bounded_args);
     }
 }

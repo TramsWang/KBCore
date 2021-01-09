@@ -4,8 +4,8 @@ public class Validness {
     final int posCnt;
     final int negCnt;
 
-    public Validness(int positiveCnt, int negCnt) {
-        this.posCnt = positiveCnt;
+    public Validness(int posCnt, int negCnt) {
+        this.posCnt = posCnt;
         this.negCnt = negCnt;
     }
 

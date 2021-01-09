@@ -13,7 +13,7 @@ public class PredInfo {
         this.predicate = another.predicate;
         this.args = new ArgInfo[another.args.length];
         for (int i = 0; i < args.length; i++) {
-            this.args[i] = new ArgInfo(another.args[i]);
+            this.args[i] = (null == another.args[i]) ? null : new ArgInfo(another.args[i]);
         }
     }
 }

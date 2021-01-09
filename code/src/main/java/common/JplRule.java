@@ -2,8 +2,6 @@ package common;
 
 import org.jpl7.Compound;
 
-import java.util.Arrays;
-
 public class JplRule {
     public Compound head;
     public Compound[] body;
@@ -15,8 +13,11 @@ public class JplRule {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(head.toString());
-        builder.append(":-");
+        return getHeadString() + ":-" + getBodyString();
+    }
+
+    public String getBodyString() {
+        StringBuilder builder = new StringBuilder();
         if (0 < body.length) {
             builder.append(body[0].toString());
             for (int i = 1; i < body.length; i++) {
@@ -24,5 +25,9 @@ public class JplRule {
             }
         }
         return builder.toString();
+    }
+
+    public String getHeadString() {
+        return head.toString();
     }
 }
