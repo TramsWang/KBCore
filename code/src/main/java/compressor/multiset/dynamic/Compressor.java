@@ -1,9 +1,6 @@
 package compressor.multiset.dynamic;
 
-import common.GraphNode4Compound;
 import common.JplRule;
-import compressor.CompressorWithMultisetDynamicRuleConstruction;
-import compressor.NaiveCompressor;
 import org.jpl7.Atom;
 import org.jpl7.Compound;
 import org.jpl7.Query;
@@ -13,6 +10,7 @@ import utils.MultiSet;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class Compressor {
@@ -22,6 +20,7 @@ public class Compressor {
     private final boolean debug;
 
     private final Set<Compound> originalFacts = new HashSet<>();
+    private final Map<String, Integer> originalFactsCntByPred = new HashMap<>();
     private final Map<String, Set<Compound>> curFactsByPred = new HashMap<>();
     private final Map<String, MultiSet<String>[]> pred2ArgSetMap = new HashMap<>();
     private final Map<String, Integer> pred2ArityMap = new HashMap<>();
@@ -79,6 +78,10 @@ public class Compressor {
             for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
                 pred2ArityMap.put(entry.getKey(), entry.getValue().length);
             }
+            for (Map.Entry<String, Set<Compound>> entry: curFactsByPred.entrySet()) {
+                originalFactsCntByPred.put(entry.getKey(), entry.getValue().size());
+            }
+            RuleConstructor.setPred2FactSetMap(originalFactsCntByPred);
             System.out.printf("BK loaded: %d predicates; %d facts\n", pred2ArgSetMap.size(), line_cnt);
         } catch (IOException e) {
             e.printStackTrace();
@@ -88,24 +91,36 @@ public class Compressor {
     public void observeFirstRoundRules() {
         loadBk();
 
+        List<JplRule> all_rules = new ArrayList<>();
         for (String pred: pred2ArityMap.keySet()) {
             RuleConstructor constructor = new RuleConstructor(pred, pred2ArgSetMap);
             try {
                 List<JplRule> rules = constructor.findRules();
-                for (JplRule rule: rules) {
-                    Validness validness = calValidness(rule);
-                    System.out.printf(
-                            "%d/%d(%f)\t%s\n", validness.posCnt, validness.negCnt,
-                            validness.getValidness(), rule
-                    );
-                }
+//                for (JplRule rule: rules) {
+//                    Validness validness = calValidness(rule);
+//                    System.out.printf(
+//                            "%d/%d(%f)\t%s\n", validness.posCnt, validness.negCnt,
+//                            validness.getValidness(), rule
+//                    );
+//                }
+                all_rules.addAll(rules);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
 
-            if (debug) {
-                break;
+        try {
+            PrintWriter writer = new PrintWriter(hypothesisPath);
+            for (JplRule rule: all_rules) {
+                Validness validness = calValidness(rule);
+                writer.printf(
+                        "%d/%d(%f)\t%s\n", validness.posCnt, validness.negCnt,
+                        validness.getValidness(), rule
+                );
             }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -141,8 +156,8 @@ public class Compressor {
 
     public static void main(String[] args) {
         Compressor compressor = new Compressor(
-                "FamilyRelationSimple(0.05)(100x).tsv",
-                "none",
+                "FamilyRelationMedium(0.05)(100x).tsv",
+                "HypothesisDynamic.pl",
                 true
         );
         compressor.observeFirstRoundRules();

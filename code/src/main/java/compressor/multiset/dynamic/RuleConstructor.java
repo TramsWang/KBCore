@@ -4,11 +4,15 @@ import common.JplRule;
 import org.jpl7.*;
 import utils.MultiSet;
 
+import java.lang.Integer;
 import java.util.*;
 
 public class RuleConstructor {
 
-    private static final double THRESHOLD = 0.0;
+    private static final double MIN_SIMILARITY = 0.0;
+    private static final double MIN_HEAD_COVERAGE = 0.05;
+
+    private static Map<String, Integer> pred2FactSetMap;
 
     /* Head pred is at index 0; body from 1 to ... */
     int vars_cnt;
@@ -93,12 +97,15 @@ public class RuleConstructor {
 
         /* 给相似度排序，从高到低依次用来构造规则 */
         sim_info_list.sort(Comparator.comparingDouble((SimilarityInfo e) -> e.similarity).reversed());
-        if (sim_info_list.isEmpty() || THRESHOLD > sim_info_list.get(0).similarity) {
+        if (sim_info_list.isEmpty() || MIN_SIMILARITY >= sim_info_list.get(0).similarity) {
             /* 如果所有的参数效果都不好，中止 */
-            System.out.println("Abort");
+            showCurRule();
+            System.out.printf("Abort: %d covered for now\n", ruleArgSetList.get(0)[0].size());
             return result;
         }
-        for (SimilarityInfo sim_info: sim_info_list) {
+//        for (SimilarityInfo sim_info: sim_info_list) {
+        for (int sim_info_idx = 0; sim_info_idx < sim_info_list.size(); sim_info_idx++) {
+            SimilarityInfo sim_info = sim_info_list.get(sim_info_idx);
             /* 将参数复制一份 */
             int tmp_var_cnt = vars_cnt;
             List<PredInfo> tmp_rule = new ArrayList<>(rule.size());
@@ -154,8 +161,11 @@ public class RuleConstructor {
                 }
             }
 
-            /* 更新参数multiset */
+            /* 更新参数multiset，如果是null表示不再递归 */
             List<MultiSet<String>[]> tmp_rule_arg_set_list = calRuleArgSets(tmp_rule);
+            if (null == tmp_rule_arg_set_list) {
+                continue;
+            }
 
             RuleConstructor next_step = new RuleConstructor(
                     tmp_var_cnt, tmp_rule, tmp_rule_arg_set_list, tmp_other_pred_2_arg_set_map
@@ -236,23 +246,46 @@ public class RuleConstructor {
         });
         Map<String, Term>[] bindings = q.allSolutions();
         q.close();
+
+        /* 先看head coverage，如果太小则直接abort */
         List<MultiSet<String>[]> pred_arg_sets = new ArrayList<>(rule.size());
-        for (int pred_idx = 0; pred_idx < rule.size(); pred_idx++) {
-            Compound compound = rule_compounds.get(pred_idx);
-            Set<Compound> fact_set = new HashSet<>();
-            MultiSet<String>[] arg_sets = new MultiSet[compound.arity()];
-            for (int set_idx = 0; set_idx < arg_sets.length; set_idx++) {
-                arg_sets[set_idx] = new MultiSet<>();
+        Compound compound_head = rule_compounds.get(0);
+        Set<Compound> head_fact_set = new HashSet<>();
+        MultiSet<String>[] head_arg_sets = new MultiSet[compound_head.arity()];
+        for (int set_idx = 0; set_idx < head_arg_sets.length; set_idx++) {
+            head_arg_sets[set_idx] = new MultiSet<>();
+        }
+        for (Map<String, Term> binding: bindings) {
+            Compound fact = substitute(compound_head, binding);
+            if (head_fact_set.add(fact)) {
+                for (int arg_idx = 0; arg_idx < fact.arity(); arg_idx++) {
+                    head_arg_sets[arg_idx].add(fact.arg(arg_idx+1).name());
+                }
+            }
+        }
+        double head_coverage = ((double)head_fact_set.size()) / pred2FactSetMap.get(head_pred_info.predicate);
+        if (MIN_HEAD_COVERAGE >= head_coverage) {
+            return null;
+        }
+        pred_arg_sets.add(head_arg_sets);
+
+        /* 继续把其他所有的参数更新 */
+        for (int pred_idx = 1; pred_idx < rule.size(); pred_idx++) {
+            Compound compound_body = rule_compounds.get(pred_idx);
+            Set<Compound> body_fact_set = new HashSet<>();
+            MultiSet<String>[] body_arg_sets = new MultiSet[compound_body.arity()];
+            for (int set_idx = 0; set_idx < body_arg_sets.length; set_idx++) {
+                body_arg_sets[set_idx] = new MultiSet<>();
             }
             for (Map<String, Term> binding: bindings) {
-                Compound fact = substitute(compound, binding);
-                if (fact_set.add(fact)) {
+                Compound fact = substitute(compound_body, binding);
+                if (body_fact_set.add(fact)) {
                     for (int arg_idx = 0; arg_idx < fact.arity(); arg_idx++) {
-                        arg_sets[arg_idx].add(fact.arg(arg_idx+1).name());
+                        body_arg_sets[arg_idx].add(fact.arg(arg_idx+1).name());
                     }
                 }
             }
-            pred_arg_sets.add(arg_sets);
+            pred_arg_sets.add(body_arg_sets);
         }
         return pred_arg_sets;
     }
@@ -264,5 +297,22 @@ public class RuleConstructor {
             bounded_args[i] = binding.getOrDefault(original.name(), original);
         }
         return new Compound(compound.name(), bounded_args);
+    }
+
+    private void showCurRule() {
+        System.out.print(rule.get(0).toString());
+        System.out.print(":-");
+        if (1 < rule.size()) {
+            System.out.print(rule.get(1));
+            for (int i = 2; i < rule.size(); i++) {
+                System.out.print(',');
+                System.out.print(rule.get(i).toString());
+            }
+        }
+        System.out.println();
+    }
+
+    public static void setPred2FactSetMap(Map<String, Integer> pred2FactSetMap) {
+        RuleConstructor.pred2FactSetMap = pred2FactSetMap;
     }
 }
