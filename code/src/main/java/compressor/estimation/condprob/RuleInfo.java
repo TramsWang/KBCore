@@ -23,6 +23,7 @@ public class RuleInfo {
         for (int i = 0; i < arity; i++) {
             head_info.args[i] = new ArgInfo(i, ArgType.VAR);
         }
+        rule.add(head_info);
         varCntList = new ArrayList<>(arity);
         for (int i = 0; i < arity; i++) {
             varCntList.add(1);
@@ -142,30 +143,4 @@ public class RuleInfo {
         PredInfo pred_info = rule.get(predIdx);
         return (null != pred_info.args[argIdx]) && (1 < varCntList.get(pred_info.args[argIdx].id));
     }
-
-//    public String toPlStringWithOnlyKnownVars() {
-//        PredInfo head_pred_info = rule.get(0);
-//        Term[] args = new Term[head_pred_info.args.length];
-//        for (int arg_idx = 0; arg_idx < args.length; arg_idx++) {
-//            args[arg_idx] = (1 < varCntList.get(head_pred_info.args[arg_idx].id)) ?
-//                    new Variable(head_pred_info.args[arg_idx].name) : new Variable("_");
-//        }
-//        Compound head_compound = new Compound(head_pred_info.predicate, args);
-//
-//        Compound[] body_compounds = new Compound[rule.size() - 1];
-//        for (int pred_idx = 1; pred_idx < rule.size(); pred_idx++) {
-//            PredInfo body_pred_info = rule.get(pred_idx);
-//            args = new Term[body_pred_info.args.length];
-//            for (int arg_idx = 0; arg_idx < args.length; arg_idx++) {
-//                args[arg_idx] = (
-//                        null != body_pred_info.args[arg_idx] &&
-//                                1 < varCntList.get(body_pred_info.args[arg_idx].id)
-//                ) ? new Variable(body_pred_info.args[arg_idx].name) :
-//                        new Variable("_");
-//            }
-//            body_compounds[pred_idx - 1] = new Compound(body_pred_info.predicate, args);
-//        }
-//
-//        return new JplRule(head_compound, body_compounds).toString();
-//    }
 }

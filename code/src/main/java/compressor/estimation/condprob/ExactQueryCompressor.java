@@ -89,7 +89,6 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
         PriorityQueue<RuleInfo> max_heap = new PriorityQueue<>(
                 Comparator.comparingDouble((RuleInfo e) -> e.score).reversed()
         );
-        List<JplRule> top_rules = new ArrayList<>();
         for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
             String predicate = entry.getKey();
             MultiSet<String>[] arg_sets = entry.getValue();
@@ -98,7 +97,9 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
             rule_info.score = 2.0 * arg_sets[0].size() - Math.pow(constants.size(), arg_sets.length);
             max_heap.add(rule_info);
         }
+
         while (!max_heap.isEmpty()) {
+            /* 如果得分最高的规则是一条完整的rule，则直接返回 */
             RuleInfo rule_info = max_heap.poll();
             JplRule jpl_rule = rule_info.toJplRule();
             if (null != jpl_rule) {
@@ -107,16 +108,15 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
 
             /* 遍历当前rule所有的可能的一步扩展，并加入heap */
             System.out.printf("Extend: %s\n", rule_info.toString());
-            if (0 < rule_info.getUnknownArgCnt()) {
+            int pred_idx = rule_info.ruleSize() - 1;
+            PredInfo last_pred_info = rule_info.getPred(pred_idx);
+            int arg_idx;
+            for (arg_idx = 0;
+                 arg_idx < last_pred_info.args.length && null != last_pred_info.args[arg_idx];
+                 arg_idx++
+            ) {}
+            if (arg_idx < last_pred_info.args.length) {
                 /* 有未知参数，先解决未知参数 */
-                int pred_idx = rule_info.ruleSize() - 1;
-                PredInfo last_pred_info = rule_info.getPred(pred_idx);
-                int arg_idx;
-                for (arg_idx = 0;
-                     arg_idx < last_pred_info.args.length && null != last_pred_info.args[arg_idx];
-                     arg_idx++
-                ) {}
-                arg_idx--;
                 for (int var_id = 0; var_id <= rule_info.getVarCnt(); var_id++) {
                     RuleInfo new_rule_info = new RuleInfo(rule_info);
                     new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
@@ -128,7 +128,7 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
                 for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
                     RuleInfo new_rule_info = new RuleInfo(rule_info);
                     new_rule_info.addNewPred(entry.getKey(), entry.getValue().length);
-                    new_rule_info.score = calRuleScore(new_rule_info);
+                    new_rule_info.score = rule_info.score;
                     max_heap.add(new_rule_info);
                 }
             }
@@ -175,24 +175,33 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
         }
         q.close();
 
+        int pos_cnt = 0;
         Term[] head_args = new Term[head_pred_info.args.length];
         for (int arg_idx = 0; arg_idx < head_args.length; arg_idx++) {
             head_args[arg_idx] = new Variable(head_pred_info.args[arg_idx].name);
         }
         Compound head_compound = new Compound(head_pred_info.predicate, head_args);
-        int pos_cnt = 0;
-        for (Map<String, Term> head_binding: head_binding_set) {
-            Compound head_template = SwiplUtil.substitute(head_compound, head_binding);
-            Query sub_q = new Query(":", new Term[]{
-                    new Atom(PrologModule.GLOBAL.getSessionName()), head_template
-            });
-            for (Map<String, Term> template_binding: sub_q) {
-                Compound head_instance = SwiplUtil.substitute(head_template, template_binding);
+        if (0 == free_var_cnt_in_head) {
+            for (Map<String, Term> head_binding : head_binding_set) {
+                Compound head_instance = SwiplUtil.substitute(head_compound, head_binding);
                 if (globalFacts.contains(head_instance)) {
                     pos_cnt++;
                 }
             }
-            sub_q.close();
+        } else {
+            for (Map<String, Term> head_binding : head_binding_set) {
+                Compound head_template = SwiplUtil.substitute(head_compound, head_binding);
+                Query sub_q = new Query(":", new Term[]{
+                        new Atom(PrologModule.GLOBAL.getSessionName()), head_template
+                });
+                for (Map<String, Term> template_binding : sub_q) {
+                    Compound head_instance = SwiplUtil.substitute(head_template, template_binding);
+                    if (globalFacts.contains(head_instance)) {
+                        pos_cnt++;
+                    }
+                }
+                sub_q.close();
+            }
         }
 
         /* 计算all possible entailments */
@@ -222,5 +231,16 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
     @Override
     protected void writeCounterExampleSet() {
         /* Todo: Implement Here */
+    }
+
+    public static void main(String[] args) {
+        ExactQueryCompressor compressor = new ExactQueryCompressor(
+                "FamilyRelationSimple(0.05)(100x).tsv",
+                null,
+                null,
+                null,
+                true
+        );
+        compressor.run();
     }
 }
