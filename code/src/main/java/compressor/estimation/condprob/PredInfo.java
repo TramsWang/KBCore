@@ -17,6 +17,10 @@ public class PredInfo {
         }
     }
 
+    public int arity() {
+        return args.length;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(predicate);

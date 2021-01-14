@@ -2,18 +2,16 @@ package compressor.estimation.condprob;
 
 import common.JplRule;
 import compressor.estimation.CompressorBase;
-import org.jpl7.Atom;
-import org.jpl7.Compound;
+import org.jpl7.*;
 import utils.MultiSet;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.Integer;
 import java.util.*;
 
-public class CondProbEstCompressor extends CompressorBase<JplRule> {
-
-    public static final int BEAM_SEARCH_N = 3;
+public class ExactQueryCompressor extends CompressorBase<JplRule> {
 
     private final Set<Compound> globalFacts = new HashSet<>();
     private final Set<String> constants = new HashSet<>();
@@ -24,10 +22,9 @@ public class CondProbEstCompressor extends CompressorBase<JplRule> {
     private final List<String> predList = new ArrayList<>();
     private final List<JplRule> hypothesis = new ArrayList<>();
 
-    private int totalArgs = 0;
     private boolean shouldContinue = true;
 
-    public CondProbEstCompressor(
+    public ExactQueryCompressor(
             String kbFilePath, String hypothesisFilePath, String startSetFilePath, String counterExampleSetFilePath,
             boolean debug
     ) {
@@ -71,7 +68,6 @@ public class CondProbEstCompressor extends CompressorBase<JplRule> {
                 SwiplUtil.appendKnowledge(PrologModule.GLOBAL, compound);
                 globalFacts.add(compound);
             }
-            totalArgs = pred_idx + 1;
 
             System.out.printf(
                     "BK loaded: %d predicates; %d constants, %d facts\n",
@@ -89,10 +85,7 @@ public class CondProbEstCompressor extends CompressorBase<JplRule> {
 
     @Override
     protected JplRule findRule() {
-        /* 计算条件概率矩阵 */
-        double[][] cond_prob_matrix = calCondProb();  // P(A | B) = matrix[B][A]
-
-        /* 初始化一个最大堆，每次扩展堆顶的元素，直到找到n条最好的rule */
+        /* 初始化一个最大堆，每次扩展堆顶的元素，直到找到1条最好的rule */
         PriorityQueue<RuleInfo> max_heap = new PriorityQueue<>(
                 Comparator.comparingDouble((RuleInfo e) -> e.score).reversed()
         );
@@ -105,12 +98,11 @@ public class CondProbEstCompressor extends CompressorBase<JplRule> {
             rule_info.score = 2.0 * arg_sets[0].size() - Math.pow(constants.size(), arg_sets.length);
             max_heap.add(rule_info);
         }
-        for (; top_rules.size() < BEAM_SEARCH_N; ) {
+        while (!max_heap.isEmpty()) {
             RuleInfo rule_info = max_heap.poll();
             JplRule jpl_rule = rule_info.toJplRule();
             if (null != jpl_rule) {
-                top_rules.add(jpl_rule);
-                continue;
+                return jpl_rule;
             }
 
             /* 遍历当前rule所有的可能的一步扩展，并加入heap */
@@ -142,45 +134,73 @@ public class CondProbEstCompressor extends CompressorBase<JplRule> {
             }
         }
 
-        /* TODO: 比较最好的n条rule，选择效果最好的输出 */
-        for (JplRule rule: top_rules) {
-            System.out.printf("Candidate: %s\n", rule);
-        }
-        hypothesis.add(top_rules.get(0));
-        return top_rules.get(0);
-    }
-
-    private double[][] calCondProb() {
-        double[][] matrix = new double[totalArgs - 1][];
-        for (int i = 0; i < matrix.length; i++) {
-            matrix[i] = new double[totalArgs];
-        }
-
-        for (int pred_idx_i = 0, pred_offset_i = 0; pred_idx_i < predList.size(); pred_idx_i++) {
-            MultiSet<String>[] arg_sets_i = pred2ArgSetMap.get(predList.get(pred_idx_i));
-            int size_i = arg_sets_i[0].size();
-            for (int pred_idx_j = pred_idx_i, pred_offset_j = pred_offset_i; pred_idx_j < predList.size(); pred_idx_j++) {
-                MultiSet<String>[] arg_sets_j = pred2ArgSetMap.get(predList.get(pred_idx_j));
-                int size_j = arg_sets_j[0].size();
-                for (int arg_idx_i = 0; arg_idx_i < arg_sets_i.length; arg_idx_i++) {
-                    for (int arg_idx_j = 0; arg_idx_j < arg_sets_j.length; arg_idx_j++) {
-                        MultiSet<String> union = arg_sets_i[arg_idx_i].union(arg_sets_j[arg_idx_j]);
-                        int union_size = union.size();
-                        matrix[pred_offset_i + arg_idx_i][pred_offset_j + arg_idx_j] = ((double) union_size) / size_i;
-                        matrix[pred_offset_j + arg_idx_j][pred_offset_i + arg_idx_i] = ((double) union_size) / size_j;
-                    }
-                }
-                pred_offset_j += arg_sets_j.length;
-            }
-            pred_offset_i += arg_sets_i.length;
-        }
-
-        return matrix;
+        return null;
     }
 
     private double calRuleScore(RuleInfo ruleInfo) {
-        /* Todo: Implement Here */
-        return 0;
+        /* 如果head上的所有变量都是自由变量则直接计算 */
+        Set<String> non_free_var_in_head = ruleInfo.NonFreeVarSetInHead();
+        PredInfo head_pred_info =  ruleInfo.getHead();
+        int free_var_cnt_in_head = head_pred_info.arity() - non_free_var_in_head.size();
+        if (non_free_var_in_head.isEmpty()) {
+            MultiSet<String>[] arg_sets = pred2ArgSetMap.get(head_pred_info.predicate);
+            return 2.0 * arg_sets[0].size() - Math.pow(constants.size(), arg_sets.length);
+        }
+
+        /* 计算positive entailments */
+        StringBuilder query_builder = new StringBuilder();
+        for (int pred_idx = 1; pred_idx < ruleInfo.ruleSize(); pred_idx++) {
+            PredInfo body_pred_info = ruleInfo.getPred(pred_idx);
+            Term[] args = new Term[body_pred_info.arity()];
+            for (int arg_idx = 0; arg_idx < body_pred_info.arity(); arg_idx++) {
+                args[arg_idx] = ruleInfo.isNonFreeVar(pred_idx, arg_idx) ?
+                        new Variable(body_pred_info.args[arg_idx].name) : new Variable("_");
+            }
+            Compound body_compound = new Compound(body_pred_info.predicate, args);
+            query_builder.append(body_compound.toString()).append(',');
+        }
+        query_builder.deleteCharAt(query_builder.length() - 1);
+        String query_str = query_builder.toString();
+
+        Query q = new Query(":", new Term[]{
+                new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(query_str)
+        });
+        Set<Map<String, Term>> head_binding_set = new HashSet<>();
+        for (Map<String, Term> binding: q) {
+            Map<String, Term> head_binding = new HashMap<>();
+            for (String non_free_var: non_free_var_in_head) {
+                head_binding.put(non_free_var, binding.get(non_free_var));
+            }
+            head_binding_set.add(head_binding);
+        }
+        q.close();
+
+        Term[] head_args = new Term[head_pred_info.args.length];
+        for (int arg_idx = 0; arg_idx < head_args.length; arg_idx++) {
+            head_args[arg_idx] = new Variable(head_pred_info.args[arg_idx].name);
+        }
+        Compound head_compound = new Compound(head_pred_info.predicate, head_args);
+        int pos_cnt = 0;
+        for (Map<String, Term> head_binding: head_binding_set) {
+            Compound head_template = SwiplUtil.substitute(head_compound, head_binding);
+            Query sub_q = new Query(":", new Term[]{
+                    new Atom(PrologModule.GLOBAL.getSessionName()), head_template
+            });
+            for (Map<String, Term> template_binding: sub_q) {
+                Compound head_instance = SwiplUtil.substitute(head_template, template_binding);
+                if (globalFacts.contains(head_instance)) {
+                    pos_cnt++;
+                }
+            }
+            sub_q.close();
+        }
+
+        /* 计算all possible entailments */
+        double all_entailment_cnt = head_binding_set.size() * Math.pow(
+                constants.size(), free_var_cnt_in_head
+        );
+
+        return pos_cnt * 2.0 - all_entailment_cnt;
     }
 
     @Override
