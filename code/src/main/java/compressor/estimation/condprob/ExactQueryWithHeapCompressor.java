@@ -11,20 +11,22 @@ import java.io.IOException;
 import java.lang.Integer;
 import java.util.*;
 
-public class ExactQueryCompressor extends CompressorBase<JplRule> {
+public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
 
-    private final Set<Compound> globalFacts = new HashSet<>();
-    private final Set<String> constants = new HashSet<>();
-    private final Map<String, MultiSet<String>[]> pred2ArgSetMap = new HashMap<>();
+    protected static final double MIN_HEAD_COVERAGE = 0.05;
+
+    protected final Set<Compound> globalFacts = new HashSet<>();
+    protected final Set<String> constants = new HashSet<>();
+    protected final Map<String, MultiSet<String>[]> pred2ArgSetMap = new HashMap<>();
     /* 按照这样的顺序排列时: P1.Arg1, P1.Arg2, ..., P1.LastArg, P2.Arg1, ..., LastPred.LastArg
        各个Pred的Idx */
-    private final Map<String, Integer> pred2IdxMap = new HashMap<>();
-    private final List<String> predList = new ArrayList<>();
-    private final List<JplRule> hypothesis = new ArrayList<>();
+    protected final Map<String, Integer> pred2IdxMap = new HashMap<>();
+    protected final List<String> predList = new ArrayList<>();
+    protected final List<JplRule> hypothesis = new ArrayList<>();
 
-    private boolean shouldContinue = true;
+    protected boolean shouldContinue = true;
 
-    public ExactQueryCompressor(
+    public ExactQueryWithHeapCompressor(
             String kbFilePath, String hypothesisFilePath, String startSetFilePath, String counterExampleSetFilePath,
             boolean debug
     ) {
@@ -93,8 +95,7 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
             String predicate = entry.getKey();
             MultiSet<String>[] arg_sets = entry.getValue();
             RuleInfo rule_info = new RuleInfo(predicate, arg_sets.length);
-            /* 2 * |H[Θ]| - |B[Θ]| */
-            rule_info.score = 2.0 * arg_sets[0].size() - Math.pow(constants.size(), arg_sets.length);
+            rule_info.score = scoreMetric(arg_sets[0].size(), Math.pow(constants.size(), arg_sets.length));
             max_heap.add(rule_info);
         }
 
@@ -121,7 +122,9 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
                     RuleInfo new_rule_info = new RuleInfo(rule_info);
                     new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
                     new_rule_info.score = calRuleScore(new_rule_info);
-                    max_heap.add(new_rule_info);
+                    if (!Double.isNaN(new_rule_info.score)) {
+                        max_heap.add(new_rule_info);
+                    }
                 }
             } else {
                 /* 没有未知参数，但是有自由变量，创建新的predicate */
@@ -129,7 +132,9 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
                     RuleInfo new_rule_info = new RuleInfo(rule_info);
                     new_rule_info.addNewPred(entry.getKey(), entry.getValue().length);
                     new_rule_info.score = rule_info.score;
-                    max_heap.add(new_rule_info);
+                    if (!Double.isNaN(new_rule_info.score)) {
+                        max_heap.add(new_rule_info);
+                    }
                 }
             }
         }
@@ -137,14 +142,15 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
         return null;
     }
 
-    private double calRuleScore(RuleInfo ruleInfo) {
+    protected double calRuleScore(RuleInfo ruleInfo) {
         /* 如果head上的所有变量都是自由变量则直接计算 */
         Set<String> non_free_var_in_head = ruleInfo.NonFreeVarSetInHead();
         PredInfo head_pred_info =  ruleInfo.getHead();
         int free_var_cnt_in_head = head_pred_info.arity() - non_free_var_in_head.size();
+        MultiSet<String>[] arg_sets = pred2ArgSetMap.get(head_pred_info.predicate);
+        int total_pos_cnt = arg_sets[0].size();
         if (non_free_var_in_head.isEmpty()) {
-            MultiSet<String>[] arg_sets = pred2ArgSetMap.get(head_pred_info.predicate);
-            return 2.0 * arg_sets[0].size() - Math.pow(constants.size(), arg_sets.length);
+            return scoreMetric(total_pos_cnt, Math.pow(constants.size(), arg_sets.length));
         }
 
         /* 计算positive entailments */
@@ -204,12 +210,21 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
             }
         }
 
+        double head_coverage = ((double) pos_cnt) / total_pos_cnt;
+        if (MIN_HEAD_COVERAGE >= head_coverage) {
+            return Double.NaN;
+        }
+
         /* 计算all possible entailments */
         double all_entailment_cnt = head_binding_set.size() * Math.pow(
                 constants.size(), free_var_cnt_in_head
         );
 
         return pos_cnt * 2.0 - all_entailment_cnt;
+    }
+
+    protected double scoreMetric(double posCnt, double allCnt) {
+        return posCnt / allCnt;
     }
 
     @Override
@@ -234,7 +249,7 @@ public class ExactQueryCompressor extends CompressorBase<JplRule> {
     }
 
     public static void main(String[] args) {
-        ExactQueryCompressor compressor = new ExactQueryCompressor(
+        ExactQueryWithHeapCompressor compressor = new ExactQueryWithHeapCompressor(
                 "FamilyRelationSimple(0.05)(100x).tsv",
                 null,
                 null,

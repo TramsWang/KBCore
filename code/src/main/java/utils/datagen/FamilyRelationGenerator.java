@@ -343,7 +343,7 @@ public class FamilyRelationGenerator {
     }
 
     public static void main(String[] args) throws IOException {
-//        generateSimple("testData/familyRelation");
+        generateSimple("testData/familyRelation");
         generateMedium("testData/familyRelation");
     }
 }
