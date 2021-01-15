@@ -1,11 +1,13 @@
 package compressor.estimation.condprob;
 
 import common.JplRule;
+import org.jpl7.Compound;
 import utils.MultiSet;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ExactQueryWithBfsCompressor extends ExactQueryWithHeapCompressor {
 
@@ -21,11 +23,12 @@ public class ExactQueryWithBfsCompressor extends ExactQueryWithHeapCompressor {
     @Override
     protected JplRule findRule() {
         List<RuleInfo> candidates = new ArrayList<>();
-        for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
+        for (Map.Entry<String, Set<Compound>> entry: curPred2FactSetMap.entrySet()) {
             String predicate = entry.getKey();
-            MultiSet<String>[] arg_sets = entry.getValue();
-            RuleInfo rule_info = new RuleInfo(predicate, arg_sets.length);
-            rule_info.score = scoreMetric(arg_sets[0].size(), Math.pow(constants.size(), arg_sets.length));
+            Set<Compound> fact_set = entry.getValue();
+            int arity = pred2ArityMap.get(predicate);
+            RuleInfo rule_info = new RuleInfo(predicate, arity);
+            rule_info.score = scoreMetric(fact_set.size(), Math.pow(constants.size(), arity));
             candidates.add(rule_info);
         }
 
@@ -59,9 +62,9 @@ public class ExactQueryWithBfsCompressor extends ExactQueryWithHeapCompressor {
                 }
             } else {
                 /* 没有未知参数，但是有自由变量，创建新的predicate */
-                for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
+                for (Map.Entry<String, Integer> entry: pred2ArityMap.entrySet()) {
                     RuleInfo new_rule_info = new RuleInfo(rule_info);
-                    new_rule_info.addNewPred(entry.getKey(), entry.getValue().length);
+                    new_rule_info.addNewPred(entry.getKey(), entry.getValue());
                     new_rule_info.score = rule_info.score;
                     if (!Double.isNaN(new_rule_info.score)) {
                         candidates.add(new_rule_info);

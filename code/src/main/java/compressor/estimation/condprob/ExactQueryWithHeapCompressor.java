@@ -16,13 +16,10 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
     protected static final double MIN_HEAD_COVERAGE = 0.05;
 
     protected final Set<Compound> globalFacts = new HashSet<>();
+    protected final Map<String, Integer> pred2ArityMap = new HashMap<>();
     protected final Set<Compound> curFacts = new HashSet<>();
+    protected final Map<String, Set<Compound>> curPred2FactSetMap = new HashMap<>();
     protected final Set<String> constants = new HashSet<>();
-    protected final Map<String, MultiSet<String>[]> pred2ArgSetMap = new HashMap<>();
-    /* 按照这样的顺序排列时: P1.Arg1, P1.Arg2, ..., P1.LastArg, P2.Arg1, ..., LastPred.LastArg
-       各个Pred的Idx */
-    protected final Map<String, Integer> pred2IdxMap = new HashMap<>();
-    protected final List<String> predList = new ArrayList<>();
     protected final List<JplRule> hypothesis = new ArrayList<>();
 
     protected boolean shouldContinue = true;
@@ -49,33 +46,33 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
             while (null != (line = reader.readLine())) {
                 String[] components = line.split("\t");
                 String predicate = components[0];
-                MultiSet<String>[] arg_set_list = pred2ArgSetMap.get(predicate);
-                if (null == arg_set_list) {
-                    arg_set_list = new MultiSet[components.length - 1];
-                    for (int i = 0; i < arg_set_list.length; i++) {
-                        arg_set_list[i] = new MultiSet<>();
-                    }
-                    pred2ArgSetMap.put(predicate, arg_set_list);
-                    predList.add(predicate);
-                    pred2IdxMap.put(predicate, pred_idx);
-                    pred_idx += arg_set_list.length;
-                }
 
                 Atom[] args = new Atom[components.length - 1];
                 for (int i = 1; i < components.length; i++) {
                     constants.add(components[i]);
-                    arg_set_list[i-1].add(components[i]);
                     args[i-1] = new Atom(components[i]);
                 }
                 Compound compound = new Compound(predicate, args);
                 SwiplUtil.appendKnowledge(PrologModule.GLOBAL, compound);
                 SwiplUtil.appendKnowledge(PrologModule.CURRENT, compound);
                 globalFacts.add(compound);
+                curFacts.add(compound);
+                curPred2FactSetMap.compute(predicate, (k, v) -> {
+                    if (null == v) {
+                        v = new HashSet<>();
+                    }
+                    v.add(compound);
+                    return v;
+                });
+            }
+
+            for (Map.Entry<String, Set<Compound>> entry: curPred2FactSetMap.entrySet()) {
+                pred2ArityMap.put(entry.getKey(), entry.getValue().iterator().next().arity());
             }
 
             System.out.printf(
                     "BK loaded: %d predicates; %d constants, %d facts\n",
-                    pred2ArgSetMap.size(), constants.size(), globalFacts.size()
+                    curPred2FactSetMap.size(), constants.size(), globalFacts.size()
             );
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,15 +87,26 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
     @Override
     protected JplRule findRule() {
         /* 初始化一个最大堆，每次扩展堆顶的元素，直到找到1条最好的rule */
-        PriorityQueue<RuleInfo> max_heap = new PriorityQueue<>(
-                Comparator.comparingDouble((RuleInfo e) -> e.score).reversed()
-        );
-        for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
+//        PriorityQueue<RuleInfo> max_heap = new PriorityQueue<>(
+//                Comparator.comparingDouble((RuleInfo e) -> e.score).reversed()
+//        );
+        Set<String> ignore_set = new HashSet<>();
+        if (debug) {
+            ignore_set.add("gender");
+        }
+
+
+        MaxHeap<RuleInfo> max_heap = new MaxHeap<>();
+        for (Map.Entry<String, Set<Compound>> entry: curPred2FactSetMap.entrySet()) {
             String predicate = entry.getKey();
-            MultiSet<String>[] arg_sets = entry.getValue();
-            RuleInfo rule_info = new RuleInfo(predicate, arg_sets.length);
-            rule_info.score = scoreMetric(arg_sets[0].size(), Math.pow(constants.size(), arg_sets.length));
-            max_heap.add(rule_info);
+            if (ignore_set.contains(predicate)) {
+                continue;
+            }
+            Set<Compound> facts = entry.getValue();
+            int arity = pred2ArityMap.get(predicate);
+            RuleInfo rule_info = new RuleInfo(predicate, arity);
+            rule_info.score = scoreMetric(facts.size(), Math.pow(constants.size(), arity));
+            max_heap.add(rule_info, rule_info.score);
         }
 
         while (!max_heap.isEmpty()) {
@@ -126,19 +134,30 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
                     new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
                     new_rule_info.score = calRuleScore(new_rule_info);
                     if (!Double.isNaN(new_rule_info.score) && new_rule_info.score >= rule_info.score) {
-                        max_heap.add(new_rule_info);
+                        max_heap.add(new_rule_info, new_rule_info.score);
                     }
                 }
             } else {
                 /* 没有未知参数，但是有自由变量，创建新的predicate */
                 String head_pred = rule_info.getHead().predicate;
-                for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
+                pred_idx++;
+                arg_idx = 0;
+                for (Map.Entry<String, Integer> entry: pred2ArityMap.entrySet()) {
                     if (!head_pred.equals(entry.getKey())) {
-                        RuleInfo new_rule_info = new RuleInfo(rule_info);
-                        new_rule_info.addNewPred(entry.getKey(), entry.getValue().length);
-                        new_rule_info.score = rule_info.score;
-                        if (!Double.isNaN(new_rule_info.score)) {
-                            max_heap.add(new_rule_info);
+                        RuleInfo tmp_rule_info = new RuleInfo(rule_info);
+                        tmp_rule_info.addNewPred(entry.getKey(), entry.getValue());
+//                        tmp_rule_info.score = rule_info.score;
+//                        if (!Double.isNaN(tmp_rule_info.score)) {
+//                            max_heap.add(tmp_rule_info, tmp_rule_info.score);
+//                        }
+                        /* 直接添加一个参数 */
+                        for (int var_id = 0; var_id <= tmp_rule_info.getVarCnt(); var_id++) {
+                            RuleInfo new_rule_info = new RuleInfo(tmp_rule_info);
+                            new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
+                            new_rule_info.score = calRuleScore(new_rule_info);
+                            if (!Double.isNaN(new_rule_info.score) && new_rule_info.score >= tmp_rule_info.score) {
+                                max_heap.add(new_rule_info, new_rule_info.score);
+                            }
                         }
                     }
                 }
@@ -153,10 +172,11 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
         Set<String> non_free_var_in_head = ruleInfo.NonFreeVarSetInHead();
         PredInfo head_pred_info =  ruleInfo.getHead();
         int free_var_cnt_in_head = head_pred_info.arity() - non_free_var_in_head.size();
-        MultiSet<String>[] arg_sets = pred2ArgSetMap.get(head_pred_info.predicate);
-        int total_pos_cnt = arg_sets[0].size();
+        Set<Compound> facts = curPred2FactSetMap.get(head_pred_info.predicate);
+        int head_arity = pred2ArityMap.get(head_pred_info.predicate);
+        int total_pos_cnt = facts.size();
         if (non_free_var_in_head.isEmpty()) {
-            return scoreMetric(total_pos_cnt, Math.pow(constants.size(), arg_sets.length));
+            return scoreMetric(total_pos_cnt, Math.pow(constants.size(), head_arity));
         }
 
         /* 计算positive entailments */
@@ -242,6 +262,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
 
         /* 删除已经被证明的 */
         hypothesis.add(rule);
+        Set<Compound> fact_set = curPred2FactSetMap.get(rule.head.name());
         String query_str = String.format("%s,%s",rule.getHeadString(), rule.getBodyString());
         Query q = new Query(":", new Term[]{
                 new Atom(PrologModule.CURRENT.getSessionName()), Term.textToTerm(query_str)
@@ -249,6 +270,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
         for (Map<String, Term> binding: q) {
             Compound head_instance = SwiplUtil.substitute(rule.head, binding);
             SwiplUtil.retractKnowledge(PrologModule.CURRENT, head_instance);
+            fact_set.remove(head_instance);
         }
         q.close();
     }

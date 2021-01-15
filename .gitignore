@@ -1,0 +1,27 @@
+# Track ONLY source code project and experimental data
+/*
+!/code
+!/experiments
+!/README.md
+!/.gitignore
+
+### Source code Project ###
+# Track necessary code, resources and meta info
+/code/*
+!/code/src/
+!/code/testData/
+/code/testData/*
+!/code/testData/diffKB/
+!/code/testData/familyRelation/
+/code/testData/familyRelation/*
+!/code/testData/familyRelation/HypothesisHumanSimple.amie
+!/code/testData/familyRelation/HypothesisHumanMedium.amie
+!/code/pom.xml
+
+### Experiments ###
+/experiments/*
+!/experiments/NaiveWithFamilyRelation/
+/experiments/NaiveWithFamilyRelation/*
+!/experiments/NaiveWithFamilyRelation/run.sh
+!/experiments/NaiveWithFamilyRelation/result*
+!/experiments/NaiveWithFamilyRelation/Multiset*.xlsx
