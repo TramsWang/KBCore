@@ -19,6 +19,16 @@ public class SwiplUtil {
         q.close();
     }
 
+    public static void retractKnowledge(PrologModule module, Term knowledge) {
+        Query q = new Query(
+                new Compound(":", new Term[]{
+                        new Atom(module.getSessionName()), new Compound("retract", new Term[]{knowledge})
+                })
+        );
+        q.hasSolution();
+        q.close();
+    }
+
     public static Compound substitute(Compound compound, Map<String, Term> binding) {
         Term[] bounded_args = new Term[compound.arity()];
         for (int i = 0; i < bounded_args.length; i++) {

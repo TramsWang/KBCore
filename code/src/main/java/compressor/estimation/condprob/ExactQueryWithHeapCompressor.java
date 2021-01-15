@@ -16,6 +16,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
     protected static final double MIN_HEAD_COVERAGE = 0.05;
 
     protected final Set<Compound> globalFacts = new HashSet<>();
+    protected final Set<Compound> curFacts = new HashSet<>();
     protected final Set<String> constants = new HashSet<>();
     protected final Map<String, MultiSet<String>[]> pred2ArgSetMap = new HashMap<>();
     /* 按照这样的顺序排列时: P1.Arg1, P1.Arg2, ..., P1.LastArg, P2.Arg1, ..., LastPred.LastArg
@@ -68,6 +69,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
                 }
                 Compound compound = new Compound(predicate, args);
                 SwiplUtil.appendKnowledge(PrologModule.GLOBAL, compound);
+                SwiplUtil.appendKnowledge(PrologModule.CURRENT, compound);
                 globalFacts.add(compound);
             }
 
@@ -123,18 +125,21 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
                     RuleInfo new_rule_info = new RuleInfo(rule_info);
                     new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
                     new_rule_info.score = calRuleScore(new_rule_info);
-                    if (!Double.isNaN(new_rule_info.score)) {
+                    if (!Double.isNaN(new_rule_info.score) && new_rule_info.score >= rule_info.score) {
                         max_heap.add(new_rule_info);
                     }
                 }
             } else {
                 /* 没有未知参数，但是有自由变量，创建新的predicate */
+                String head_pred = rule_info.getHead().predicate;
                 for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
-                    RuleInfo new_rule_info = new RuleInfo(rule_info);
-                    new_rule_info.addNewPred(entry.getKey(), entry.getValue().length);
-                    new_rule_info.score = rule_info.score;
-                    if (!Double.isNaN(new_rule_info.score)) {
-                        max_heap.add(new_rule_info);
+                    if (!head_pred.equals(entry.getKey())) {
+                        RuleInfo new_rule_info = new RuleInfo(rule_info);
+                        new_rule_info.addNewPred(entry.getKey(), entry.getValue().length);
+                        new_rule_info.score = rule_info.score;
+                        if (!Double.isNaN(new_rule_info.score)) {
+                            max_heap.add(new_rule_info);
+                        }
                     }
                 }
             }
@@ -170,7 +175,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
         String query_str = query_builder.toString();
 
         Query q = new Query(":", new Term[]{
-                new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(query_str)
+                new Atom(PrologModule.CURRENT.getSessionName()), Term.textToTerm(query_str)
         });
         Set<Map<String, Term>> head_binding_set = new HashSet<>();
         for (Map<String, Term> binding: q) {
@@ -199,7 +204,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
             for (Map<String, Term> head_binding : head_binding_set) {
                 Compound head_template = SwiplUtil.substitute(head_compound, head_binding);
                 Query sub_q = new Query(":", new Term[]{
-                        new Atom(PrologModule.GLOBAL.getSessionName()), head_template
+                        new Atom(PrologModule.CURRENT.getSessionName()), head_template
                 });
                 for (Map<String, Term> template_binding : sub_q) {
                     Compound head_instance = SwiplUtil.substitute(head_template, template_binding);
@@ -230,13 +235,30 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
 
     @Override
     protected void updateKb(JplRule rule) {
-        /* Todo: 删除已经被证明的 */
-        shouldContinue = false;
+        if (null == rule) {
+            shouldContinue = false;
+            return;
+        }
+
+        /* 删除已经被证明的 */
+        hypothesis.add(rule);
+        String query_str = String.format("%s,%s",rule.getHeadString(), rule.getBodyString());
+        Query q = new Query(":", new Term[]{
+                new Atom(PrologModule.CURRENT.getSessionName()), Term.textToTerm(query_str)
+        });
+        for (Map<String, Term> binding: q) {
+            Compound head_instance = SwiplUtil.substitute(rule.head, binding);
+            SwiplUtil.retractKnowledge(PrologModule.CURRENT, head_instance);
+        }
+        q.close();
     }
 
     @Override
     protected void writeHypothesis() {
-        /* Todo: Implement Here */
+        System.out.println("\nHypothesis Found:");
+        for (JplRule rule: hypothesis) {
+            System.out.println(rule);
+        }
     }
 
     @Override
@@ -251,7 +273,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
 
     public static void main(String[] args) {
         ExactQueryWithHeapCompressor compressor = new ExactQueryWithHeapCompressor(
-                "FamilyRelationSimple(0.00)(10x).tsv",
+                "FamilyRelationMedium(0.00)(10x).tsv",
                 null,
                 null,
                 null,
