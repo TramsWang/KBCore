@@ -93,8 +93,8 @@ public class FamilyRelationGenerator {
         }
     }
 
-    public static double ERROR_PROB = 0.05;
-    public static int FAMILY_CNT = 100;
+    public static double ERROR_PROB = 0.0;
+    public static int FAMILY_CNT = 10;
 
     public static void generateSimple(String path) throws IOException {
         final String fpath = String.format("%s/FamilyRelationSimple(%.2f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);

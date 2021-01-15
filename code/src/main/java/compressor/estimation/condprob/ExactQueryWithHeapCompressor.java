@@ -104,11 +104,12 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
             RuleInfo rule_info = max_heap.poll();
             JplRule jpl_rule = rule_info.toJplRule();
             if (null != jpl_rule) {
+                System.out.printf("Found >>> %s\n", jpl_rule);
                 return jpl_rule;
             }
 
             /* 遍历当前rule所有的可能的一步扩展，并加入heap */
-            System.out.printf("Extend: %s\n", rule_info.toString());
+            System.out.printf("Extend(score=%f): %s\n", rule_info.score, rule_info.toString());
             int pred_idx = rule_info.ruleSize() - 1;
             PredInfo last_pred_info = rule_info.getPred(pred_idx);
             int arg_idx;
@@ -220,7 +221,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
                 constants.size(), free_var_cnt_in_head
         );
 
-        return pos_cnt * 2.0 - all_entailment_cnt;
+        return scoreMetric(pos_cnt, all_entailment_cnt);
     }
 
     protected double scoreMetric(double posCnt, double allCnt) {
@@ -250,7 +251,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
 
     public static void main(String[] args) {
         ExactQueryWithHeapCompressor compressor = new ExactQueryWithHeapCompressor(
-                "FamilyRelationSimple(0.05)(100x).tsv",
+                "FamilyRelationSimple(0.00)(10x).tsv",
                 null,
                 null,
                 null,
