@@ -89,65 +89,66 @@ public class CondProbEstCompressor extends CompressorBase<JplRule> {
 
     @Override
     protected JplRule findRule() {
-        /* 计算条件概率矩阵 */
-        double[][] cond_prob_matrix = calCondProb();  // P(A | B) = matrix[B][A]
-
-        /* 初始化一个最大堆，每次扩展堆顶的元素，直到找到n条最好的rule */
-        PriorityQueue<RuleInfo> max_heap = new PriorityQueue<>(
-                Comparator.comparingDouble((RuleInfo e) -> e.score).reversed()
-        );
-        List<JplRule> top_rules = new ArrayList<>();
-        for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
-            String predicate = entry.getKey();
-            MultiSet<String>[] arg_sets = entry.getValue();
-            RuleInfo rule_info = new RuleInfo(predicate, arg_sets.length);
-            /* 2 * |H[Θ]| - |B[Θ]| */
-            rule_info.score = 2.0 * arg_sets[0].size() - Math.pow(constants.size(), arg_sets.length);
-            max_heap.add(rule_info);
-        }
-        for (; top_rules.size() < BEAM_SEARCH_N; ) {
-            RuleInfo rule_info = max_heap.poll();
-            JplRule jpl_rule = rule_info.toJplRule();
-            if (null != jpl_rule) {
-                top_rules.add(jpl_rule);
-                continue;
-            }
-
-            /* 遍历当前rule所有的可能的一步扩展，并加入heap */
-            System.out.printf("Extend: %s\n", rule_info.toString());
-            if (0 < rule_info.getUnknownArgCnt()) {
-                /* 有未知参数，先解决未知参数 */
-                int pred_idx = rule_info.ruleSize() - 1;
-                PredInfo last_pred_info = rule_info.getPred(pred_idx);
-                int arg_idx;
-                for (arg_idx = 0;
-                     arg_idx < last_pred_info.args.length && null != last_pred_info.args[arg_idx];
-                     arg_idx++
-                ) {}
-                arg_idx--;
-                for (int var_id = 0; var_id <= rule_info.getVarCnt(); var_id++) {
-                    RuleInfo new_rule_info = new RuleInfo(rule_info);
-                    new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
-                    new_rule_info.score = calRuleScore(new_rule_info);
-                    max_heap.add(new_rule_info);
-                }
-            } else {
-                /* 没有未知参数，但是有自由变量，创建新的predicate */
-                for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
-                    RuleInfo new_rule_info = new RuleInfo(rule_info);
-                    new_rule_info.addNewPred(entry.getKey(), entry.getValue().length);
-                    new_rule_info.score = calRuleScore(new_rule_info);
-                    max_heap.add(new_rule_info);
-                }
-            }
-        }
-
-        /* TODO: 比较最好的n条rule，选择效果最好的输出 */
-        for (JplRule rule: top_rules) {
-            System.out.printf("Candidate: %s\n", rule);
-        }
-        hypothesis.add(top_rules.get(0));
-        return top_rules.get(0);
+//        /* 计算条件概率矩阵 */
+//        double[][] cond_prob_matrix = calCondProb();  // P(A | B) = matrix[B][A]
+//
+//        /* 初始化一个最大堆，每次扩展堆顶的元素，直到找到n条最好的rule */
+//        PriorityQueue<RuleInfo> max_heap = new PriorityQueue<>(
+//                Comparator.comparingDouble((RuleInfo e) -> e.score).reversed()
+//        );
+//        List<JplRule> top_rules = new ArrayList<>();
+//        for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
+//            String predicate = entry.getKey();
+//            MultiSet<String>[] arg_sets = entry.getValue();
+//            RuleInfo rule_info = new RuleInfo(predicate, arg_sets.length);
+//            /* 2 * |H[Θ]| - |B[Θ]| */
+//            rule_info.score = 2.0 * arg_sets[0].size() - Math.pow(constants.size(), arg_sets.length);
+//            max_heap.add(rule_info);
+//        }
+//        for (; top_rules.size() < BEAM_SEARCH_N; ) {
+//            RuleInfo rule_info = max_heap.poll();
+//            JplRule jpl_rule = rule_info.toJplRule();
+//            if (null != jpl_rule) {
+//                top_rules.add(jpl_rule);
+//                continue;
+//            }
+//
+//            /* 遍历当前rule所有的可能的一步扩展，并加入heap */
+//            System.out.printf("Extend: %s\n", rule_info.toString());
+//            if (0 < rule_info.getUnknownArgCnt()) {
+//                /* 有未知参数，先解决未知参数 */
+//                int pred_idx = rule_info.ruleSize() - 1;
+//                PredInfo last_pred_info = rule_info.getPred(pred_idx);
+//                int arg_idx;
+//                for (arg_idx = 0;
+//                     arg_idx < last_pred_info.args.length && null != last_pred_info.args[arg_idx];
+//                     arg_idx++
+//                ) {}
+//                arg_idx--;
+//                for (int var_id = 0; var_id <= rule_info.getVarCnt(); var_id++) {
+//                    RuleInfo new_rule_info = new RuleInfo(rule_info);
+//                    new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
+//                    new_rule_info.score = calRuleScore(new_rule_info);
+//                    max_heap.add(new_rule_info);
+//                }
+//            } else {
+//                /* 没有未知参数，但是有自由变量，创建新的predicate */
+//                for (Map.Entry<String, MultiSet<String>[]> entry: pred2ArgSetMap.entrySet()) {
+//                    RuleInfo new_rule_info = new RuleInfo(rule_info);
+//                    new_rule_info.addNewPred(entry.getKey(), entry.getValue().length);
+//                    new_rule_info.score = calRuleScore(new_rule_info);
+//                    max_heap.add(new_rule_info);
+//                }
+//            }
+//        }
+//
+//        /* TODO: 比较最好的n条rule，选择效果最好的输出 */
+//        for (JplRule rule: top_rules) {
+//            System.out.printf("Candidate: %s\n", rule);
+//        }
+//        hypothesis.add(top_rules.get(0));
+//        return top_rules.get(0);
+        return null;
     }
 
     private double[][] calCondProb() {

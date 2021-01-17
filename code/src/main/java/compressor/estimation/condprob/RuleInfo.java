@@ -15,7 +15,8 @@ public class RuleInfo {
     private final List<Integer> varCntList;
     private int unknownArgCnt;
 
-    public double score;
+    private Validity validity;
+//    private double score;
 
     public RuleInfo(String headPredicate, int arity) {
         rule = new ArrayList<>();
@@ -29,7 +30,8 @@ public class RuleInfo {
             varCntList.add(1);
         }
         unknownArgCnt = 0;
-        score = 0;
+        validity = null;
+//        score = 0;
     }
 
     public RuleInfo(RuleInfo another) {
@@ -39,7 +41,8 @@ public class RuleInfo {
         }
         this.varCntList = new ArrayList<>(another.varCntList);
         this.unknownArgCnt = another.unknownArgCnt;
-        this.score = another.score;
+        this.validity = another.validity;
+//        this.score = another.score;
     }
 
     public void addNewPred(String predicate, int arity) {
@@ -142,5 +145,14 @@ public class RuleInfo {
     public boolean isNonFreeVar(int predIdx, int argIdx) {
         PredInfo pred_info = rule.get(predIdx);
         return (null != pred_info.args[argIdx]) && (1 < varCntList.get(pred_info.args[argIdx].id));
+    }
+
+    public Validity getValidity() {
+        return validity;
+    }
+
+    public void setValidity(Validity validity) {
+        this.validity = validity;
+//        this.score = validness.validity;
     }
 }

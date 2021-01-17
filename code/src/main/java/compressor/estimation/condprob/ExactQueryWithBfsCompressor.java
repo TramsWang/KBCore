@@ -2,7 +2,6 @@ package compressor.estimation.condprob;
 
 import common.JplRule;
 import org.jpl7.Compound;
-import utils.MultiSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ public class ExactQueryWithBfsCompressor extends ExactQueryWithHeapCompressor {
             Set<Compound> fact_set = entry.getValue();
             int arity = pred2ArityMap.get(predicate);
             RuleInfo rule_info = new RuleInfo(predicate, arity);
-            rule_info.score = scoreMetric(fact_set.size(), Math.pow(constants.size(), arity));
+            rule_info.setValidity(new Validity(fact_set.size(), Math.pow(constants.size(), arity)));
             candidates.add(rule_info);
         }
 
@@ -36,7 +35,7 @@ public class ExactQueryWithBfsCompressor extends ExactQueryWithHeapCompressor {
             /* 如果得分最高的规则是一条完整的rule，则直接返回 */
             RuleInfo rule_info = candidates.get(i);
             JplRule jpl_rule = rule_info.toJplRule();
-            if (null != jpl_rule && MIN_SCORE < rule_info.score) {
+            if (null != jpl_rule && MIN_SCORE < rule_info.getValidity().validity) {
                 System.out.printf(">>> %s\n", jpl_rule);
                 return jpl_rule;
             }
@@ -55,8 +54,9 @@ public class ExactQueryWithBfsCompressor extends ExactQueryWithHeapCompressor {
                 for (int var_id = 0; var_id <= rule_info.getVarCnt(); var_id++) {
                     RuleInfo new_rule_info = new RuleInfo(rule_info);
                     new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
-                    new_rule_info.score = calRuleScore(new_rule_info);
-                    if (!Double.isNaN(new_rule_info.score)) {
+                    Validity validity = calRuleScore(new_rule_info);
+                    if (null != validity) {
+                        new_rule_info.setValidity(validity);
                         candidates.add(new_rule_info);
                     }
                 }
@@ -65,10 +65,7 @@ public class ExactQueryWithBfsCompressor extends ExactQueryWithHeapCompressor {
                 for (Map.Entry<String, Integer> entry: pred2ArityMap.entrySet()) {
                     RuleInfo new_rule_info = new RuleInfo(rule_info);
                     new_rule_info.addNewPred(entry.getKey(), entry.getValue());
-                    new_rule_info.score = rule_info.score;
-                    if (!Double.isNaN(new_rule_info.score)) {
-                        candidates.add(new_rule_info);
-                    }
+                    new_rule_info.setValidity(rule_info.getValidity());
                 }
             }
         }

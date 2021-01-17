@@ -3,7 +3,6 @@ package compressor.estimation.condprob;
 import common.JplRule;
 import compressor.estimation.CompressorBase;
 import org.jpl7.*;
-import utils.MultiSet;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -95,7 +94,6 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
             ignore_set.add("gender");
         }
 
-
         MaxHeap<RuleInfo> max_heap = new MaxHeap<>();
         for (Map.Entry<String, Set<Compound>> entry: curPred2FactSetMap.entrySet()) {
             String predicate = entry.getKey();
@@ -105,8 +103,8 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
             Set<Compound> facts = entry.getValue();
             int arity = pred2ArityMap.get(predicate);
             RuleInfo rule_info = new RuleInfo(predicate, arity);
-            rule_info.score = scoreMetric(facts.size(), Math.pow(constants.size(), arity));
-            max_heap.add(rule_info, rule_info.score);
+            rule_info.setValidity(new Validity(facts.size(), Math.pow(constants.size(), arity)));
+            max_heap.add(rule_info, rule_info.getValidity().validity);
         }
 
         while (!max_heap.isEmpty()) {
@@ -119,45 +117,79 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
             }
 
             /* 遍历当前rule所有的可能的一步扩展，并加入heap */
-            System.out.printf("Extend(score=%f): %s\n", rule_info.score, rule_info.toString());
-            int pred_idx = rule_info.ruleSize() - 1;
-            PredInfo last_pred_info = rule_info.getPred(pred_idx);
-            int arg_idx;
-            for (arg_idx = 0;
-                 arg_idx < last_pred_info.args.length && null != last_pred_info.args[arg_idx];
-                 arg_idx++
-            ) {}
-            if (arg_idx < last_pred_info.args.length) {
-                /* 有未知参数，先解决未知参数 */
-                for (int var_id = 0; var_id <= rule_info.getVarCnt(); var_id++) {
-                    RuleInfo new_rule_info = new RuleInfo(rule_info);
-                    new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
-                    new_rule_info.score = calRuleScore(new_rule_info);
-                    if (!Double.isNaN(new_rule_info.score) && new_rule_info.score >= rule_info.score) {
-                        max_heap.add(new_rule_info, new_rule_info.score);
+            System.out.printf("Extend(%s): %s\n", rule_info.getValidity(), rule_info.toString());
+            List<int[]> vacant_list = new ArrayList<>();    // 空白参数记录表：{pred_idx, arg_idx}
+            for (int pred_idx = 1; pred_idx < rule_info.ruleSize(); pred_idx++) {
+                PredInfo pred_info = rule_info.getPred(pred_idx);
+                for (int arg_idx = 0; arg_idx < pred_info.arity(); arg_idx++) {
+                    if (null != pred_info.args[arg_idx]) {
+                        vacant_list.add(new int[]{pred_idx, arg_idx});
                     }
                 }
-            } else {
-                /* 没有未知参数，但是有自由变量，创建新的predicate */
-                String head_pred = rule_info.getHead().predicate;
-                pred_idx++;
-                arg_idx = 0;
+            }
+            for (int[] vacant: vacant_list) {
+                /* 找到一个空位，尝试已知变量 */
+                for (int var_id = 0; var_id < rule_info.getVarCnt(); var_id++) {
+                    RuleInfo new_rule_info = new RuleInfo(rule_info);
+                    new_rule_info.setUnknownArg(vacant[0], vacant[1], var_id);
+                    Validity validity = calRuleScore(new_rule_info);
+                    if (null != validity && validity.validity > rule_info.getValidity().validity) {
+                        new_rule_info.setValidity(validity);
+                        max_heap.add(new_rule_info, validity.validity);
+                    }
+                }
+            }
+            for (Map.Entry<String, Integer> entry: pred2ArityMap.entrySet()) {
+                /* 拓展一个谓词，并尝试一个已知变量 */
+                String predicate = entry.getKey();
+                int arity = entry.getValue();
+                int pred_idx = rule_info.ruleSize();
+                RuleInfo new_rule_template = new RuleInfo(rule_info);
+                new_rule_template.addNewPred(predicate, arity);
+                for (int arg_idx = 0; arg_idx < arity; arg_idx++) {
+                    for (int var_id = 0; var_id < new_rule_template.getVarCnt(); var_id++) {
+                        RuleInfo new_rule_info = new RuleInfo(new_rule_template);
+                        new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
+                        Validity validity = calRuleScore(new_rule_info);
+                        if (null != validity && validity.validity > new_rule_template.getValidity().validity) {
+                            new_rule_info.setValidity(validity);
+                            max_heap.add(new_rule_info, validity.validity);
+                        }
+                    }
+                }
+            }
+
+            /* 找到两个位置尝试同一个新变量 */
+            int new_var_id = rule_info.getVarCnt();
+            for (int i = 0; i < vacant_list.size(); i++) {
+                /* 找到新变量的第一个位置 */
+                int[] first_vacant = vacant_list.get(i);
+                for (int j = i + 1; j < vacant_list.size(); j++) {
+                    /* 新变量的第二个位置可以是当前rule中的其他空位 */
+                    int[] second_vacant = vacant_list.get(j);
+                    RuleInfo new_rule_info = new RuleInfo(rule_info);
+                    new_rule_info.setUnknownArg(first_vacant[0], first_vacant[1], new_var_id);
+                    new_rule_info.setUnknownArg(second_vacant[0], second_vacant[1], new_var_id);
+                    Validity validity = calRuleScore(new_rule_info);
+                    if (null != validity && validity.validity > rule_info.getValidity().validity) {
+                        new_rule_info.setValidity(validity);
+                        max_heap.add(new_rule_info, validity.validity);
+                    }
+                }
                 for (Map.Entry<String, Integer> entry: pred2ArityMap.entrySet()) {
-                    if (!head_pred.equals(entry.getKey())) {
-                        RuleInfo tmp_rule_info = new RuleInfo(rule_info);
-                        tmp_rule_info.addNewPred(entry.getKey(), entry.getValue());
-//                        tmp_rule_info.score = rule_info.score;
-//                        if (!Double.isNaN(tmp_rule_info.score)) {
-//                            max_heap.add(tmp_rule_info, tmp_rule_info.score);
-//                        }
-                        /* 直接添加一个参数 */
-                        for (int var_id = 0; var_id <= tmp_rule_info.getVarCnt(); var_id++) {
-                            RuleInfo new_rule_info = new RuleInfo(tmp_rule_info);
-                            new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
-                            new_rule_info.score = calRuleScore(new_rule_info);
-                            if (!Double.isNaN(new_rule_info.score) && new_rule_info.score >= tmp_rule_info.score) {
-                                max_heap.add(new_rule_info, new_rule_info.score);
-                            }
+                    /* 新变量的第二个位置也可以是拓展一个谓词以后的位置 */
+                    String predicate = entry.getKey();
+                    int arity = entry.getValue();
+                    int new_pred_idx = rule_info.ruleSize();
+                    for (int j = 0; j < arity; j++) {
+                        RuleInfo new_rule_info = new RuleInfo(rule_info);
+                        new_rule_info.addNewPred(predicate, arity);
+                        new_rule_info.setUnknownArg(first_vacant[0], first_vacant[1], new_var_id);
+                        new_rule_info.setUnknownArg(new_pred_idx, j, new_var_id);
+                        Validity validity = calRuleScore(new_rule_info);
+                        if (null != validity && validity.validity > rule_info.getValidity().validity) {
+                            new_rule_info.setValidity(validity);
+                            max_heap.add(new_rule_info, validity.validity);
                         }
                     }
                 }
@@ -167,7 +199,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
         return null;
     }
 
-    protected double calRuleScore(RuleInfo ruleInfo) {
+    protected Validity calRuleScore(RuleInfo ruleInfo) {
         /* 如果head上的所有变量都是自由变量则直接计算 */
         Set<String> non_free_var_in_head = ruleInfo.NonFreeVarSetInHead();
         PredInfo head_pred_info =  ruleInfo.getHead();
@@ -176,7 +208,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
         int head_arity = pred2ArityMap.get(head_pred_info.predicate);
         int total_pos_cnt = facts.size();
         if (non_free_var_in_head.isEmpty()) {
-            return scoreMetric(total_pos_cnt, Math.pow(constants.size(), head_arity));
+            return new Validity(total_pos_cnt, Math.pow(constants.size(), head_arity));
         }
 
         /* 计算positive entailments */
@@ -238,7 +270,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
 
         double head_coverage = ((double) pos_cnt) / total_pos_cnt;
         if (MIN_HEAD_COVERAGE >= head_coverage) {
-            return Double.NaN;
+            return null;
         }
 
         /* 计算all possible entailments */
@@ -246,11 +278,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
                 constants.size(), free_var_cnt_in_head
         );
 
-        return scoreMetric(pos_cnt, all_entailment_cnt);
-    }
-
-    protected double scoreMetric(double posCnt, double allCnt) {
-        return posCnt / allCnt;
+        return new Validity(pos_cnt, all_entailment_cnt);
     }
 
     @Override
