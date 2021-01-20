@@ -1,4 +1,4 @@
-package compressor.estimation.condprob;
+package compressor.ml.heap;
 
 public enum PrologModule {
     GLOBAL("global"), CURRENT("current"), START_SET("start_set");

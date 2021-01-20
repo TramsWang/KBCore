@@ -1,4 +1,4 @@
-package compressor.estimation.condprob;
+package compressor.ml.heap;
 
 import java.util.*;
 
@@ -35,6 +35,7 @@ public class MaxHeap<T> {
     }
 
     public void add(T element, double score) {
+        System.out.printf("Heap Add: (%f)%s\n", score, element);
         HeapElement<T> heap_element = valueMap.get(score);
         if (null == heap_element) {
             heap_element = new HeapElement<>(element, score);

@@ -1,7 +1,8 @@
-package compressor.estimation.condprob;
+package compressor.ml.heap;
 
 import common.JplRule;
-import compressor.estimation.CompressorBase;
+import compressor.ml.CompressorBase;
+import compressor.ml.SwiplUtil;
 import org.jpl7.Atom;
 import org.jpl7.Compound;
 import utils.MultiSet;

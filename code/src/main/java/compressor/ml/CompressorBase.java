@@ -1,4 +1,4 @@
-package compressor.estimation;
+package compressor.ml;
 
 public abstract class CompressorBase<RuleType> {
 

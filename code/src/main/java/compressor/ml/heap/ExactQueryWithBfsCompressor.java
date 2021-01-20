@@ -1,4 +1,4 @@
-package compressor.estimation.condprob;
+package compressor.ml.heap;
 
 import common.JplRule;
 import org.jpl7.Compound;

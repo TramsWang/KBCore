@@ -1,4 +1,4 @@
-package compressor.estimation.condprob;
+package compressor.ml.heap;
 
 import common.JplRule;
 import org.jpl7.Compound;
@@ -119,8 +119,9 @@ public class RuleInfo {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(rule.get(0).toString());
-        builder.append(":-");
+        StringBuilder builder = new StringBuilder("(");
+        builder.append(validity).append(')');
+        builder.append(rule.get(0).toString()).append(":-");
         if (1 < rule.size()) {
             builder.append(rule.get(1));
             for (int i = 2; i < rule.size(); i++) {

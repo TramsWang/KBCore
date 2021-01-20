@@ -1,4 +1,4 @@
-package compressor.estimation.condprob;
+package compressor.ml.heap;
 
 public class Validity {
     final double posCnt;
@@ -12,7 +12,7 @@ public class Validity {
     }
 
     private double calculate() {
-        return posCnt / (posCnt + allCnt);
+        return posCnt / allCnt;
     }
 
     @Override

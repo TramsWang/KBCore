@@ -1,7 +1,8 @@
-package compressor.estimation.condprob;
+package compressor.ml.heap;
 
 import common.JplRule;
-import compressor.estimation.CompressorBase;
+import compressor.ml.CompressorBase;
+import compressor.ml.SwiplUtil;
 import org.jpl7.*;
 
 import java.io.BufferedReader;
@@ -13,6 +14,7 @@ import java.util.*;
 public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
 
     protected static final double MIN_HEAD_COVERAGE = 0.05;
+    protected static final double MIN_COMPRESSION_RATE = 0.5;
 
     protected final Set<Compound> globalFacts = new HashSet<>();
     protected final Map<String, Integer> pred2ArityMap = new HashMap<>();
@@ -112,49 +114,50 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
             RuleInfo rule_info = max_heap.poll();
             JplRule jpl_rule = rule_info.toJplRule();
             if (null != jpl_rule) {
-                System.out.printf("Found >>> %s\n", jpl_rule);
+                if (shouldAbandon(rule_info)) {
+                    /* 如果不符合保留条件，则丢弃 */
+                    System.out.printf("Abondon: %s\n", rule_info);
+                    continue;
+                }
+
+                System.out.printf("Found >>> %s\n", rule_info);
                 return jpl_rule;
             }
 
             /* 遍历当前rule所有的可能的一步扩展，并加入heap */
-            System.out.printf("Extend(%s): %s\n", rule_info.getValidity(), rule_info.toString());
+            /* 先找到所有空白的参数 */
+            System.out.printf("Extend: %s\n", rule_info.toString());
             List<int[]> vacant_list = new ArrayList<>();    // 空白参数记录表：{pred_idx, arg_idx}
             for (int pred_idx = 1; pred_idx < rule_info.ruleSize(); pred_idx++) {
                 PredInfo pred_info = rule_info.getPred(pred_idx);
                 for (int arg_idx = 0; arg_idx < pred_info.arity(); arg_idx++) {
-                    if (null != pred_info.args[arg_idx]) {
+                    if (null == pred_info.args[arg_idx]) {
                         vacant_list.add(new int[]{pred_idx, arg_idx});
                     }
                 }
             }
+
+            /* 尝试增加已知变量 */
             for (int[] vacant: vacant_list) {
-                /* 找到一个空位，尝试已知变量 */
+                /* 尝试将已知变量填入空白参数 */
                 for (int var_id = 0; var_id < rule_info.getVarCnt(); var_id++) {
                     RuleInfo new_rule_info = new RuleInfo(rule_info);
                     new_rule_info.setUnknownArg(vacant[0], vacant[1], var_id);
-                    Validity validity = calRuleScore(new_rule_info);
-                    if (null != validity && validity.validity > rule_info.getValidity().validity) {
-                        new_rule_info.setValidity(validity);
-                        max_heap.add(new_rule_info, validity.validity);
-                    }
+                    addRule2Heap(max_heap, rule_info, new_rule_info);
                 }
             }
             for (Map.Entry<String, Integer> entry: pred2ArityMap.entrySet()) {
                 /* 拓展一个谓词，并尝试一个已知变量 */
                 String predicate = entry.getKey();
                 int arity = entry.getValue();
-                int pred_idx = rule_info.ruleSize();
+                int new_pred_idx = rule_info.ruleSize();
                 RuleInfo new_rule_template = new RuleInfo(rule_info);
                 new_rule_template.addNewPred(predicate, arity);
                 for (int arg_idx = 0; arg_idx < arity; arg_idx++) {
                     for (int var_id = 0; var_id < new_rule_template.getVarCnt(); var_id++) {
                         RuleInfo new_rule_info = new RuleInfo(new_rule_template);
-                        new_rule_info.setUnknownArg(pred_idx, arg_idx, var_id);
-                        Validity validity = calRuleScore(new_rule_info);
-                        if (null != validity && validity.validity > new_rule_template.getValidity().validity) {
-                            new_rule_info.setValidity(validity);
-                            max_heap.add(new_rule_info, validity.validity);
-                        }
+                        new_rule_info.setUnknownArg(new_pred_idx, arg_idx, var_id);
+                        addRule2Heap(max_heap, new_rule_template, new_rule_info);
                     }
                 }
             }
@@ -170,33 +173,59 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
                     RuleInfo new_rule_info = new RuleInfo(rule_info);
                     new_rule_info.setUnknownArg(first_vacant[0], first_vacant[1], new_var_id);
                     new_rule_info.setUnknownArg(second_vacant[0], second_vacant[1], new_var_id);
-                    Validity validity = calRuleScore(new_rule_info);
-                    if (null != validity && validity.validity > rule_info.getValidity().validity) {
-                        new_rule_info.setValidity(validity);
-                        max_heap.add(new_rule_info, validity.validity);
-                    }
+                    addRule2Heap(max_heap, new_rule_info, rule_info);
                 }
                 for (Map.Entry<String, Integer> entry: pred2ArityMap.entrySet()) {
                     /* 新变量的第二个位置也可以是拓展一个谓词以后的位置 */
                     String predicate = entry.getKey();
                     int arity = entry.getValue();
                     int new_pred_idx = rule_info.ruleSize();
-                    for (int j = 0; j < arity; j++) {
+                    for (int arg_idx = 0; arg_idx < arity; arg_idx++) {
                         RuleInfo new_rule_info = new RuleInfo(rule_info);
                         new_rule_info.addNewPred(predicate, arity);
                         new_rule_info.setUnknownArg(first_vacant[0], first_vacant[1], new_var_id);
-                        new_rule_info.setUnknownArg(new_pred_idx, j, new_var_id);
-                        Validity validity = calRuleScore(new_rule_info);
-                        if (null != validity && validity.validity > rule_info.getValidity().validity) {
-                            new_rule_info.setValidity(validity);
-                            max_heap.add(new_rule_info, validity.validity);
-                        }
+                        new_rule_info.setUnknownArg(new_pred_idx, arg_idx, new_var_id);
+                        addRule2Heap(max_heap, new_rule_info, rule_info);
                     }
                 }
             }
         }
 
         return null;
+    }
+
+    protected boolean shouldAbandon(RuleInfo ruleInfo) {
+        /* 抛弃不能产生压缩效果的rule */
+        Validity validity = ruleInfo.getValidity();
+        return MIN_COMPRESSION_RATE >= (validity.posCnt / validity.allCnt);
+    }
+
+    protected void addRule2Heap(MaxHeap<RuleInfo> maxHeap, RuleInfo baseRuleInfo, RuleInfo newRuleInfo) {
+        if (isTrivialForm(newRuleInfo)) {
+            return;
+        }
+        Validity validity = calRuleScore(newRuleInfo);
+        if (null != validity && validity.validity > baseRuleInfo.getValidity().validity) {
+            newRuleInfo.setValidity(validity);
+            maxHeap.add(newRuleInfo, validity.validity);
+        }
+    }
+
+    protected boolean isTrivialForm(RuleInfo ruleInfo) {
+        /* Trivial Rule: Body中有和Head相同的谓词且其变量集相同（顺序不同也算） */
+        PredInfo head_pred_info = ruleInfo.getHead();
+        boolean non_trivial = true;
+        for (int pred_idx = 1; pred_idx < ruleInfo.ruleSize() && non_trivial; pred_idx++) {
+            PredInfo body_pred_info = ruleInfo.getPred(pred_idx);
+            if (head_pred_info.predicate.equals(body_pred_info.predicate)) {
+                boolean body_pred_is_trivial = true;
+                for (int arg_idx = 0; arg_idx < head_pred_info.arity() && body_pred_is_trivial; arg_idx++) {
+                    body_pred_is_trivial = (body_pred_info.args[arg_idx].id < head_pred_info.arity());
+                }
+                non_trivial = !body_pred_is_trivial;
+            }
+        }
+        return !non_trivial;
     }
 
     protected Validity calRuleScore(RuleInfo ruleInfo) {
@@ -248,7 +277,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
         if (0 == free_var_cnt_in_head) {
             for (Map<String, Term> head_binding : head_binding_set) {
                 Compound head_instance = SwiplUtil.substitute(head_compound, head_binding);
-                if (globalFacts.contains(head_instance)) {
+                if (facts.contains(head_instance)) {
                     pos_cnt++;
                 }
             }
@@ -260,7 +289,7 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
                 });
                 for (Map<String, Term> template_binding : sub_q) {
                     Compound head_instance = SwiplUtil.substitute(head_template, template_binding);
-                    if (globalFacts.contains(head_instance)) {
+                    if (facts.contains(head_instance)) {
                         pos_cnt++;
                     }
                 }
@@ -290,17 +319,20 @@ public class ExactQueryWithHeapCompressor extends CompressorBase<JplRule> {
 
         /* 删除已经被证明的 */
         hypothesis.add(rule);
+        writeHypothesis();
         Set<Compound> fact_set = curPred2FactSetMap.get(rule.head.name());
         String query_str = String.format("%s,%s",rule.getHeadString(), rule.getBodyString());
         Query q = new Query(":", new Term[]{
                 new Atom(PrologModule.CURRENT.getSessionName()), Term.textToTerm(query_str)
         });
+        int removed_cnt = 0;
         for (Map<String, Term> binding: q) {
             Compound head_instance = SwiplUtil.substitute(rule.head, binding);
             SwiplUtil.retractKnowledge(PrologModule.CURRENT, head_instance);
-            fact_set.remove(head_instance);
+            removed_cnt += fact_set.remove(head_instance) ? 1 : 0;
         }
         q.close();
+        System.out.printf("Update: %d removed\n", removed_cnt);
     }
 
     @Override
