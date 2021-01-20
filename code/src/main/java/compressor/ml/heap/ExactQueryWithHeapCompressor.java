@@ -2,6 +2,8 @@ package compressor.ml.heap;
 
 import common.JplRule;
 import compressor.ml.CompressorBase;
+import compressor.ml.PredInfo;
+import compressor.ml.PrologModule;
 import compressor.ml.SwiplUtil;
 import org.jpl7.*;
 

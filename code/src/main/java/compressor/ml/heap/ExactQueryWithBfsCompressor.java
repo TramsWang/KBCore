@@ -1,6 +1,7 @@
 package compressor.ml.heap;
 
 import common.JplRule;
+import compressor.ml.PredInfo;
 import org.jpl7.Compound;
 
 import java.util.ArrayList;

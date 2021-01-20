@@ -1,8 +1,8 @@
-package compressor.ml.heap;
+package compressor.ml;
 
 public class PredInfo {
-    final String predicate;
-    final ArgInfo[] args;
+    public final String predicate;
+    public final ArgInfo[] args;
 
     public PredInfo(String predicate, int arity) {
         this.predicate = predicate;

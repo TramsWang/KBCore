@@ -1,4 +1,4 @@
-package compressor.ml.heap;
+package compressor.ml;
 
 public enum PrologModule {
     GLOBAL("global"), CURRENT("current"), START_SET("start_set");

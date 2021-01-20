@@ -1,4 +1,4 @@
-package compressor.ml.heap;
+package compressor.ml;
 
 public class ArgInfo {
     public final int id;

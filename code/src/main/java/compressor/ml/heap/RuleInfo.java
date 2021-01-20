@@ -1,6 +1,9 @@
 package compressor.ml.heap;
 
 import common.JplRule;
+import compressor.ml.ArgInfo;
+import compressor.ml.ArgType;
+import compressor.ml.PredInfo;
 import org.jpl7.Compound;
 import org.jpl7.Term;
 import org.jpl7.Variable;

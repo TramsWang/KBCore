@@ -1,6 +1,5 @@
 package compressor.ml;
 
-import compressor.ml.heap.PrologModule;
 import org.jpl7.Atom;
 import org.jpl7.Compound;
 import org.jpl7.Query;
