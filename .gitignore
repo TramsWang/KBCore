@@ -2,6 +2,7 @@
 /*
 !/code
 !/experiments
+!/doc
 !/README.md
 !/.gitignore
 
@@ -25,3 +26,7 @@
 !/experiments/NaiveWithFamilyRelation/run.sh
 !/experiments/NaiveWithFamilyRelation/result*
 !/experiments/NaiveWithFamilyRelation/Multiset*.xlsx
+
+### Documents ###
+/doc/*
+!/doc/report/
