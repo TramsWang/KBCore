@@ -8,14 +8,12 @@ import org.jpl7.Compound;
 import org.jpl7.Term;
 import org.jpl7.Variable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class RuleInfo {
     private final List<PredInfo> rule;
-    private final List<Integer> usedVars;
+    private final List<ArgInfo> usedVars;
+    private final List<Integer> varCnts;
     private int appliedConditions;
     private EvalMetric evalMetric;
 
@@ -23,6 +21,7 @@ public class RuleInfo {
         rule = new ArrayList<>();
         addPred(headPredicate, arity);
         usedVars = new ArrayList<>();
+        varCnts = new ArrayList<>();
         appliedConditions = 0;
         evalMetric = null;
     }
@@ -33,6 +32,7 @@ public class RuleInfo {
             this.rule.add(new PredInfo(pred_info));
         }
         this.usedVars = new ArrayList<>(another.usedVars);
+        this.varCnts = new ArrayList<>(another.varCnts);
         this.appliedConditions = another.appliedConditions;
         this.evalMetric = another.evalMetric;
     }
@@ -65,8 +65,8 @@ public class RuleInfo {
     public void setEmptyArg2KnownVar(int predIdx, int argIdx, int varId) {
         PredInfo pred_info = rule.get(predIdx);
         if (null == pred_info.args[argIdx] && varId < usedVars.size()) {
-            pred_info.args[argIdx] = new ArgInfo(varId, ArgType.VAR);
-            usedVars.set(varId, usedVars.get(varId)+1);
+            pred_info.args[argIdx] = usedVars.get(varId);
+            varCnts.set(varId, varCnts.get(varId)+1);
             appliedConditions++;
         }
     }
@@ -78,7 +78,8 @@ public class RuleInfo {
             ArgInfo new_var = new ArgInfo(usedVars.size(), ArgType.VAR);
             pred_info_1.args[argIdx1] = new_var;
             pred_info_2.args[argIdx2] = new_var;
-            usedVars.add(2);
+            usedVars.add(new_var);
+            varCnts.add(2);
             appliedConditions++;
         }
     }
@@ -132,61 +133,94 @@ public class RuleInfo {
     public void removeKnownVar(int predIdx, int argIdx) {
         PredInfo pred_info = rule.get(predIdx);
         ArgInfo var = pred_info.args[argIdx];
+        if (null == var) {
+            return;
+        }
         pred_info.args[argIdx] = null;
-        Integer var_uses_cnt = usedVars.get(argIdx);
+        Integer var_uses_cnt = varCnts.get(var.id);
+
         if (2 >= var_uses_cnt) {
+            /* 用最后一个var填补删除var的空缺 */
+            /* 要注意删除的也可能是最后一个var */
+            int last_var_idx = usedVars.size() - 1;
+            ArgInfo last_var = usedVars.remove(last_var_idx);
+            varCnts.set(var.id, varCnts.get(last_var_idx));
+            varCnts.remove(last_var_idx);
+
             /* 删除本次出现以外，还需要再删除作为自由变量的存在 */
             for (PredInfo another_pred_info: rule) {
                 for (int i = 0; i < another_pred_info.arity(); i++) {
-                    if (argIdx == another_pred_info.args[i].id) {
-                        another_pred_info.args[i] = null;
+                    if (null != another_pred_info.args[i]) {
+                        if (var.id == another_pred_info.args[i].id) {
+                            another_pred_info.args[i] = null;
+                        }
                     }
                 }
             }
-            var_uses_cnt = 0;
+
+            if (var != last_var) {
+                for (PredInfo another_pred_info : rule) {
+                    for (int i = 0; i < another_pred_info.arity(); i++) {
+                        if (null != another_pred_info.args[i]) {
+                            if (last_var.id == another_pred_info.args[i].id) {
+                                another_pred_info.args[i] = var;
+                            }
+                        }
+                    }
+                }
+            }
         } else {
             /* 只删除本次出现 */
-            var_uses_cnt--;
+            varCnts.set(var.id, var_uses_cnt-1);
         }
-        usedVars.set(argIdx, var_uses_cnt);
+        appliedConditions--;
 
-        /* 删除变量可能出现纯自由的predicate，需要一并删除 */
-        rule.removeIf(predInfo -> {
-            for (ArgInfo arg_info: predInfo.args) {
+        /* 删除变量可能出现纯自由的predicate，需要一并删除(head保留) */
+        Iterator<PredInfo> itr = rule.iterator();
+        PredInfo head_pred = itr.next();
+        while (itr.hasNext()) {
+            PredInfo body_pred = itr.next();
+            boolean is_empty_pred = true;
+            for (ArgInfo arg_info: body_pred.args) {
                 if (null != arg_info) {
-                    return false;
+                    is_empty_pred = false;
+                    break;
                 }
             }
-            return true;
-        });
+            if (is_empty_pred) {
+                itr.remove();
+            }
+        }
     }
 
-    public boolean isTrivial() {
-        /* 当Head的所有参数都Bounded以后，Body中出现和其functor一致且参数集是其子集的predicate，是为Trivial */
+    public boolean isInvalid() {
+        /* Head没有bounded var，且body不为空 */
         PredInfo head_pred_info = rule.get(0);
-        Set<Integer> head_vars = new HashSet<>();
-        for (ArgInfo arg_info: head_pred_info.args) {
-            if (null == arg_info) {
-                return false;
+        boolean no_bounded_var_in_head = true;
+        for (ArgInfo head_arg_info: head_pred_info.args) {
+            if (null != head_arg_info) {
+                no_bounded_var_in_head = false;
+                break;
             }
-            head_vars.add(arg_info.id);
+        }
+        if (no_bounded_var_in_head && 2 <= rule.size()) {
+            return true;
         }
 
+        /* body中有和Head一样的pred（只要存在同样位置的参数一样，就算） */
         for (int pred_idx = 1; pred_idx < rule.size(); pred_idx++) {
-            PredInfo body_pred_info  = rule.get(pred_idx);
+            PredInfo body_pred_info = rule.get(pred_idx);
             if (head_pred_info.predicate.equals(body_pred_info.predicate)) {
-                boolean body_vars_in_head_var_set = true;
-                for (ArgInfo body_arg_info: body_pred_info.args) {
-                    if (!head_vars.contains(body_arg_info.id)) {
-                        body_vars_in_head_var_set = false;
-                        break;
+                for (int arg_idx = 0; arg_idx < head_pred_info.arity(); arg_idx++) {
+                    ArgInfo head_arg = head_pred_info.args[arg_idx];
+                    ArgInfo body_arg = body_pred_info.args[arg_idx];
+                    if (null != head_arg && head_arg == body_arg) {
+                        return true;
                     }
-                }
-                if (body_vars_in_head_var_set) {
-                    return true;
                 }
             }
         }
+
         return false;
     }
 }

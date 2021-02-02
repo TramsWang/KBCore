@@ -95,8 +95,7 @@ public class ExactQueryCompressor extends CompressorBase<RuleInfo> {
         }
 
         /* 找到仅有head的rule中得分最高的作为起始rule */
-        RuleInfo r_max = new RuleInfo("null", 0);
-        r_max.setEvalMetric(new CompressRatio(0, 0, 0));
+        List<RuleInfo> starting_rules = new ArrayList<>();
         for (Map.Entry<String, Integer> entry: pred2ArityMap.entrySet()) {
             String predicate = entry.getKey();
             Integer arity = entry.getValue();
@@ -104,14 +103,22 @@ public class ExactQueryCompressor extends CompressorBase<RuleInfo> {
                 continue;
             }
             RuleInfo rule_info = new RuleInfo(predicate, arity);
-            EvalMetric eval = evalRule(rule_info);
-            if (eval.getEvaluation() > r_max.getEvalMetric().getEvaluation()) {
-                r_max = rule_info;
+            checkThenAddRule(starting_rules, rule_info);
+        }
+        if (starting_rules.isEmpty()) {
+            /* 没有适合条件的规则了 */
+            return null;
+        }
+        RuleInfo r_max = starting_rules.get(0);
+        for (RuleInfo r: starting_rules) {
+            if (r.getEvalMetric().getEvaluation() > r_max.getEvalMetric().getEvaluation()) {
+                r_max = r;
             }
         }
 
-        /* 寻找局部最优 */
+        /* 寻找局部最优（只要进入这个循环，一定有局部最优） */
         while (true) {
+            System.out.printf("Extend: %s\n", r_max);
             RuleInfo r_e_max = r_max;
 
             /* 遍历r_max的后继邻居 */
@@ -133,6 +140,7 @@ public class ExactQueryCompressor extends CompressorBase<RuleInfo> {
             if (r_e_max == r_max) {
                 return r_max;
             }
+            r_max = r_e_max;
         }
     }
 
@@ -177,8 +185,7 @@ public class ExactQueryCompressor extends CompressorBase<RuleInfo> {
         String query_str = query_builder.toString();
 
         Query q = new Query(":", new Term[]{
-                // Todo: 这里究竟应该是Current还是Global？
-                new Atom(PrologModule.CURRENT.getSessionName()), Term.textToTerm(query_str)
+                new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(query_str)
         });
         Map<String, Term>[] bindings = q.allSolutions();
         q.close();
@@ -287,18 +294,9 @@ public class ExactQueryCompressor extends CompressorBase<RuleInfo> {
 
     protected List<RuleInfo> findPred(RuleInfo ruleInfo) {
         List<RuleInfo> predecessors = new ArrayList<>();
-
-        /* 先判断Head中的变量是否可以删除 */
-        Set<String> head_vars = new HashSet<>();
-        PredInfo head_pred = ruleInfo.getHead();
-        for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
-            if (null != head_pred.args[arg_idx]) {
-                head_vars.add(head_pred.args[arg_idx].name);
-            }
-        }
-
-        int start_idx = (2 <= head_vars.size()) ? 0 : 1;
-        for (int pred_idx = start_idx; pred_idx < ruleInfo.predCnt(); pred_idx++) {
+        for (int pred_idx = 0; pred_idx < ruleInfo.predCnt(); pred_idx++) {
+            /* 从Head开始删除可能会出现Head中全部是自由变量但是Body不为空的情况，按照定义来说，这种规则是不在搜索
+               空间中的，但是实际eval的时候会将这种规则当做空的规则，因此不会成为r_max，也就不会影响搜索结果 */
             PredInfo pred_info = ruleInfo.getPred(pred_idx);
             for (int arg_idx = 0; arg_idx < pred_info.arity(); arg_idx++) {
                 if (null != pred_info.args[arg_idx]) {
@@ -313,35 +311,60 @@ public class ExactQueryCompressor extends CompressorBase<RuleInfo> {
     }
 
     protected void checkThenAddRule(Collection<RuleInfo> collection, RuleInfo ruleInfo) {
-        if (!ruleInfo.isTrivial() && null != evalRule(ruleInfo)) {
+        if (!ruleInfo.isInvalid() && null != evalRule(ruleInfo)) {
             collection.add(ruleInfo);
         }
     }
 
     @Override
     protected void updateKb(RuleInfo rule) {
-        if (!rule.getEvalMetric().useful()) {
+        if (null == rule || !rule.getEvalMetric().useful()) {
             shouldContinue = false;
             return;
         }
 
-        /* 删除已经被证明的 */
         JplRule jpl_rule = rule.toJplRule();
         hypothesis.add(jpl_rule);
         writeHypothesis();
-        Set<Compound> fact_set = curPred2FactSetMap.get(jpl_rule.head.name());
-        String query_str = String.format("%s,%s",jpl_rule.getHeadString(), jpl_rule.getBodyString());
+
+        /* 删除已经被证明的 */
+        PredInfo head_pred_info = rule.getHead();
+        Term[] head_args = new Term[head_pred_info.args.length];
+        int free_var_cnt_in_head = 0;
+        for (int arg_idx = 0; arg_idx < head_args.length; arg_idx++) {
+            if (null == head_pred_info.args[arg_idx]) {
+                head_args[arg_idx] = new Variable(String.format("Y%d", free_var_cnt_in_head));
+                free_var_cnt_in_head++;
+            } else {
+                head_args[arg_idx] = new Variable(head_pred_info.args[arg_idx].name);
+            }
+        }
+        Compound head_compound = new Compound(head_pred_info.predicate, head_args);
+        StringBuilder query_builder = new StringBuilder(head_compound.toString());
+        for (int pred_idx = 1; pred_idx < rule.predCnt(); pred_idx++) {
+            PredInfo body_pred_info = rule.getPred(pred_idx);
+            Term[] args = new Term[body_pred_info.arity()];
+            for (int arg_idx = 0; arg_idx < body_pred_info.arity(); arg_idx++) {
+                args[arg_idx] = (null == body_pred_info.args[arg_idx]) ? new Variable("_") :
+                        new Variable(body_pred_info.args[arg_idx].name);
+            }
+            Compound body_compound = new Compound(body_pred_info.predicate, args);
+            query_builder.append(',').append(body_compound.toString());
+        }
+        String query_str = query_builder.toString();
         Query q = new Query(":", new Term[]{
-                new Atom(PrologModule.CURRENT.getSessionName()), Term.textToTerm(query_str)
+                new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(query_str)
         });
+
+        Set<Compound> fact_set = curPred2FactSetMap.get(jpl_rule.head.name());
         int removed_cnt = 0;
         for (Map<String, Term> binding: q) {
-            Compound head_instance = SwiplUtil.substitute(jpl_rule.head, binding);
+            Compound head_instance = SwiplUtil.substitute(head_compound, binding);
             SwiplUtil.retractKnowledge(PrologModule.CURRENT, head_instance);
             removed_cnt += fact_set.remove(head_instance) ? 1 : 0;
         }
-        q.close();
         System.out.printf("Update: %d removed\n", removed_cnt);
+        q.close();
     }
 
     @Override

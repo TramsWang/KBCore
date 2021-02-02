@@ -169,8 +169,33 @@ public class JplTest {
         System.out.println(m3.equals(m4));
     }
 
+    private void testExistenceQuery() {
+        JPL.init();
+        Atom a = new Atom("a");
+        Atom b = new Atom("b");
+        Atom c = new Atom("c");
+        Atom d = new Atom("d");
+        Atom e = new Atom("e");
+        Compound p1 = new Compound("parent", new Term[]{a, b});
+        Compound p2 = new Compound("parent", new Term[]{b, c});
+        Compound p3 = new Compound("parent", new Term[]{c, d});
+        Compound p4 = new Compound("parent", new Term[]{d, e});
+        Query q1 = new Query(new Compound("assertz", new Term[]{p1}));
+        Query q2 = new Query(new Compound("assertz", new Term[]{p2}));
+        Query q3 = new Query(new Compound("assertz", new Term[]{p3}));
+        Query q4 = new Query(new Compound("assertz", new Term[]{p4}));
+        q1.hasSolution();q1.close();
+        q2.hasSolution();q2.close();
+        q3.hasSolution();q3.close();
+        q4.hasSolution();q4.close();
+        Query q = new Query(new Compound("parent", new Term[]{new Variable("X"), new Variable("Y")}));
+        System.out.println("X\tparent\tY");
+        System.out.println(q.hasSolution());
+        q.close();
+    }
+
     public static void main(String[] args) {
         JplTest test = new JplTest();
-        test.testMapEquality();
+        test.testExistenceQuery();
     }
 }
