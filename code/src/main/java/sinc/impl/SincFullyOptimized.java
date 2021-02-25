@@ -103,6 +103,9 @@ public class SincFullyOptimized extends SInC {
             ignore_set.add("gender");
         }
 
+        /* 初始化Evaluation Cache */
+        Map<Rule, Eval> eval_cache = new HashMap<>();
+
         /* 找到仅有head的rule中得分最高的作为起始rule */
         List<Rule> starting_rules = new ArrayList<>();
         for (Map.Entry<String, Integer> entry: functor2ArityMap.entrySet()) {
@@ -112,7 +115,7 @@ public class SincFullyOptimized extends SInC {
                 continue;
             }
             Rule rule = new Rule(predicate, arity);
-            checkThenAddRule(starting_rules, rule);
+            checkThenAddRule(starting_rules, rule, eval_cache);
         }
         if (starting_rules.isEmpty()) {
             /* 没有适合条件的规则了 */
@@ -141,19 +144,19 @@ public class SincFullyOptimized extends SInC {
             System.out.printf("Extend: %s\n", r_max);
             Rule r_e_max = r_max;
 
-            /* 遍历r_max的后继邻居 */
-            List<Rule> successors = findExtension(r_max, functor_2_promising_const_map);
-            for (Rule successor: successors) {
-                if (successor.getEval().value(evalType) > r_e_max.getEval().value(evalType)) {
-                    r_e_max = successor;
+            /* 遍历r_max的扩展邻居 */
+            List<Rule> extensions = findExtension(r_max, functor_2_promising_const_map, eval_cache);
+            for (Rule r_e: extensions) {
+                if (r_e.getEval().value(evalType) > r_e_max.getEval().value(evalType)) {
+                    r_e_max = r_e;
                 }
             }
 
             /* 遍历r_max的前驱邻居 */
-            List<Rule> predecessors = findOrigin(r_max);
-            for (Rule predecessor: predecessors) {
-                if (predecessor.getEval().value(evalType) > r_e_max.getEval().value(evalType)) {
-                    r_e_max = predecessor;
+            List<Rule> origins = findOrigin(r_max, eval_cache);
+            for (Rule r_o: origins) {
+                if (r_o.getEval().value(evalType) > r_e_max.getEval().value(evalType)) {
+                    r_e_max = r_o;
                 }
             }
 
@@ -164,7 +167,13 @@ public class SincFullyOptimized extends SInC {
         }
     }
 
-    protected Eval evalRule(Rule rule) {
+    protected void evalRule(Rule rule, Map<Rule, Eval> evalCache) {
+        Eval cache = evalCache.get(rule);
+        if (null != cache) {
+            rule.setEval(cache);
+            return;
+        }
+
         /* 统计Head的参数情况，并将其转成带Free Var的Jpl Arg Array */
         Predicate head_pred = rule.getHead();
         List<String> bounded_vars_in_head = new ArrayList<>();
@@ -191,7 +200,7 @@ public class SincFullyOptimized extends SInC {
                             facts.size(), Math.pow(constants.size(), head_pred.arity()), rule.size()
                     )
             );
-            return rule.getEval();
+            return;
         }
 
         /* 计算entailments */
@@ -234,8 +243,8 @@ public class SincFullyOptimized extends SInC {
         /* 用HC剪枝 */
         double head_coverage = ((double) pos_cnt) / facts.size();
         if (MIN_HEAD_COVERAGE >= head_coverage) {
-            rule.setEval(null);
-            return null;
+            rule.setEval(Eval.MIN);
+            return;
         }
 
         rule.setEval(
@@ -245,10 +254,11 @@ public class SincFullyOptimized extends SInC {
                         rule.size()
                 )
         );
-        return rule.getEval();
     }
 
-    protected List<Rule> findExtension(Rule rule, Map<String, List<String>[]> functor2promisingConstMap) {
+    protected List<Rule> findExtension(
+            Rule rule, Map<String, List<String>[]> functor2promisingConstMap, Map<Rule, Eval> evalCache
+    ) {
         List<Rule> extensions = new ArrayList<>();
 
         /* 先找到所有空白的参数 */
@@ -268,7 +278,7 @@ public class SincFullyOptimized extends SInC {
                 /* 尝试将已知变量填入空白参数 */
                 Rule new_rule = new Rule(rule);
                 new_rule.boundFreeVar2ExistedVar(vacant[0], vacant[1], var_id);
-                checkThenAddRule(extensions, new_rule);
+                checkThenAddRule(extensions, new_rule, evalCache);
             }
 
             for (Map.Entry<String, Integer> entry: functor2ArityMap.entrySet()) {
@@ -281,7 +291,7 @@ public class SincFullyOptimized extends SInC {
                 for (int arg_idx = 0; arg_idx < arity; arg_idx++) {
                     Rule new_rule = new Rule(new_rule_template);
                     new_rule.boundFreeVar2ExistedVar(new_pred_idx, arg_idx, var_id);
-                    checkThenAddRule(extensions, new_rule);
+                    checkThenAddRule(extensions, new_rule, evalCache);
                 }
             }
         }
@@ -296,7 +306,7 @@ public class SincFullyOptimized extends SInC {
             for (String const_symbol: const_list) {
                 Rule new_rule = new Rule(rule);
                 new_rule.boundFreeVar2Constant(first_vacant[0], first_vacant[1], DEFAULT_CONST_ID, const_symbol);
-                checkThenAddRule(extensions, new_rule);
+                checkThenAddRule(extensions, new_rule, evalCache);
             }
 
             /* 找到两个位置尝试同一个新变量 */
@@ -307,7 +317,7 @@ public class SincFullyOptimized extends SInC {
                 new_rule_info.boundFreeVars2NewVar(
                         first_vacant[0], first_vacant[1], second_vacant[0], second_vacant[1]
                 );
-                checkThenAddRule(extensions, new_rule_info);
+                checkThenAddRule(extensions, new_rule_info, evalCache);
             }
             for (Map.Entry<String, Integer> entry: functor2ArityMap.entrySet()) {
                 /* 新变量的第二个位置也可以是拓展一个谓词以后的位置 */
@@ -320,7 +330,7 @@ public class SincFullyOptimized extends SInC {
                     new_rule_info.boundFreeVars2NewVar(
                             first_vacant[0], first_vacant[1], new_pred_idx, arg_idx
                     );
-                    checkThenAddRule(extensions, new_rule_info);
+                    checkThenAddRule(extensions, new_rule_info, evalCache);
                 }
             }
         }
@@ -328,7 +338,7 @@ public class SincFullyOptimized extends SInC {
         return extensions;
     }
 
-    protected List<Rule> findOrigin(Rule rule) {
+    protected List<Rule> findOrigin(Rule rule, Map<Rule, Eval> evalCache) {
         List<Rule> origins = new ArrayList<>();
         for (int pred_idx = 0; pred_idx < rule.length(); pred_idx++) {
             /* 从Head开始删除可能会出现Head中没有Bounded Var但是Body不为空的情况，按照定义来说，这种规则是不在
@@ -338,7 +348,7 @@ public class SincFullyOptimized extends SInC {
                 if (null != predicate.args[arg_idx]) {
                     Rule new_rule = new Rule(rule);
                     new_rule.removeKnownArg(pred_idx, arg_idx);
-                    checkThenAddRule(origins, new_rule);
+                    checkThenAddRule(origins, new_rule, evalCache);
                 }
             }
         }
@@ -346,8 +356,9 @@ public class SincFullyOptimized extends SInC {
         return origins;
     }
 
-    protected void checkThenAddRule(Collection<Rule> collection, Rule rule) {
-        if (!rule.isInvalid() && null != evalRule(rule)) {
+    protected void checkThenAddRule(Collection<Rule> collection, Rule rule, Map<Rule, Eval> evalCache) {
+        if (!rule.isInvalid()) {
+            evalRule(rule, evalCache);
             collection.add(rule);
         }
     }

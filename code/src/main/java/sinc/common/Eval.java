@@ -1,6 +1,24 @@
 package sinc.common;
 
 public class Eval {
+    private static class EvalMin extends Eval {
+        private EvalMin() {
+            super(0, Double.POSITIVE_INFINITY, Integer.MAX_VALUE);
+        }
+
+        @Override
+        public double value(EvalMetric type) {
+            return Double.NEGATIVE_INFINITY;
+        }
+
+        @Override
+        public boolean useful(EvalMetric type) {
+            return false;
+        }
+    }
+
+    public static final Eval MIN = new EvalMin();
+
     private static final double COMP_RATIO_USEFUL_THRESHOLD = 0.5;
     private static final double COMP_CAPACITY_USEFUL_THRESHOLD = 0.0;
 
