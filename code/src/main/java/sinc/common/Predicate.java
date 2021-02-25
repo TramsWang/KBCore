@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Predicate {
-    final String functor;
-    final Argument[] args;
+    public final String functor;
+    public final Argument[] args;
 
     public Predicate(String functor, int arity) {
         this.functor = functor;

@@ -1,8 +1,11 @@
 package sinc;
 
+import sinc.common.EvalMetric;
 import sinc.common.Rule;
 
 public abstract class SInC {
+
+    protected final EvalMetric evalType;
 
     protected final String bkFilePath;
     protected final String hypothesisFilePath;
@@ -11,9 +14,11 @@ public abstract class SInC {
     protected final boolean debug;
 
     public SInC(
+            EvalMetric evalType,
             String bkFilePath, String hypothesisFilePath, String startSetFilePath, String counterExampleSetFilePath,
             boolean debug
     ) {
+        this.evalType = evalType;
         this.bkFilePath = bkFilePath;
         this.hypothesisFilePath = hypothesisFilePath;
         this.startSetFilePath = startSetFilePath;

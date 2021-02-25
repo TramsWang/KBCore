@@ -1,9 +1,6 @@
 package sinc.util;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class MultiSet<T> {
     private final Map<T, Integer> cntMap;
@@ -82,6 +79,17 @@ public class MultiSet<T> {
                     (k, v) -> (null == v) ? entry.getValue() : Math.max(v, entry.getValue()));
         }
         return new MultiSet<>(union);
+    }
+
+    public List<T> elementsAboveProportion(double proportion) {
+        List<T> result = new ArrayList<>();
+        int threshold = (int)(this.size * proportion);
+        for (Map.Entry<T, Integer> entry: cntMap.entrySet()) {
+            if (entry.getValue() > threshold) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
     }
 
     @Override

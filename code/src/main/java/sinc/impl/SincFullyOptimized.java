@@ -1,8 +1,9 @@
 package sinc.impl;
 
 import org.jpl7.*;
+import org.jpl7.Variable;
 import sinc.SInC;
-import sinc.common.Rule;
+import sinc.common.*;
 import sinc.util.MultiSet;
 import sinc.util.PrologModule;
 import sinc.util.SwiplUtil;
@@ -16,13 +17,12 @@ import java.util.*;
 public class SincFullyOptimized extends SInC {
 
     protected static final double MIN_HEAD_COVERAGE = 0.05;
-    protected static final double MIN_COMPRESSION_RATE = 0.5;
     protected static final double MIN_CONSTANT_PROPORTION = 0.25;
+    protected static final int DEFAULT_CONST_ID = -1;
 
     protected final Set<Compound> globalFacts = new HashSet<>();
     protected final Map<String, Integer> functor2ArityMap = new HashMap<>();
 
-    protected final Set<Compound> curFacts = new HashSet<>();  // Todo: Is this needed?
     protected final Map<String, Set<Compound>> curFunctor2FactSetMap = new HashMap<>();
     protected final Map<String, MultiSet<String>[]> curFunctor2ArgSetsMap = new HashMap<>();
     protected final Set<String> constants = new HashSet<>();
@@ -32,10 +32,11 @@ public class SincFullyOptimized extends SInC {
     protected boolean shouldContinue = true;
 
     public SincFullyOptimized(
+            EvalMetric evalType,
             String kbFilePath, String hypothesisFilePath, String startSetFilePath, String counterExampleSetFilePath,
             boolean debug
     ) {
-        super(kbFilePath, hypothesisFilePath, startSetFilePath, counterExampleSetFilePath, debug);
+        super(evalType, kbFilePath, hypothesisFilePath, startSetFilePath, counterExampleSetFilePath, debug);
     }
 
     /**
@@ -66,9 +67,8 @@ public class SincFullyOptimized extends SInC {
                 }
                 Compound compound = new Compound(functor, args);
                 SwiplUtil.appendKnowledge(PrologModule.GLOBAL, compound);
-//                SwiplUtil.appendKnowledge(PrologModule.CURRENT, compound);  // Todo: Is this needed?
                 globalFacts.add(compound);
-                curFacts.add(compound);
+//                curFacts.add(compound);
                 curFunctor2FactSetMap.compute(functor, (k, v) -> {
                     if (null == v) {
                         v = new HashSet<>();
@@ -111,8 +111,8 @@ public class SincFullyOptimized extends SInC {
             if (ignore_set.contains(predicate)) {
                 continue;
             }
-            Rule rule_info = new Rule(predicate, arity);
-            checkThenAddRule(starting_rules, rule_info);
+            Rule rule = new Rule(predicate, arity);
+            checkThenAddRule(starting_rules, rule);
         }
         if (starting_rules.isEmpty()) {
             /* 没有适合条件的规则了 */
@@ -120,30 +120,39 @@ public class SincFullyOptimized extends SInC {
         }
         Rule r_max = starting_rules.get(0);
         for (Rule r: starting_rules) {
-            if (r.getEval().value() > r_max.getEval().value()) {
+            if (r.getEval().value(evalType) > r_max.getEval().value(evalType)) {
                 r_max = r;
             }
         }
 
-        /* Todo: 计算所有符合阈值的constant */
+        /* 计算所有符合阈值的constant */
+        Map<String, List<String>[]> functor_2_promising_const_map = new HashMap<>();
+        for (Map.Entry<String, MultiSet<String>[]> entry: curFunctor2ArgSetsMap.entrySet()) {
+            MultiSet<String>[] arg_sets = entry.getValue();
+            List<String>[] arg_const_lists = new List[arg_sets.length];
+            for (int i = 0; i < arg_sets.length; i++) {
+                arg_const_lists[i] = arg_sets[i].elementsAboveProportion(MIN_CONSTANT_PROPORTION);
+            }
+            functor_2_promising_const_map.put(entry.getKey(), arg_const_lists);
+        }
 
         /* 寻找局部最优（只要进入这个循环，一定有局部最优） */
         while (true) {
             System.out.printf("Extend: %s\n", r_max);
-            RuleInfo r_e_max = r_max;
+            Rule r_e_max = r_max;
 
             /* 遍历r_max的后继邻居 */
-            List<RuleInfo> successors = findSucc(r_max);
-            for (RuleInfo successor: successors) {
-                if (successor.getEvalMetric().getEvaluation() > r_e_max.getEvalMetric().getEvaluation()) {
+            List<Rule> successors = findExtension(r_max, functor_2_promising_const_map);
+            for (Rule successor: successors) {
+                if (successor.getEval().value(evalType) > r_e_max.getEval().value(evalType)) {
                     r_e_max = successor;
                 }
             }
 
             /* 遍历r_max的前驱邻居 */
-            List<RuleInfo> predecessors = findPred(r_max);
-            for (RuleInfo predecessor: predecessors) {
-                if (predecessor.getEvalMetric().getEvaluation() > r_e_max.getEvalMetric().getEvaluation()) {
+            List<Rule> predecessors = findOrigin(r_max);
+            for (Rule predecessor: predecessors) {
+                if (predecessor.getEval().value(evalType) > r_e_max.getEval().value(evalType)) {
                     r_e_max = predecessor;
                 }
             }
@@ -155,42 +164,48 @@ public class SincFullyOptimized extends SInC {
         }
     }
 
-    protected EvalMetric evalRule(RuleInfo ruleInfo) {
-        /* 如果head上的所有变量都是自由变量则直接计算 */
-        PredInfo head_pred_info =  ruleInfo.getHead();
+    protected Eval evalRule(Rule rule) {
+        /* 统计Head的参数情况，并将其转成带Free Var的Jpl Arg Array */
+        Predicate head_pred = rule.getHead();
         List<String> bounded_vars_in_head = new ArrayList<>();
-        Term[] head_args = new Term[head_pred_info.args.length];
+        Term[] head_args = new Term[head_pred.args.length];
         int free_var_cnt_in_head = 0;
         for (int arg_idx = 0; arg_idx < head_args.length; arg_idx++) {
-            if (null == head_pred_info.args[arg_idx]) {
+            Argument argument = head_pred.args[arg_idx];
+            if (null == argument) {
                 head_args[arg_idx] = new Variable(String.format("Y%d", free_var_cnt_in_head));
                 free_var_cnt_in_head++;
+            } else if (argument.isVar) {
+                head_args[arg_idx] = new Variable(argument.name);
+                bounded_vars_in_head.add(argument.name);
             } else {
-                head_args[arg_idx] = new Variable(head_pred_info.args[arg_idx].name);
-                bounded_vars_in_head.add(head_pred_info.args[arg_idx].name);
+                head_args[arg_idx] = new Atom(argument.name);
             }
         }
-        Set<Compound> facts = curFunctor2FactSetMap.get(head_pred_info.predicate);
-        if (bounded_vars_in_head.isEmpty()) {
-            ruleInfo.setEvalMetric(
-                    new CompressRatio(
-                            facts.size(), Math.pow(constants.size(), head_pred_info.arity()), ruleInfo.size()
+        Set<Compound> facts = curFunctor2FactSetMap.get(head_pred.functor);
+
+        /* 如果head上的所有变量都是自由变量则直接计算 */
+        if (head_pred.arity() == free_var_cnt_in_head) {
+            rule.setEval(
+                    new Eval(
+                            facts.size(), Math.pow(constants.size(), head_pred.arity()), rule.size()
                     )
             );
-            return ruleInfo.getEvalMetric();
+            return rule.getEval();
         }
 
         /* 计算entailments */
-        Compound head_compound = new Compound(head_pred_info.predicate, head_args);
+        Compound head_compound = new Compound(head_pred.functor, head_args);
         StringBuilder query_builder = new StringBuilder(head_compound.toString());
-        for (int pred_idx = 1; pred_idx < ruleInfo.predCnt(); pred_idx++) {
-            PredInfo body_pred_info = ruleInfo.getPred(pred_idx);
-            Term[] args = new Term[body_pred_info.arity()];
-            for (int arg_idx = 0; arg_idx < body_pred_info.arity(); arg_idx++) {
-                args[arg_idx] = (null == body_pred_info.args[arg_idx]) ? new Variable("_") :
-                        new Variable(body_pred_info.args[arg_idx].name);
+        for (int pred_idx = 1; pred_idx < rule.length(); pred_idx++) {
+            Predicate body_pred = rule.getPredicate(pred_idx);
+            Term[] args = new Term[body_pred.arity()];
+            for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
+                Argument argument = body_pred.args[arg_idx];
+                args[arg_idx] = (null == argument) ? new Variable("_") :
+                        argument.isVar ? new Variable(argument.name) : new Atom(argument.name);
             }
-            Compound body_compound = new Compound(body_pred_info.predicate, args);
+            Compound body_compound = new Compound(body_pred.functor, args);
             query_builder.append(',').append(body_compound.toString());
         }
         String query_str = query_builder.toString();
@@ -219,27 +234,27 @@ public class SincFullyOptimized extends SInC {
         /* 用HC剪枝 */
         double head_coverage = ((double) pos_cnt) / facts.size();
         if (MIN_HEAD_COVERAGE >= head_coverage) {
-            ruleInfo.setEvalMetric(null);
+            rule.setEval(null);
             return null;
         }
 
-        ruleInfo.setEvalMetric(
-                new CompressRatio(
+        rule.setEval(
+                new Eval(
                         pos_cnt,
                         head_templates.size() * Math.pow(constants.size(), free_var_cnt_in_head),
-                        ruleInfo.size()
+                        rule.size()
                 )
         );
-        return ruleInfo.getEvalMetric();
+        return rule.getEval();
     }
 
-    protected List<RuleInfo> findSucc(RuleInfo ruleInfo) {
-        List<RuleInfo> successors = new ArrayList<>();
+    protected List<Rule> findExtension(Rule rule, Map<String, List<String>[]> functor2promisingConstMap) {
+        List<Rule> extensions = new ArrayList<>();
 
         /* 先找到所有空白的参数 */
         List<int[]> vacant_list = new ArrayList<>();    // 空白参数记录表：{pred_idx, arg_idx}
-        for (int pred_idx = 0; pred_idx < ruleInfo.predCnt(); pred_idx++) {
-            PredInfo pred_info = ruleInfo.getPred(pred_idx);
+        for (int pred_idx = 0; pred_idx < rule.length(); pred_idx++) {
+            Predicate pred_info = rule.getPredicate(pred_idx);
             for (int arg_idx = 0; arg_idx < pred_info.arity(); arg_idx++) {
                 if (null == pred_info.args[arg_idx]) {
                     vacant_list.add(new int[]{pred_idx, arg_idx});
@@ -248,118 +263,129 @@ public class SincFullyOptimized extends SInC {
         }
 
         /* 尝试增加已知变量 */
-        for (int var_id = 0; var_id < ruleInfo.usedVars(); var_id++) {
+        for (int var_id = 0; var_id < rule.usedBoundedVars(); var_id++) {
             for (int[] vacant: vacant_list) {
                 /* 尝试将已知变量填入空白参数 */
-                RuleInfo new_rule_info = new RuleInfo(ruleInfo);
-                new_rule_info.setEmptyArg2KnownVar(vacant[0], vacant[1], var_id);
-                checkThenAddRule(successors, new_rule_info);
+                Rule new_rule = new Rule(rule);
+                new_rule.boundFreeVar2ExistedVar(vacant[0], vacant[1], var_id);
+                checkThenAddRule(extensions, new_rule);
             }
 
             for (Map.Entry<String, Integer> entry: functor2ArityMap.entrySet()) {
                 /* 拓展一个谓词，并尝试一个已知变量 */
-                String predicate = entry.getKey();
+                String functor = entry.getKey();
                 int arity = entry.getValue();
-                int new_pred_idx = ruleInfo.predCnt();
-                RuleInfo new_rule_template = new RuleInfo(ruleInfo);
-                new_rule_template.addPred(predicate, arity);
+                int new_pred_idx = rule.length();
+                Rule new_rule_template = new Rule(rule);
+                new_rule_template.addPred(functor, arity);
                 for (int arg_idx = 0; arg_idx < arity; arg_idx++) {
-                    RuleInfo new_rule_info = new RuleInfo(new_rule_template);
-                    new_rule_info.setEmptyArg2KnownVar(new_pred_idx, arg_idx, var_id);
-                    checkThenAddRule(successors, new_rule_info);
+                    Rule new_rule = new Rule(new_rule_template);
+                    new_rule.boundFreeVar2ExistedVar(new_pred_idx, arg_idx, var_id);
+                    checkThenAddRule(extensions, new_rule);
                 }
             }
         }
 
-        /* 找到两个位置尝试同一个新变量 */
         for (int i = 0; i < vacant_list.size(); i++) {
             /* 找到新变量的第一个位置 */
             int[] first_vacant = vacant_list.get(i);
+
+            /* 拓展一个常量 */
+            Predicate predicate = rule.getPredicate(first_vacant[0]);
+            List<String> const_list = functor2promisingConstMap.get(predicate.functor)[first_vacant[1]];
+            for (String const_symbol: const_list) {
+                Rule new_rule = new Rule(rule);
+                new_rule.boundFreeVar2Constant(first_vacant[0], first_vacant[1], DEFAULT_CONST_ID, const_symbol);
+                checkThenAddRule(extensions, new_rule);
+            }
+
+            /* 找到两个位置尝试同一个新变量 */
             for (int j = i + 1; j < vacant_list.size(); j++) {
                 /* 新变量的第二个位置可以是当前rule中的其他空位 */
                 int[] second_vacant = vacant_list.get(j);
-                RuleInfo new_rule_info = new RuleInfo(ruleInfo);
-                new_rule_info.setEmptyArgs2NewVar(
+                Rule new_rule_info = new Rule(rule);
+                new_rule_info.boundFreeVars2NewVar(
                         first_vacant[0], first_vacant[1], second_vacant[0], second_vacant[1]
                 );
-                checkThenAddRule(successors, new_rule_info);
+                checkThenAddRule(extensions, new_rule_info);
             }
             for (Map.Entry<String, Integer> entry: functor2ArityMap.entrySet()) {
                 /* 新变量的第二个位置也可以是拓展一个谓词以后的位置 */
-                String predicate = entry.getKey();
+                String functor = entry.getKey();
                 int arity = entry.getValue();
-                int new_pred_idx = ruleInfo.predCnt();
+                int new_pred_idx = rule.length();
                 for (int arg_idx = 0; arg_idx < arity; arg_idx++) {
-                    RuleInfo new_rule_info = new RuleInfo(ruleInfo);
-                    new_rule_info.addPred(predicate, arity);
-                    new_rule_info.setEmptyArgs2NewVar(
+                    Rule new_rule_info = new Rule(rule);
+                    new_rule_info.addPred(functor, arity);
+                    new_rule_info.boundFreeVars2NewVar(
                             first_vacant[0], first_vacant[1], new_pred_idx, arg_idx
                     );
-                    checkThenAddRule(successors, new_rule_info);
+                    checkThenAddRule(extensions, new_rule_info);
                 }
             }
         }
 
-        return successors;
+        return extensions;
     }
 
-    protected List<RuleInfo> findPred(RuleInfo ruleInfo) {
-        List<RuleInfo> predecessors = new ArrayList<>();
-        for (int pred_idx = 0; pred_idx < ruleInfo.predCnt(); pred_idx++) {
-            /* 从Head开始删除可能会出现Head中全部是自由变量但是Body不为空的情况，按照定义来说，这种规则是不在搜索
-               空间中的，但是实际eval的时候会将这种规则当做空的规则，因此不会成为r_max，也就不会影响搜索结果 */
-            PredInfo pred_info = ruleInfo.getPred(pred_idx);
-            for (int arg_idx = 0; arg_idx < pred_info.arity(); arg_idx++) {
-                if (null != pred_info.args[arg_idx]) {
-                    RuleInfo new_rule_info = new RuleInfo(ruleInfo);
-                    new_rule_info.removeKnownVar(pred_idx, arg_idx);
-                    checkThenAddRule(predecessors, new_rule_info);
+    protected List<Rule> findOrigin(Rule rule) {
+        List<Rule> origins = new ArrayList<>();
+        for (int pred_idx = 0; pred_idx < rule.length(); pred_idx++) {
+            /* 从Head开始删除可能会出现Head中没有Bounded Var但是Body不为空的情况，按照定义来说，这种规则是不在
+               搜索空间中的，但是实际eval的时候会将这种规则当做空的规则，因此不会成为r_max，也就不会影响搜索结果 */
+            Predicate predicate = rule.getPredicate(pred_idx);
+            for (int arg_idx = 0; arg_idx < predicate.arity(); arg_idx++) {
+                if (null != predicate.args[arg_idx]) {
+                    Rule new_rule = new Rule(rule);
+                    new_rule.removeKnownArg(pred_idx, arg_idx);
+                    checkThenAddRule(origins, new_rule);
                 }
             }
         }
 
-        return predecessors;
+        return origins;
     }
 
-    protected void checkThenAddRule(Collection<RuleInfo> collection, RuleInfo ruleInfo) {
-        if (!ruleInfo.isInvalid() && null != evalRule(ruleInfo)) {
-            collection.add(ruleInfo);
+    protected void checkThenAddRule(Collection<Rule> collection, Rule rule) {
+        if (!rule.isInvalid() && null != evalRule(rule)) {
+            collection.add(rule);
         }
     }
 
     @Override
-    protected void updateKb(RuleInfo rule) {
-        if (null == rule || !rule.getEvalMetric().useful()) {
+    protected void updateKb(Rule rule) {
+        if (null == rule || !rule.getEval().useful(evalType)) {
             shouldContinue = false;
             return;
         }
 
-        JplRule jpl_rule = rule.toJplRule();
-        hypothesis.add(jpl_rule);
-        writeHypothesis();
+        hypothesis.add(rule);
+        dumpHypothesis();
 
         /* 删除已经被证明的 */
-        PredInfo head_pred_info = rule.getHead();
-        Term[] head_args = new Term[head_pred_info.args.length];
+        Predicate head_predicate = rule.getHead();
+        Term[] head_args = new Term[head_predicate.args.length];
         int free_var_cnt_in_head = 0;
         for (int arg_idx = 0; arg_idx < head_args.length; arg_idx++) {
-            if (null == head_pred_info.args[arg_idx]) {
+            Argument argument = head_predicate.args[arg_idx];
+            if (null == argument) {
                 head_args[arg_idx] = new Variable(String.format("Y%d", free_var_cnt_in_head));
                 free_var_cnt_in_head++;
             } else {
-                head_args[arg_idx] = new Variable(head_pred_info.args[arg_idx].name);
+                head_args[arg_idx] = argument.isVar ? new Variable(argument.name) : new Atom(argument.name);
             }
         }
-        Compound head_compound = new Compound(head_pred_info.predicate, head_args);
+        Compound head_compound = new Compound(head_predicate.functor, head_args);
         StringBuilder query_builder = new StringBuilder(head_compound.toString());
-        for (int pred_idx = 1; pred_idx < rule.predCnt(); pred_idx++) {
-            PredInfo body_pred_info = rule.getPred(pred_idx);
-            Term[] args = new Term[body_pred_info.arity()];
-            for (int arg_idx = 0; arg_idx < body_pred_info.arity(); arg_idx++) {
-                args[arg_idx] = (null == body_pred_info.args[arg_idx]) ? new Variable("_") :
-                        new Variable(body_pred_info.args[arg_idx].name);
+        for (int pred_idx = 1; pred_idx < rule.length(); pred_idx++) {
+            Predicate body_predicate = rule.getPredicate(pred_idx);
+            Term[] args = new Term[body_predicate.arity()];
+            for (int arg_idx = 0; arg_idx < body_predicate.arity(); arg_idx++) {
+                Argument argument = body_predicate.args[arg_idx];
+                args[arg_idx] = (null == argument) ? new Variable("_") :
+                        argument.isVar ? new Variable(argument.name) : new Atom(argument.name);
             }
-            Compound body_compound = new Compound(body_pred_info.predicate, args);
+            Compound body_compound = new Compound(body_predicate.functor, args);
             query_builder.append(',').append(body_compound.toString());
         }
         String query_str = query_builder.toString();
@@ -367,37 +393,39 @@ public class SincFullyOptimized extends SInC {
                 new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(query_str)
         });
 
-        Set<Compound> fact_set = curFunctor2FactSetMap.get(jpl_rule.head.name());
+        Set<Compound> fact_set = curFunctor2FactSetMap.get(head_predicate.functor);
         int removed_cnt = 0;
         for (Map<String, Term> binding: q) {
             Compound head_instance = SwiplUtil.substitute(head_compound, binding);
-            SwiplUtil.retractKnowledge(PrologModule.CURRENT, head_instance);
-            removed_cnt += fact_set.remove(head_instance) ? 1 : 0;
+            if (fact_set.remove(head_instance)) {
+                removed_cnt++;
+            }
         }
         System.out.printf("Update: %d removed\n", removed_cnt);
         q.close();
     }
 
     @Override
-    protected void writeHypothesis() {
+    protected void dumpHypothesis() {
         System.out.println("\nHypothesis Found:");
-        for (JplRule rule: hypothesis) {
+        for (Rule rule: hypothesis) {
             System.out.println(rule);
         }
     }
 
     @Override
-    protected void writeStartSet() {
+    protected void dumpStartSet() {
         /* Todo: Implement Here */
     }
 
     @Override
-    protected void writeCounterExampleSet() {
+    protected void dumpCounterExampleSet() {
         /* Todo: Implement Here */
     }
 
     public static void main(String[] args) {
-        ExactQueryCompressor compressor = new ExactQueryCompressor(
+        SincFullyOptimized compressor = new SincFullyOptimized(
+                EvalMetric.CompressRatio,
                 "FamilyRelationMedium(0.00)(10x).tsv",
                 null,
                 null,

@@ -91,7 +91,16 @@ public class Rule {
         }
     }
 
-    public void removeKnownVar(int predIdx, int argIdx) {
+    public void boundFreeVar2Constant(int predIdx, int argIdx, int constId, String constant) {
+        Predicate predicate = rule.get(predIdx);
+        if (null == predicate.args[argIdx]) {
+            predicate.args[argIdx] = new Constant(constId, constant);
+            equivConds++;
+            fingerPrint = new RuleFingerPrint(rule);
+        }
+    }
+
+    public void removeKnownArg(int predIdx, int argIdx) {
         Predicate predicate = rule.get(predIdx);
         Argument var = predicate.args[argIdx];
         if (null == var) {

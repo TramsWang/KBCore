@@ -1,7 +1,7 @@
 package exp;
 
 import compressor.NaiveCompressor;
-import utils.datagen.FamilyRelationGenerator;
+import sinc.util.datagen.FamilyRelationGenerator;
 
 import java.io.File;
 import java.io.IOException;

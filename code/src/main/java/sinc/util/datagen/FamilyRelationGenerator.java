@@ -1,4 +1,4 @@
-package utils.datagen;
+package sinc.util.datagen;
 
 import java.io.IOException;
 import java.io.PrintWriter;
