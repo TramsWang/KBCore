@@ -16,6 +16,7 @@ public class Rule {
         rule = new ArrayList<>();
         boundedVars = new ArrayList<>();
         boundedVarCnts = new ArrayList<>();
+        addPred(headFunctor, arity);
         fingerPrint = new RuleFingerPrint(rule);
         equivConds = 0;
         eval = null;
@@ -184,6 +185,24 @@ public class Rule {
         /* 1. 用Set检查 */
         /* 2. 为了防止进入和Head重复的情况，检查和Head存在相同位置相同参数的情况 */
         Predicate head_pred = rule.get(0);
+        {
+            /* 先把Head中的变量进行统计加入disjoint set */
+            List<Integer> bounded_var_ids = new ArrayList<>();
+            for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
+                Argument argument = head_pred.args[arg_idx];
+                if (null != argument && argument.isVar) {
+                    bounded_var_ids.add(argument.id);
+                }
+            }
+            if (!bounded_var_ids.isEmpty()) {
+                /* 这里必须判断，因为Head中可能不存在Bounded Var */
+                int first_id = bounded_var_ids.get(0);
+                for (int i = 1; i < bounded_var_ids.size(); i++) {
+                    disjoint_set.unionSets(first_id, bounded_var_ids.get(i));
+                }
+            }
+        }
+
         Set<Predicate> predicate_set = new HashSet<>();
         for (int pred_idx = 1; pred_idx < rule.size(); pred_idx++) {
             Predicate body_pred = rule.get(pred_idx);
@@ -215,9 +234,14 @@ public class Rule {
             }
 
             /* 在同一个Predicate中出现的Bounded Var合并到一个集合中 */
-            int first_id = bounded_var_ids.get(0);
-            for (int i = 1; i < bounded_var_ids.size(); i++) {
-                disjoint_set.unionSets(first_id, bounded_var_ids.get(i));
+            if (bounded_var_ids.isEmpty()) {
+                /* 如果body的pred中没有bounded var那一定是independent fragment */
+                return true;
+            } else {
+                int first_id = bounded_var_ids.get(0);
+                for (int i = 1; i < bounded_var_ids.size(); i++) {
+                    disjoint_set.unionSets(first_id, bounded_var_ids.get(i));
+                }
             }
         }
 

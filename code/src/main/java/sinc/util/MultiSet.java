@@ -15,10 +15,6 @@ public class MultiSet<T> {
         this.size = another.size;
     }
 
-    private MultiSet(Map<T, Integer> map) {
-        this.cntMap = map;
-    }
-
     public void add(T element) {
         cntMap.compute(element, (k, v) -> (null == v) ? 1 : v + 1);
         size++;
@@ -27,6 +23,7 @@ public class MultiSet<T> {
     public void addAll(MultiSet<T> another) {
         for (Map.Entry<T, Integer> entry: another.cntMap.entrySet()) {
             this.cntMap.compute(entry.getKey(), (k, v) -> (null == v) ? entry.getValue() : v + entry.getValue());
+            this.size += entry.getValue();
         }
     }
 
@@ -52,7 +49,6 @@ public class MultiSet<T> {
     }
 
     public MultiSet<T> intersection(MultiSet<T> another) {
-        Map<T, Integer> intersection = new HashMap<>();
         Set<Map.Entry<T, Integer>> entry_set;
         Map<T, Integer> compared_map;
         if (this.cntMap.keySet().size() <= another.cntMap.keySet().size()) {
@@ -62,23 +58,45 @@ public class MultiSet<T> {
             entry_set = another.cntMap.entrySet();
             compared_map = this.cntMap;
         }
+
+        MultiSet<T> intersection = new MultiSet<>();
         for (Map.Entry<T, Integer> entry: entry_set) {
             Integer compared_cnt = compared_map.get(entry.getKey());
             if (null != compared_cnt) {
-                intersection.put(entry.getKey(), Math.min(entry.getValue(), compared_cnt));
+                int i = Math.min(entry.getValue(), compared_cnt);
+                intersection.cntMap.put(entry.getKey(), i);
+                intersection.size += i;
             }
         }
-        return new MultiSet<>(intersection);
+        return intersection;
     }
 
     public MultiSet<T> union(MultiSet<T> another) {
-        HashMap<T, Integer> union = new HashMap<>(cntMap);
-        for (Map.Entry<T, Integer> entry: another.cntMap.entrySet()) {
-            union.compute(
-                    entry.getKey(),
-                    (k, v) -> (null == v) ? entry.getValue() : Math.max(v, entry.getValue()));
+        Set<Map.Entry<T, Integer>> entry_set;
+        MultiSet<T> union;
+        if (this.cntMap.keySet().size() <= another.cntMap.keySet().size()) {
+            entry_set = this.cntMap.entrySet();
+            union = new MultiSet<>(another);
+        } else {
+            entry_set = another.cntMap.entrySet();
+            union = new MultiSet<>(this);
         }
-        return new MultiSet<>(union);
+
+        for (Map.Entry<T, Integer> entry: entry_set) {
+            union.cntMap.compute(entry.getKey(), (k, v) -> {
+                if (null != v) {
+                    if (entry.getValue() > v) {
+                        union.size += entry.getValue() - v;
+                        return entry.getValue();
+                    }
+                    return v;
+                } else {
+                    union.size += entry.getValue();
+                    return entry.getValue();
+                }
+            });
+        }
+        return union;
     }
 
     public List<T> elementsAboveProportion(double proportion) {
@@ -97,7 +115,7 @@ public class MultiSet<T> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MultiSet<?> multiSet = (MultiSet<?>) o;
-        return size == multiSet.size && Objects.equals(cntMap, multiSet.cntMap);  // Todo: Is this reliable?
+        return size == multiSet.size && Objects.equals(cntMap, multiSet.cntMap);
     }
 
     @Override

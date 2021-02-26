@@ -7,13 +7,14 @@ import java.util.*;
 public class RuleFingerPrint {
     private final String headFunctor;
     private final MultiSet<ArgIndicator>[] headEquivClasses;
-    private final Set<MultiSet<ArgIndicator>> otherEquivClasses;
+//    private final Set<MultiSet<ArgIndicator>> otherEquivClasses;
+    private final MultiSet<MultiSet<ArgIndicator>> otherEquivClasses;
 
     public RuleFingerPrint(List<Predicate> rule) {
         Predicate head_predicate = rule.get(0);
         headFunctor = head_predicate.functor;
         headEquivClasses = new MultiSet[head_predicate.arity()];
-        otherEquivClasses = new HashSet<>();
+        otherEquivClasses = new MultiSet<>();
         Map<Integer, MultiSet<ArgIndicator>> bounded_equiv_classes = new HashMap<>();
 
         /* 先处理Head */
@@ -81,22 +82,9 @@ public class RuleFingerPrint {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RuleFingerPrint that = (RuleFingerPrint) o;
-        if (!this.headFunctor.equals(that.headFunctor) ||
-                this.headEquivClasses.length != that.headEquivClasses.length ||
-                this.otherEquivClasses.size() != that.otherEquivClasses.size()) {
-            return false;
-        }
-        for (int i = 0; i < headEquivClasses.length; i++) {
-            if (!this.headEquivClasses[i].equals(that.headEquivClasses[i])) {
-                return false;
-            }
-        }
-        for (MultiSet<ArgIndicator> that_ec: that.otherEquivClasses) {
-            if (!this.otherEquivClasses.contains(that_ec)) {
-                return false;
-            }
-        }
-        return true;
+        return Objects.equals(headFunctor, that.headFunctor) &&
+                Arrays.equals(headEquivClasses, that.headEquivClasses) &&
+                Objects.equals(otherEquivClasses, that.otherEquivClasses);
     }
 
     @Override
