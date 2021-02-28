@@ -103,50 +103,49 @@ public class Rule {
 
     public void removeKnownArg(int predIdx, int argIdx) {
         Predicate predicate = rule.get(predIdx);
-        Argument var = predicate.args[argIdx];
-        if (null == var) {
+        Argument argument = predicate.args[argIdx];
+        if (null == argument) {
             return;
         }
         predicate.args[argIdx] = null;
-        if (!var.isVar) {
-            return;
-        }
 
         /* 如果删除的是变量，需要调整相关变量的次数和编号 */
-        Integer var_uses_cnt = boundedVarCnts.get(var.id);
-        if (2 >= var_uses_cnt) {
-            /* 用最后一个var填补删除var的空缺 */
-            /* 要注意删除的也可能是最后一个var */
-            int last_var_idx = boundedVars.size() - 1;
-            Variable last_var = boundedVars.remove(last_var_idx);
-            boundedVarCnts.set(var.id, boundedVarCnts.get(last_var_idx));
-            boundedVarCnts.remove(last_var_idx);
+        if (argument.isVar) {
+            Integer var_uses_cnt = boundedVarCnts.get(argument.id);
+            if (2 >= var_uses_cnt) {
+                /* 用最后一个var填补删除var的空缺 */
+                /* 要注意删除的也可能是最后一个var */
+                int last_var_idx = boundedVars.size() - 1;
+                Variable last_var = boundedVars.remove(last_var_idx);
+                boundedVarCnts.set(argument.id, boundedVarCnts.get(last_var_idx));
+                boundedVarCnts.remove(last_var_idx);
 
-            /* 删除本次出现以外，还需要再删除作为自由变量的存在 */
-            for (Predicate another_predicate: rule) {
-                for (int i = 0; i < another_predicate.arity(); i++) {
-                    if (null != another_predicate.args[i]) {
-                        if (var.id == another_predicate.args[i].id) {
-                            another_predicate.args[i] = null;
-                        }
-                    }
-                }
-            }
-
-            if (var != last_var) {
+                /* 删除本次出现以外，还需要再删除作为自由变量的存在 */
                 for (Predicate another_predicate : rule) {
                     for (int i = 0; i < another_predicate.arity(); i++) {
                         if (null != another_predicate.args[i]) {
-                            if (last_var.id == another_predicate.args[i].id) {
-                                another_predicate.args[i] = var;
+                            if (argument.id == another_predicate.args[i].id) {
+                                another_predicate.args[i] = null;
                             }
                         }
                     }
                 }
+
+                if (argument != last_var) {
+                    for (Predicate another_predicate : rule) {
+                        for (int i = 0; i < another_predicate.arity(); i++) {
+                            if (null != another_predicate.args[i]) {
+                                if (last_var.id == another_predicate.args[i].id) {
+                                    another_predicate.args[i] = argument;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                /* 只删除本次出现 */
+                boundedVarCnts.set(argument.id, var_uses_cnt - 1);
             }
-        } else {
-            /* 只删除本次出现 */
-            boundedVarCnts.set(var.id, var_uses_cnt-1);
         }
         equivConds--;
 
@@ -178,7 +177,7 @@ public class Rule {
     public boolean isInvalid() {
         /* Independent Fragment(可能在找origin的时候出现) */
         /* 用并查集检查 */
-        /* Assumption: 没有全部是Free Var或Const的Pred，因此把所有Bounded Var根据在一个Pred里出现进行合并即可 */
+        /* Assumption: 没有全部是Free Var或Const的Pred(除了head)，因此把所有Bounded Var根据在一个Pred里出现进行合并即可 */
         DisjointSet disjoint_set = new DisjointSet(boundedVars.size());
 
         /* Trivial(用Set检查) */
@@ -194,7 +193,12 @@ public class Rule {
                     bounded_var_ids.add(argument.id);
                 }
             }
-            if (!bounded_var_ids.isEmpty()) {
+            if (bounded_var_ids.isEmpty()) {
+                if (rule.size() >= 2) {
+                    /* Head中没有bounded var但是body不为空，此时head是一个independent fragment */
+                    return true;
+                }
+            } else {
                 /* 这里必须判断，因为Head中可能不存在Bounded Var */
                 int first_id = bounded_var_ids.get(0);
                 for (int i = 1; i < bounded_var_ids.size(); i++) {

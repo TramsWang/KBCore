@@ -83,7 +83,7 @@ class RuleTest {
         assertEquals(1, r1.size());
         assertEquals(2, r1.length());
         assertEquals(1, r1.usedBoundedVars());
-        assertFalse(r1.isInvalid());
+        assertTrue(r1.isInvalid());
         assertEquals("(null)h(?,X0):-h(?,X0)", r1.toString());
 
         r1.removeKnownArg(0, 1);

@@ -21,7 +21,7 @@ public class DisjointSet {
         int set1 = findSet(idx1);
         int set2 = findSet(idx2);
         if (set1 != set2) {
-            sets[idx1] = set2;
+            sets[set1] = set2;
         }
     }
 
