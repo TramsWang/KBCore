@@ -96,6 +96,59 @@ public class FamilyRelationGenerator {
     public static double ERROR_PROB = 0.0;
     public static int FAMILY_CNT = 10;
 
+    private static Random random = new Random();
+
+    public static void generateTiny(String path, int families, double errorProbability) throws IOException {
+        Random random = new Random();
+        PrintWriter writer = new PrintWriter(path);
+        FamilyMember[] familyMemberValues = FamilyMember.values();
+        FamilyPredicate[] familyPredicateValues = FamilyPredicate.values();
+
+        for (int i = 0; i < families; i++) {
+            List<Triple> triples = new ArrayList<>();
+
+            /* father/mother */
+            triples.add(new FamilyTriple(FamilyMember.FATHER, FamilyPredicate.FATHER, FamilyMember.SON));
+            triples.add(new FamilyTriple(FamilyMember.FATHER, FamilyPredicate.FATHER, FamilyMember.DAUGHTER));
+            triples.add(new FamilyTriple(FamilyMember.MOTHER, FamilyPredicate.MOTHER, FamilyMember.SON));
+            triples.add(new FamilyTriple(FamilyMember.MOTHER, FamilyPredicate.MOTHER, FamilyMember.DAUGHTER));
+
+            /* gender */
+            triples.add(new GenderTripe(FamilyMember.FATHER, Gender.MALE));
+            triples.add(new GenderTripe(FamilyMember.SON, Gender.MALE));
+            triples.add(new GenderTripe(FamilyMember.MOTHER, Gender.FEMALE));
+            triples.add(new GenderTripe(FamilyMember.DAUGHTER, Gender.FEMALE));
+
+            /* Perturb correct data */
+            for (Triple triple: triples) {
+                double magic = random.nextDouble();
+                if (errorProbability > magic) {
+                    magic = random.nextDouble();
+
+                    /* Determine which type of error it is */
+                    if (errorProbability / magic < 2) {
+                        /* Alter constant */
+                        if (triple instanceof GenderTripe) {
+                            GenderTripe triple_gender = (GenderTripe)triple;
+                            triple_gender.gender = (Gender.MALE == triple_gender.gender)? Gender.FEMALE: Gender.MALE;
+                        } else if (triple instanceof FamilyTriple) {
+                            FamilyTriple triple_family = (FamilyTriple) triple;
+                            triple_family.subject = familyMemberValues[random.nextInt(familyMemberValues.length)];
+                            triple_family.familyPredicate =
+                                    familyPredicateValues[random.nextInt(familyPredicateValues.length)];
+                            triple_family.object = familyMemberValues[random.nextInt(familyMemberValues.length)];
+                        }
+                        writeRelation(writer, triple, random.nextInt(FAMILY_CNT), random.nextInt(FAMILY_CNT));
+                    }
+                    /* Other wise omit writing to represent missing triple */
+                } else {
+                    writeRelation(writer, triple, i, i);
+                }
+            }
+        }
+        writer.close();
+    }
+
     public static void generateSimple(String path) throws IOException {
         final String fpath = String.format("%s/FamilyRelationSimple(%.2f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);
         Random random = new Random();

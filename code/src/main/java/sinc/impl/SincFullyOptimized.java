@@ -64,6 +64,7 @@ public class SincFullyOptimized extends SInC {
                 for (int i = 1; i < components.length; i++) {
                     arg_set_list[i-1].add(components[i]);
                     args[i-1] = new Atom(components[i]);
+                    constants.add(components[i]);
                 }
                 Compound compound = new Compound(functor, args);
                 SwiplUtil.appendKnowledge(PrologModule.GLOBAL, compound);
@@ -200,60 +201,90 @@ public class SincFullyOptimized extends SInC {
                             facts.size(), Math.pow(constants.size(), head_pred.arity()), rule.size()
                     )
             );
+            evalCache.put(rule, rule.getEval());
             return;
         }
 
-        /* 计算entailments */
-        Compound head_compound = new Compound(head_pred.functor, head_args);
-        StringBuilder query_builder = new StringBuilder(head_compound.toString());
-        for (int pred_idx = 1; pred_idx < rule.length(); pred_idx++) {
-            Predicate body_pred = rule.getPredicate(pred_idx);
-            Term[] args = new Term[body_pred.arity()];
-            for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
-                Argument argument = body_pred.args[arg_idx];
-                args[arg_idx] = (null == argument) ? new Variable("_") :
-                        argument.isVar ? new Variable(argument.name) : new Atom(argument.name);
+        /* 计算all entailments */
+        Set<String> bounded_vars_in_body = new HashSet<>();
+        StringBuilder query_builder = new StringBuilder();
+        if (2 <= rule.length()) {
+            for (int pred_idx = 1; pred_idx < rule.length(); pred_idx++) {
+                Predicate body_pred = rule.getPredicate(pred_idx);
+                Term[] args = new Term[body_pred.arity()];
+                for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
+                    Argument argument = body_pred.args[arg_idx];
+                    if (null == argument) {
+                        args[arg_idx] = new Variable("_");
+                    } else if (argument.isVar) {
+                        args[arg_idx] = new Variable(argument.name);
+                        bounded_vars_in_body.add(argument.name);
+                    } else {
+                        args[arg_idx] = new Atom(argument.name);
+                    }
+                }
+                Compound body_compound = new Compound(body_pred.functor, args);
+                query_builder.append(body_compound.toString()).append(',');
             }
-            Compound body_compound = new Compound(body_pred.functor, args);
-            query_builder.append(',').append(body_compound.toString());
+            query_builder.deleteCharAt(query_builder.length() - 1);
         }
         String query_str = query_builder.toString();
+        Set<Compound> head_templates = new HashSet<>();
+        boolean body_is_not_empty = !"".equals(query_str);
+        if (body_is_not_empty) {
+            Query q = new Query(":", new Term[]{
+                    new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(query_str)
+            });
+            for (Map<String, Term> binding : q) {
+                Term[] template_args = new Term[bounded_vars_in_head.size()];
+                for (int arg_idx = 0; arg_idx < template_args.length; arg_idx++) {
+                    template_args[arg_idx] = binding.get(bounded_vars_in_head.get(arg_idx));
+                }
+                head_templates.add(new Compound("h", template_args));
+            }
+            q.close();
+        }
+        Set<String> bounded_vars_in_head_only = new HashSet<>();
+        for (String bv_head : bounded_vars_in_head) {
+            if (!bounded_vars_in_body.contains(bv_head)) {
+                /* 找出所有仅在Head中出现的bounded var */
+                bounded_vars_in_head_only.add(bv_head);
+            }
+        }
+        final double all_entailments = (body_is_not_empty ? head_templates.size() : 1) * Math.pow(
+                constants.size(), free_var_cnt_in_head + bounded_vars_in_head_only.size()
+        );
+
+        /* 计算positive entailments */
+        Compound head_compound = new Compound(head_pred.functor, head_args);
+        query_str = body_is_not_empty ? head_compound.toString() + ',' + query_str :
+                head_compound.toString();
 
         Query q = new Query(":", new Term[]{
                 new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(query_str)
         });
-        Map<String, Term>[] bindings = q.allSolutions();
+        Set<Compound> head_instances = new HashSet<>();
+        for (Map<String, Term> binding: q) {
+            head_instances.add(SwiplUtil.substitute(head_compound, binding));
+        }
         q.close();
-
-        int pos_cnt = 0;
-        Set<Compound> head_templates = new HashSet<>();
-        for (Map<String, Term> binding: bindings) {
-            Term[] template_args = new Term[bounded_vars_in_head.size()];
-            for (int arg_idx = 0; arg_idx < template_args.length; arg_idx++) {
-                template_args[arg_idx] = binding.get(bounded_vars_in_head.get(arg_idx));
-            }
-            head_templates.add(new Compound("h", template_args));
-
-            Compound head_instance = SwiplUtil.substitute(head_compound, binding);
+        int positive_entailments = 0;
+        for (Compound head_instance: head_instances) {
             if (facts.contains(head_instance)) {
-                pos_cnt++;
+                positive_entailments++;
             }
         }
 
         /* 用HC剪枝 */
-        double head_coverage = ((double) pos_cnt) / facts.size();
+        double head_coverage = ((double) positive_entailments) / facts.size();
         if (MIN_HEAD_COVERAGE >= head_coverage) {
             rule.setEval(Eval.MIN);
+            evalCache.put(rule, rule.getEval());
             return;
         }
 
-        rule.setEval(
-                new Eval(
-                        pos_cnt,
-                        head_templates.size() * Math.pow(constants.size(), free_var_cnt_in_head),
-                        rule.size()
-                )
-        );
+        rule.setEval(new Eval(positive_entailments, all_entailments, rule.size()));
+        evalCache.put(rule, rule.getEval());
     }
 
     protected List<Rule> findExtension(
@@ -342,7 +373,7 @@ public class SincFullyOptimized extends SInC {
         List<Rule> origins = new ArrayList<>();
         for (int pred_idx = 0; pred_idx < rule.length(); pred_idx++) {
             /* 从Head开始删除可能会出现Head中没有Bounded Var但是Body不为空的情况，按照定义来说，这种规则是不在
-               搜索空间中的，但是实际eval的时候会将这种规则当做空的规则，因此不会成为r_max，也就不会影响搜索结果 */
+               搜索空间中的，但是会被isInvalid方法检查出来 */
             Predicate predicate = rule.getPredicate(pred_idx);
             for (int arg_idx = 0; arg_idx < predicate.arity(); arg_idx++) {
                 if (null != predicate.args[arg_idx]) {
