@@ -141,7 +141,6 @@ public class SincFullyOptimized extends SInC {
         do {
             int last_idx = waitingHeadFunctors.size() - 1;
             String functor = waitingHeadFunctors.get(last_idx);
-
             Integer arity = functor2ArityMap.get(functor);
             Rule rule = findRuleHandler(new Rule(functor, arity));
             if (null != rule && rule.getEval().useful(evalType)) {
@@ -186,7 +185,6 @@ public class SincFullyOptimized extends SInC {
             }
             r_max = r_e_max;
         }
-
     }
 
     protected void evalRule(Rule rule, Map<Rule, Eval> evalCache) {
@@ -307,7 +305,7 @@ public class SincFullyOptimized extends SInC {
         /* 用HC剪枝 */
         double head_coverage = ((double) positive_entailments) / global_facts.size();
         if (MIN_HEAD_COVERAGE >= head_coverage) {
-            rule.setEval(Eval.MIN);// Todo: 这么设置合适吗？
+            rule.setEval(Eval.MIN);
             evalCache.put(rule, rule.getEval());
             return;
         }
@@ -425,7 +423,7 @@ public class SincFullyOptimized extends SInC {
 
     @Override
     protected void updateKb(Rule rule) {
-        if (null == rule || !rule.getEval().useful(evalType)) {
+        if (null == rule) {
             shouldContinue = false;
             return;
         }
@@ -501,7 +499,7 @@ public class SincFullyOptimized extends SInC {
                 null,
                 null,
                 null,
-                true
+                false
         );
         compressor.run();
     }
