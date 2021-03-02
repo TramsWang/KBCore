@@ -20,10 +20,9 @@ public class SincFullyOptimized extends SInC {
     protected static final double MIN_CONSTANT_PROPORTION = 0.25;
     protected static final int DEFAULT_CONST_ID = -1;
 
-    protected final Set<Compound> globalFacts = new HashSet<>();
-    protected final Map<String, Integer> functor2ArityMap = new HashMap<>();
-
+    protected final Map<String, Set<Compound>> globalFunctor2FactSetMap = new HashMap<>();
     protected final Map<String, Set<Compound>> curFunctor2FactSetMap = new HashMap<>();
+    protected final Map<String, Integer> functor2ArityMap = new HashMap<>();
     protected final Map<String, MultiSet<String>[]> curFunctor2ArgSetsMap = new HashMap<>();
     protected final Set<String> constants = new HashSet<>();
     protected final Map<String, List<String>[]> functor2PromisingConstMap = new HashMap<>();
@@ -70,7 +69,13 @@ public class SincFullyOptimized extends SInC {
                 }
                 Compound compound = new Compound(functor, args);
                 SwiplUtil.appendKnowledge(PrologModule.GLOBAL, compound);
-                globalFacts.add(compound);
+                globalFunctor2FactSetMap.compute(functor, (k, v) -> {
+                    if (null == v) {
+                        v = new HashSet<>();
+                    }
+                    v.add(compound);
+                    return v;
+                });
                 curFunctor2FactSetMap.compute(functor, (k, v) -> {
                     if (null == v) {
                         v = new HashSet<>();
@@ -84,8 +89,6 @@ public class SincFullyOptimized extends SInC {
                 functor2ArityMap.put(entry.getKey(), entry.getValue().length);
             }
 
-            waitingHeadFunctors.addAll(curFunctor2ArgSetsMap.keySet());
-
             /* 计算所有符合阈值的constant */
             for (Map.Entry<String, MultiSet<String>[]> entry: curFunctor2ArgSetsMap.entrySet()) {
                 MultiSet<String>[] arg_sets = entry.getValue();
@@ -96,9 +99,31 @@ public class SincFullyOptimized extends SInC {
                 functor2PromisingConstMap.put(entry.getKey(), arg_const_lists);
             }
 
+            /* 添加所有的functor到队列 */
+            if (debug) {
+                Set<String> black_list = new HashSet<>();
+//                black_list.add("sibling");
+                black_list.addAll(functor2ArityMap.keySet());
+
+                Set<String> white_list = new HashSet<>();
+                white_list.add("gender");
+
+                for (String functor: functor2ArityMap.keySet()) {
+                    if (white_list.contains(functor) || !black_list.contains(functor)) {
+                        waitingHeadFunctors.add(functor);
+                    }
+                }
+            } else {
+                waitingHeadFunctors.addAll(curFunctor2ArgSetsMap.keySet());
+            }
+
+            int total_facts = 0;
+            for (Set<Compound> fact_set: globalFunctor2FactSetMap.values()) {
+                total_facts += fact_set.size();
+            }
             System.out.printf(
                     "BK loaded: %d predicates; %d constants, %d facts\n",
-                    curFunctor2FactSetMap.size(), constants.size(), globalFacts.size()
+                    curFunctor2FactSetMap.size(), constants.size(), total_facts
             );
         } catch (IOException e) {
             e.printStackTrace();
@@ -112,20 +137,10 @@ public class SincFullyOptimized extends SInC {
 
     @Override
     protected Rule findRule() {
-        Set<String> ignore_set = new HashSet<>();
-        if (debug) {
-            ignore_set.add("sibling");
-        }
-
         /* 逐个functor找rule */
         do {
             int last_idx = waitingHeadFunctors.size() - 1;
             String functor = waitingHeadFunctors.get(last_idx);
-
-            if (ignore_set.contains(functor)) {
-                waitingHeadFunctors.remove(last_idx);
-                continue;
-            }
 
             Integer arity = functor2ArityMap.get(functor);
             Rule rule = findRuleHandler(new Rule(functor, arity));
@@ -198,13 +213,17 @@ public class SincFullyOptimized extends SInC {
                 head_args[arg_idx] = new Atom(argument.name);
             }
         }
-        Set<Compound> facts = curFunctor2FactSetMap.get(head_pred.functor);
+        Set<Compound> global_facts = globalFunctor2FactSetMap.get(head_pred.functor);
+        Set<Compound> cur_facts = curFunctor2FactSetMap.get(head_pred.functor);
 
         /* 如果head上的所有变量都是自由变量则直接计算 */
         if (head_pred.arity() == free_var_cnt_in_head) {
             rule.setEval(
                     new Eval(
-                            facts.size(), Math.pow(constants.size(), head_pred.arity()), rule.size()
+                            cur_facts.size(),
+                            Math.pow(constants.size(), head_pred.arity()) -
+                                    global_facts.size() + cur_facts.size(),
+                            rule.size()
                     )
             );
             evalCache.put(rule, rule.getEval());
@@ -274,22 +293,26 @@ public class SincFullyOptimized extends SInC {
             head_instances.add(SwiplUtil.substitute(head_compound, binding));
         }
         q.close();
+
         int positive_entailments = 0;
+        int already_entailed = 0;
         for (Compound head_instance: head_instances) {
-            if (facts.contains(head_instance)) {
+            if (cur_facts.contains(head_instance)) {
                 positive_entailments++;
+            } else if (global_facts.contains(head_instance)) {
+                already_entailed++;
             }
         }
 
         /* 用HC剪枝 */
-        double head_coverage = ((double) positive_entailments) / facts.size();
+        double head_coverage = ((double) positive_entailments) / global_facts.size();
         if (MIN_HEAD_COVERAGE >= head_coverage) {
-            rule.setEval(Eval.MIN);
+            rule.setEval(Eval.MIN);// Todo: 这么设置合适吗？
             evalCache.put(rule, rule.getEval());
             return;
         }
 
-        rule.setEval(new Eval(positive_entailments, all_entailments, rule.size()));
+        rule.setEval(new Eval(positive_entailments, all_entailments - already_entailed, rule.size()));
         evalCache.put(rule, rule.getEval());
     }
 
@@ -478,7 +501,7 @@ public class SincFullyOptimized extends SInC {
                 null,
                 null,
                 null,
-                false
+                true
         );
         compressor.run();
     }
