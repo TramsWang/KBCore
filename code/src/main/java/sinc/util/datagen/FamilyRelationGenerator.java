@@ -93,9 +93,6 @@ public class FamilyRelationGenerator {
         }
     }
 
-    public static double ERROR_PROB = 0.0;
-    public static int FAMILY_CNT = 10;
-
     private static Random random = new Random();
 
     public static void generateTiny(String path, int families, double errorProbability) throws IOException {
@@ -138,7 +135,7 @@ public class FamilyRelationGenerator {
                                     familyPredicateValues[random.nextInt(familyPredicateValues.length)];
                             triple_family.object = familyMemberValues[random.nextInt(familyMemberValues.length)];
                         }
-                        writeRelation(writer, triple, random.nextInt(FAMILY_CNT), random.nextInt(FAMILY_CNT));
+                        writeRelation(writer, triple, random.nextInt(families), random.nextInt(families));
                     }
                     /* Other wise omit writing to represent missing triple */
                 } else {
@@ -149,13 +146,12 @@ public class FamilyRelationGenerator {
         writer.close();
     }
 
-    public static void generateSimple(String path) throws IOException {
-        final String fpath = String.format("%s/FamilyRelationSimple(%.2f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);
+    public static void generateSimple(String path, int families, double errorProbability) throws IOException {
         Random random = new Random();
-        PrintWriter writer = new PrintWriter(fpath);
+        PrintWriter writer = new PrintWriter(path);
         FamilyMember[] familyMemberValues = FamilyMember.values();
         FamilyPredicate[] familyPredicateValues = FamilyPredicate.values();
-        for (int i = 0; i < FAMILY_CNT; i++) {
+        for (int i = 0; i < families; i++) {
             List<Triple> triples = new ArrayList<>();
 
             /* father/mother */
@@ -191,11 +187,11 @@ public class FamilyRelationGenerator {
             /* Perturb correct data */
             for (Triple triple: triples) {
                 double magic = random.nextDouble();
-                if (ERROR_PROB > magic) {
+                if (errorProbability > magic) {
                     magic = random.nextDouble();
 
                     /* Determine which type of error it is */
-                    if (ERROR_PROB / magic < 2) {
+                    if (errorProbability / magic < 2) {
                         /* Alter constant */
                         if (triple instanceof GenderTripe) {
                             GenderTripe triple_gender = (GenderTripe)triple;
@@ -207,7 +203,7 @@ public class FamilyRelationGenerator {
                                     familyPredicateValues[random.nextInt(familyPredicateValues.length)];
                             triple_family.object = familyMemberValues[random.nextInt(familyMemberValues.length)];
                         }
-                        writeRelation(writer, triple, random.nextInt(FAMILY_CNT), random.nextInt(FAMILY_CNT));
+                        writeRelation(writer, triple, random.nextInt(families), random.nextInt(families));
                     }
                     /* Other wise omit writing to represent missing triple */
                 } else {
@@ -218,13 +214,12 @@ public class FamilyRelationGenerator {
         writer.close();
     }
 
-    public static void generateMedium(String path) throws IOException {
-        final String fpath = String.format("%s/FamilyRelationMedium(%.2f)(%dx).tsv", path, ERROR_PROB, FAMILY_CNT);
+    public static void generateMedium(String path, int families, double errorProbability) throws IOException {
         Random random = new Random();
-        PrintWriter writer = new PrintWriter(fpath);
+        PrintWriter writer = new PrintWriter(path);
         FamilyMember[] familyMemberValues = FamilyMember.values();
         FamilyPredicate[] familyPredicateValues = FamilyPredicate.values();
-        for (int i = 0; i < FAMILY_CNT; i++) {
+        for (int i = 0; i < families; i++) {
             List<Triple> triples = new ArrayList<>();
 
             /* father/mother */
@@ -352,11 +347,11 @@ public class FamilyRelationGenerator {
             /* Perturb correct data */
             for (Triple triple: triples) {
                 double magic = random.nextDouble();
-                if (ERROR_PROB > magic) {
+                if (errorProbability > magic) {
                     magic = random.nextDouble();
 
                     /* Determine which type of error it is */
-                    if (ERROR_PROB / magic < 2) {
+                    if (errorProbability / magic < 2) {
                         /* Alter constant */
                         if (triple instanceof GenderTripe) {
                             GenderTripe triple_gender = (GenderTripe)triple;
@@ -368,7 +363,7 @@ public class FamilyRelationGenerator {
                                     familyPredicateValues[random.nextInt(familyPredicateValues.length)];
                             triple_family.object = familyMemberValues[random.nextInt(familyMemberValues.length)];
                         }
-                        writeRelation(writer, triple, random.nextInt(FAMILY_CNT), random.nextInt(FAMILY_CNT));
+                        writeRelation(writer, triple, random.nextInt(families), random.nextInt(families));
                     }
                     /* Other wise omit writing to represent missing triple */
                 } else {
@@ -396,7 +391,8 @@ public class FamilyRelationGenerator {
     }
 
     public static void main(String[] args) throws IOException {
-        generateSimple("testData/familyRelation");
-        generateMedium("testData/familyRelation");
+        generateTiny("testData/familyRelation/FamilyRelationTiny(10x)(0.0)", 10, 0.0);
+        generateSimple("testData/familyRelation/FamilyRelationSimple(10x)(0.0)", 10, 0.0);
+        generateMedium("testData/familyRelation/FamilyRelationMedium(10x)(0.0)", 10, 0.0);
     }
 }

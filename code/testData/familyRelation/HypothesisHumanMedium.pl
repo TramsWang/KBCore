@@ -1,0 +1,12 @@
+gender(X,male):-father(X,Y).
+gender(X,female):-mother(X,Y).
+parent(X,Y):-father(X,Y).
+parent(X,Y):-mother(X,Y).
+brother(X,Y):-gender(X,male),parent(Z,X),parent(Z,Y),X\==Y.
+sister(X,Y):-gender(X,female),parent(Z,X),parent(Z,Y),X\==Y.
+brother(X,Y):-gender(X,male),parent(Z,X),parent(W,Y),sibling(Z,W).
+sister(X,Y):-gender(X,female),parent(Z,X),parent(W,Y),sibling(Z,W).
+sibling(X,Y):-brother(X,Y).
+sibling(X,Y):-sister(X,Y).
+uncle(X,Y):-brother(X,Z),parent(Z,Y).
+aunt(X,Y):-sister(X,Z),parent(Z,Y).

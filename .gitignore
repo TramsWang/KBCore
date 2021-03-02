@@ -17,6 +17,8 @@
 /code/testData/familyRelation/*
 !/code/testData/familyRelation/HypothesisHumanSimple.amie
 !/code/testData/familyRelation/HypothesisHumanMedium.amie
+!/code/testData/familyRelation/HypothesisHumanSimple.pl
+!/code/testData/familyRelation/HypothesisHumanMedium.pl
 !/code/pom.xml
 
 ### Experiments ###

@@ -165,6 +165,8 @@ public class Rule {
                 itr.remove();
             }
         }
+
+        fingerPrint = new RuleFingerPrint(rule);
     }
 
     /**

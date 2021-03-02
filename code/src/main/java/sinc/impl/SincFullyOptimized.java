@@ -26,10 +26,12 @@ public class SincFullyOptimized extends SInC {
     protected final Map<String, Set<Compound>> curFunctor2FactSetMap = new HashMap<>();
     protected final Map<String, MultiSet<String>[]> curFunctor2ArgSetsMap = new HashMap<>();
     protected final Set<String> constants = new HashSet<>();
+    protected final Map<String, List<String>[]> functor2PromisingConstMap = new HashMap<>();
 
     protected final List<Rule> hypothesis = new ArrayList<>();
 
     protected boolean shouldContinue = true;
+    protected List<String> waitingHeadFunctors = new ArrayList<>();
 
     public SincFullyOptimized(
             EvalMetric evalType,
@@ -69,7 +71,6 @@ public class SincFullyOptimized extends SInC {
                 Compound compound = new Compound(functor, args);
                 SwiplUtil.appendKnowledge(PrologModule.GLOBAL, compound);
                 globalFacts.add(compound);
-//                curFacts.add(compound);
                 curFunctor2FactSetMap.compute(functor, (k, v) -> {
                     if (null == v) {
                         v = new HashSet<>();
@@ -81,6 +82,18 @@ public class SincFullyOptimized extends SInC {
 
             for (Map.Entry<String, MultiSet<String>[]> entry: curFunctor2ArgSetsMap.entrySet()) {
                 functor2ArityMap.put(entry.getKey(), entry.getValue().length);
+            }
+
+            waitingHeadFunctors.addAll(curFunctor2ArgSetsMap.keySet());
+
+            /* 计算所有符合阈值的constant */
+            for (Map.Entry<String, MultiSet<String>[]> entry: curFunctor2ArgSetsMap.entrySet()) {
+                MultiSet<String>[] arg_sets = entry.getValue();
+                List<String>[] arg_const_lists = new List[arg_sets.length];
+                for (int i = 0; i < arg_sets.length; i++) {
+                    arg_const_lists[i] = arg_sets[i].elementsAboveProportion(MIN_CONSTANT_PROPORTION);
+                }
+                functor2PromisingConstMap.put(entry.getKey(), arg_const_lists);
             }
 
             System.out.printf(
@@ -101,52 +114,44 @@ public class SincFullyOptimized extends SInC {
     protected Rule findRule() {
         Set<String> ignore_set = new HashSet<>();
         if (debug) {
-            ignore_set.add("gender");
+            ignore_set.add("sibling");
         }
 
+        /* 逐个functor找rule */
+        do {
+            int last_idx = waitingHeadFunctors.size() - 1;
+            String functor = waitingHeadFunctors.get(last_idx);
+
+            if (ignore_set.contains(functor)) {
+                waitingHeadFunctors.remove(last_idx);
+                continue;
+            }
+
+            Integer arity = functor2ArityMap.get(functor);
+            Rule rule = findRuleHandler(new Rule(functor, arity));
+            if (null != rule && rule.getEval().useful(evalType)) {
+                return rule;
+            } else {
+                waitingHeadFunctors.remove(last_idx);
+            }
+        }
+        while (!waitingHeadFunctors.isEmpty());
+        return null;
+    }
+
+    protected Rule findRuleHandler(Rule startRule) {
         /* 初始化Evaluation Cache */
         Map<Rule, Eval> eval_cache = new HashMap<>();
 
-        /* 找到仅有head的rule中得分最高的作为起始rule */
-        List<Rule> starting_rules = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry: functor2ArityMap.entrySet()) {
-            String predicate = entry.getKey();
-            Integer arity = entry.getValue();
-            if (ignore_set.contains(predicate)) {
-                continue;
-            }
-            Rule rule = new Rule(predicate, arity);
-            checkThenAddRule(starting_rules, rule, eval_cache);
-        }
-        if (starting_rules.isEmpty()) {
-            /* 没有适合条件的规则了 */
-            return null;
-        }
-        Rule r_max = starting_rules.get(0);
-        for (Rule r: starting_rules) {
-            if (r.getEval().value(evalType) > r_max.getEval().value(evalType)) {
-                r_max = r;
-            }
-        }
-
-        /* 计算所有符合阈值的constant */
-        Map<String, List<String>[]> functor_2_promising_const_map = new HashMap<>();
-        for (Map.Entry<String, MultiSet<String>[]> entry: curFunctor2ArgSetsMap.entrySet()) {
-            MultiSet<String>[] arg_sets = entry.getValue();
-            List<String>[] arg_const_lists = new List[arg_sets.length];
-            for (int i = 0; i < arg_sets.length; i++) {
-                arg_const_lists[i] = arg_sets[i].elementsAboveProportion(MIN_CONSTANT_PROPORTION);
-            }
-            functor_2_promising_const_map.put(entry.getKey(), arg_const_lists);
-        }
-
         /* 寻找局部最优（只要进入这个循环，一定有局部最优） */
+        Rule r_max = startRule;
+        evalRule(r_max, eval_cache);
         while (true) {
             System.out.printf("Extend: %s\n", r_max);
             Rule r_e_max = r_max;
 
             /* 遍历r_max的扩展邻居 */
-            List<Rule> extensions = findExtension(r_max, functor_2_promising_const_map, eval_cache);
+            List<Rule> extensions = findExtension(r_max, eval_cache);
             for (Rule r_e: extensions) {
                 if (r_e.getEval().value(evalType) > r_e_max.getEval().value(evalType)) {
                     r_e_max = r_e;
@@ -166,6 +171,7 @@ public class SincFullyOptimized extends SInC {
             }
             r_max = r_e_max;
         }
+
     }
 
     protected void evalRule(Rule rule, Map<Rule, Eval> evalCache) {
@@ -288,7 +294,7 @@ public class SincFullyOptimized extends SInC {
     }
 
     protected List<Rule> findExtension(
-            Rule rule, Map<String, List<String>[]> functor2promisingConstMap, Map<Rule, Eval> evalCache
+            Rule rule, Map<Rule, Eval> evalCache
     ) {
         List<Rule> extensions = new ArrayList<>();
 
@@ -333,7 +339,7 @@ public class SincFullyOptimized extends SInC {
 
             /* 拓展一个常量 */
             Predicate predicate = rule.getPredicate(first_vacant[0]);
-            List<String> const_list = functor2promisingConstMap.get(predicate.functor)[first_vacant[1]];
+            List<String> const_list = functor2PromisingConstMap.get(predicate.functor)[first_vacant[1]];
             for (String const_symbol: const_list) {
                 Rule new_rule = new Rule(rule);
                 new_rule.boundFreeVar2Constant(first_vacant[0], first_vacant[1], DEFAULT_CONST_ID, const_symbol);
@@ -467,12 +473,12 @@ public class SincFullyOptimized extends SInC {
 
     public static void main(String[] args) {
         SincFullyOptimized compressor = new SincFullyOptimized(
-                EvalMetric.CompressRatio,
+                EvalMetric.CompressionCapacity,
                 "FamilyRelationMedium(0.00)(10x).tsv",
                 null,
                 null,
                 null,
-                true
+                false
         );
         compressor.run();
     }
