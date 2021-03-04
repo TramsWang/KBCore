@@ -5,14 +5,14 @@ import java.util.*;
 public class Tarjan<T extends BaseGraphNode> {
     private int index = 0;
     private final Stack<T> stack = new Stack<>();
-    private final List<List<T>> result = new ArrayList<>();
+    private final List<Set<T>> result = new ArrayList<>();
     private final Map<T, Set<T>> graph;
 
     public Tarjan(Map<T, Set<T>> graph) {
         this.graph = graph;
     }
 
-    public List<List<T>> run() {
+    public List<Set<T>> run() {
         for (T node : graph.keySet()) {
             if (-1 == node.index) {
                 strongConnect(node);
@@ -41,7 +41,7 @@ public class Tarjan<T extends BaseGraphNode> {
         }
 
         if (node.lowLink == node.index) {
-            List<T> scc = new ArrayList<>();
+            Set<T> scc = new HashSet<>();
             T top = null;
             do {
                 top = stack.pop();

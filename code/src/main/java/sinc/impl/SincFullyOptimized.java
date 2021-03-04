@@ -7,6 +7,8 @@ import sinc.common.*;
 import sinc.util.MultiSet;
 import sinc.util.PrologModule;
 import sinc.util.SwiplUtil;
+import sinc.util.graph.FeedbackVertexSetSolver;
+import sinc.util.graph.Tarjan;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -19,6 +21,7 @@ public class SincFullyOptimized extends SInC {
     protected static final double MIN_HEAD_COVERAGE = 0.05;
     protected static final double MIN_CONSTANT_PROPORTION = 0.25;
     protected static final int DEFAULT_CONST_ID = -1;
+    protected static final Compound AXIOM = new Compound("⊥", new Term[0]);
 
     protected final Map<String, Set<Compound>> globalFunctor2FactSetMap = new HashMap<>();
     protected final Map<String, Set<Compound>> curFunctor2FactSetMap = new HashMap<>();
@@ -26,11 +29,13 @@ public class SincFullyOptimized extends SInC {
     protected final Map<String, MultiSet<String>[]> curFunctor2ArgSetsMap = new HashMap<>();
     protected final Set<String> constants = new HashSet<>();
     protected final Map<String, List<String>[]> functor2PromisingConstMap = new HashMap<>();
-
     protected final List<Rule> hypothesis = new ArrayList<>();
-
     protected boolean shouldContinue = true;
     protected List<String> waitingHeadFunctors = new ArrayList<>();
+
+    protected final Map<GraphNode4Compound, Set<GraphNode4Compound>> graph = new HashMap<>();
+    protected final Set<Compound> counterExamples = new HashSet<>();
+    protected final Set<Compound> startSet = new HashSet<>();
 
     public SincFullyOptimized(
             EvalMetric evalType,
@@ -429,53 +434,222 @@ public class SincFullyOptimized extends SInC {
         }
 
         hypothesis.add(rule);
-        dumpHypothesis();
+        showHypothesis();
 
-        /* 删除已经被证明的 */
-        Predicate head_predicate = rule.getHead();
-        Term[] head_args = new Term[head_predicate.args.length];
+        /* 找出所有的entailment */
+        int removed_cnt = 0;
+
+        /* 统计Head的参数情况，并将其转成带Free Var的Jpl Compound */
+        Predicate head_pred = rule.getHead();
+        List<String> bounded_vars_in_head = new ArrayList<>();
+        Term[] head_args = new Term[head_pred.args.length];
         int free_var_cnt_in_head = 0;
         for (int arg_idx = 0; arg_idx < head_args.length; arg_idx++) {
-            Argument argument = head_predicate.args[arg_idx];
+            Argument argument = head_pred.args[arg_idx];
             if (null == argument) {
                 head_args[arg_idx] = new Variable(String.format("Y%d", free_var_cnt_in_head));
                 free_var_cnt_in_head++;
+            } else if (argument.isVar) {
+                head_args[arg_idx] = new Variable(argument.name);
+                bounded_vars_in_head.add(argument.name);
             } else {
-                head_args[arg_idx] = argument.isVar ? new Variable(argument.name) : new Atom(argument.name);
+                head_args[arg_idx] = new Atom(argument.name);
             }
         }
-        Compound head_compound = new Compound(head_predicate.functor, head_args);
-        StringBuilder query_builder = new StringBuilder(head_compound.toString());
-        for (int pred_idx = 1; pred_idx < rule.length(); pred_idx++) {
-            Predicate body_predicate = rule.getPredicate(pred_idx);
-            Term[] args = new Term[body_predicate.arity()];
-            for (int arg_idx = 0; arg_idx < body_predicate.arity(); arg_idx++) {
-                Argument argument = body_predicate.args[arg_idx];
-                args[arg_idx] = (null == argument) ? new Variable("_") :
-                        argument.isVar ? new Variable(argument.name) : new Atom(argument.name);
-            }
-            Compound body_compound = new Compound(body_predicate.functor, args);
-            query_builder.append(',').append(body_compound.toString());
-        }
-        String query_str = query_builder.toString();
-        Query q = new Query(":", new Term[]{
-                new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(query_str)
-        });
+        Compound head_compound = new Compound(head_pred.functor, head_args);
+        Set<Compound> global_facts = globalFunctor2FactSetMap.get(head_pred.functor);
+        Set<Compound> cur_fact_set = curFunctor2FactSetMap.get(head_pred.functor);
 
-        Set<Compound> fact_set = curFunctor2FactSetMap.get(head_predicate.functor);
-        int removed_cnt = 0;
-        for (Map<String, Term> binding: q) {
-            Compound head_instance = SwiplUtil.substitute(head_compound, binding);
-            if (fact_set.remove(head_instance)) {
-                removed_cnt++;
+        /* 构造所有的dependency */
+        boolean body_is_not_empty = (2 <= rule.length());
+        if (body_is_not_empty) {
+            /* 用body构造查询 */
+            Set<String> bounded_vars_in_body = new HashSet<>();
+            StringBuilder query_builder = new StringBuilder();
+            List<Compound> body_compounds = new ArrayList<>(rule.length() - 1);
+            for (int pred_idx = 1; pred_idx < rule.length(); pred_idx++) {
+                Predicate body_pred = rule.getPredicate(pred_idx);
+                Term[] args = new Term[body_pred.arity()];
+                for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
+                    Argument argument = body_pred.args[arg_idx];
+                    if (null == argument) {
+                        args[arg_idx] = new Variable("_");
+                    } else if (argument.isVar) {
+                        args[arg_idx] = new Variable(argument.name);
+                        bounded_vars_in_body.add(argument.name);
+                    } else {
+                        args[arg_idx] = new Atom(argument.name);
+                    }
+                }
+                Compound body_compound = new Compound(body_pred.functor, args);
+                body_compounds.add(body_compound);
+                query_builder.append(body_compound.toString()).append(',');
+            }
+            query_builder.deleteCharAt(query_builder.length() - 1);
+            String query_str = query_builder.toString();
+
+            /* 找出所有仅在Head中出现的bounded var */
+            Set<String> bounded_vars_in_head_only = new HashSet<>();
+            for (String bv_head : bounded_vars_in_head) {
+                if (!bounded_vars_in_body.contains(bv_head)) {
+                    bounded_vars_in_head_only.add(bv_head);
+                }
+            }
+
+            Query q_4_body_grounding = new Query(":", new Term[]{
+                    new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(query_str)
+            });
+            for (Map<String, Term> binding : q_4_body_grounding) {
+                /* 构造body grounding */
+                List<Compound> body_groundings = new ArrayList<>(body_compounds.size());
+                for (int pred_idx = 1; pred_idx < rule.length(); pred_idx++) {
+                    Predicate body_pred = rule.getPredicate(pred_idx);
+                    Compound body_compound = body_compounds.get(pred_idx - 1);
+                    int free_vars_in_body = 0;
+                    Term[] body_args = new Term[body_pred.arity()];
+                    for (int arg_idx = 0; arg_idx < body_args.length; arg_idx++) {
+                        Argument argument = body_pred.args[arg_idx];
+                        if (null == argument) {
+                            /* 对应位置的参数替换为带名字的free var */
+                            body_args[arg_idx] = new Variable("Y" + free_vars_in_body);
+                            free_vars_in_body++;
+                        } else if (argument.isVar) {
+                            /* 对应位置替换为binding的值 */
+                            Term original_arg = body_compound.arg(arg_idx + 1);
+                            body_args[arg_idx] = binding.getOrDefault(original_arg.name(), original_arg);
+                        } else {
+                            /* 对应位置保留常量不变 */
+                            body_args[arg_idx] = body_compound.arg(arg_idx + 1);
+                        }
+                    }
+
+                    Compound body_grounding = new Compound(body_pred.functor, body_args);
+                    if (0 < free_vars_in_body) {
+                        /* body中带有free var需要查找某一值替换 */
+                        Query q_4_single_body_grounding = new Query(":", new Term[]{
+                                new Atom(PrologModule.GLOBAL.getSessionName()), body_grounding
+                        });
+                        Map<String, Term> single_solution = q_4_single_body_grounding.nextSolution();
+                        q_4_single_body_grounding.close();
+                        body_grounding = SwiplUtil.substitute(body_grounding, single_solution);
+                    }
+                    body_groundings.add(body_grounding);
+                }
+
+                /* 构造head grounding*/
+                Compound head_grounding = SwiplUtil.substitute(head_compound, binding);
+                if (bounded_vars_in_head_only.isEmpty()) {
+                    if (drawInGraph(cur_fact_set, global_facts, head_grounding, body_groundings)) {
+                        removed_cnt++;
+                    }
+                } else {
+                    /* 如果head中带有free var需要遍历所有可能值 */
+                    Query q_4_head_grounding = new Query(":", new Term[]{
+                            new Atom(PrologModule.GLOBAL.getSessionName()), head_grounding
+                    });
+                    for (Map<String, Term> head_binding: q_4_head_grounding) {
+                        if (drawInGraph(
+                                cur_fact_set, global_facts, SwiplUtil.substitute(
+                                        head_grounding, head_binding
+                                ), body_groundings
+                        )) {
+                            removed_cnt++;
+                        }
+                    }
+                    q_4_head_grounding.close();
+                }
+            }
+            q_4_body_grounding.close();
+        } else {
+            /* Body为True(i.e. AXIOM) */
+            if (0 >= free_var_cnt_in_head) {
+                if (drawInGraph(cur_fact_set, global_facts, head_compound, Collections.singletonList(AXIOM))) {
+                    removed_cnt++;
+                }
+            } else {
+                /* 如果head中带有free var需要遍历所有可能值 */
+                Query q_4_head_grounding = new Query(":", new Term[]{
+                        new Atom(PrologModule.GLOBAL.getSessionName()), head_compound
+                });
+                for (Map<String, Term> head_binding: q_4_head_grounding) {
+                    if (drawInGraph(
+                            cur_fact_set, global_facts, SwiplUtil.substitute(
+                                    head_compound, head_binding
+                            ), Collections.singletonList(AXIOM)
+                    )) {
+                        removed_cnt++;
+                    }
+                }
+                q_4_head_grounding.close();
             }
         }
         System.out.printf("Update: %d removed\n", removed_cnt);
-        q.close();
+    }
+
+    protected boolean drawInGraph(
+            Set<Compound> curFactSet, Set<Compound> globalFactSet, Compound head, List<Compound> bodies
+    ) {
+        if (curFactSet.remove(head)) {
+            /* 删除并在graph中加入dependency */
+            GraphNode4Compound head_node = new GraphNode4Compound(head);
+            graph.compute(head_node, (k, v) -> {
+                if (null == v) {
+                    v = new HashSet<>();
+                }
+                for (Compound body: bodies) {
+                    GraphNode4Compound body_node = new GraphNode4Compound(body);
+                    v.add(body_node);
+                }
+                return v;
+            });
+            return true;
+        } else if (!globalFactSet.contains(head)) {
+            /* 加入反例集合 */
+            counterExamples.add(head);
+        }
+        /* 否则就是已经被prove过的，忽略即可 */
+        return false;
     }
 
     @Override
-    protected void dumpHypothesis() {
+    protected void findStartSet() {
+        /* 在更新KB的时候已经把Graph顺便做好了，这里只需要查找对应的点即可 */
+        /* 找出所有不能被prove的点 */
+        for (Set<Compound> fact_set: globalFunctor2FactSetMap.values()) {
+            for (Compound fact : fact_set) {
+                GraphNode4Compound fact_node = new GraphNode4Compound(fact);
+                if (!graph.containsKey(fact_node)) {
+                    startSet.add(fact);
+                }
+            }
+        }
+
+        /* 找出所有SCC中的覆盖点 */
+        final int start_set_size_without_scc = startSet.size();
+        Tarjan<GraphNode4Compound> tarjan = new Tarjan<>(graph);
+        List<Set<GraphNode4Compound>> sccs = tarjan.run();
+        for (Set<GraphNode4Compound> scc: sccs) {
+            /* 找出FVS的一个解，并把之放入start_set */
+            FeedbackVertexSetSolver<GraphNode4Compound> fvs_solver = new FeedbackVertexSetSolver<>(graph, scc);
+            Set<GraphNode4Compound> fvs = fvs_solver.run();
+            for (GraphNode4Compound node: fvs) {
+                startSet.add(node.compound);
+            }
+        }
+
+        System.out.printf(
+                "Core Found: %d in START set(%d SCCs; without SCC: %d)\n",
+                startSet.size(), sccs.size(), start_set_size_without_scc
+        );
+    }
+
+    @Override
+    protected void findCounterExamples() {
+        /* Counter Example 已经在更新KB的时候找出来了，这里什么也不做 */
+        System.out.printf("Counter Examples Found: %d in COUNTER EXAMPLE set\n", counterExamples.size());
+    }
+
+    private void showHypothesis() {
         System.out.println("\nHypothesis Found:");
         for (Rule rule: hypothesis) {
             System.out.println(rule);
@@ -483,13 +657,24 @@ public class SincFullyOptimized extends SInC {
     }
 
     @Override
-    protected void dumpStartSet() {
-        /* Todo: Implement Here */
+    protected List<Rule> dumpHypothesis() {
+        return hypothesis;
     }
 
     @Override
-    protected void dumpCounterExampleSet() {
+    protected Set<Compound> dumpStartSet() {
+        return startSet;
+    }
+
+    @Override
+    protected Set<Compound> dumpCounterExampleSet() {
+        return counterExamples;
+    }
+
+    @Override
+    public boolean validate() {
         /* Todo: Implement Here */
+        return false;
     }
 
     public static void main(String[] args) {

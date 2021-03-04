@@ -1,7 +1,11 @@
 package sinc;
 
+import org.jpl7.Compound;
 import sinc.common.EvalMetric;
 import sinc.common.Rule;
+
+import java.util.List;
+import java.util.Set;
 
 public abstract class SInC {
 
@@ -34,11 +38,15 @@ public abstract class SInC {
 
     abstract protected void updateKb(Rule rule);
 
-    abstract protected void dumpHypothesis();
+    abstract protected void findStartSet();
 
-    abstract protected void dumpStartSet();
+    abstract protected void findCounterExamples();
 
-    abstract protected void dumpCounterExampleSet();
+    abstract protected List<Rule> dumpHypothesis();
+
+    abstract protected Set<Compound> dumpStartSet();
+
+    abstract protected Set<Compound> dumpCounterExampleSet();
 
     public final void run() {
         loadBk();
@@ -48,10 +56,10 @@ public abstract class SInC {
             updateKb(rule);
         }
 
-        dumpHypothesis();
+        findStartSet();
 
-        dumpStartSet();
-
-        dumpCounterExampleSet();
+        findCounterExamples();
     }
+
+    abstract public boolean validate();
 }
