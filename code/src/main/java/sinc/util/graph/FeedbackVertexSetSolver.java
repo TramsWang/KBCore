@@ -9,15 +9,17 @@ public class FeedbackVertexSetSolver<T extends BaseGraphNode> {
 
     private final List<T> nodes;
     private final INDArray matrix;
+    private final int size;
 
     public FeedbackVertexSetSolver(Map<T, Set<T>> graph, Set<T> scc) {
         /* 在这里把SCC转成邻接矩阵的形式 */
+        size = scc.size();
         matrix = Nd4j.zeros(scc.size(), scc.size());
 
         /* 先把每个点编号 */
-        nodes = new ArrayList<>();
+        nodes = new ArrayList<>(size);
         for (T node: scc) {
-            node.index = nodes.size();
+            node.fvsIdx = nodes.size();
             nodes.add(node);
         }
 
@@ -41,9 +43,25 @@ public class FeedbackVertexSetSolver<T extends BaseGraphNode> {
             INDArray score = out_edges.mul(in_edges);
             int max_idx = score.argMax(0).getInt(0);
             result.add(nodes.get(max_idx));
-            /* 从SCC中删除这个点 */
-            matrix.putRow(max_idx, Nd4j.zeros(matrix.shape()[1]));
-            matrix.putColumn(max_idx, Nd4j.zeros(matrix.shape()[0]));
+
+            /* 从SCC中删除这个点以及相关的环 */
+            matrix.putRow(max_idx, Nd4j.zeros(size));
+            matrix.putColumn(max_idx, Nd4j.zeros(size));
+            boolean updated = true;
+            while (updated) {
+                updated = false;
+                out_edges = matrix.sum(1);
+                in_edges = matrix.sum(0);
+                for (int i = 0; i < size; i++) {
+                    boolean has_out_edge = out_edges.getInt(i) > 0;
+                    boolean has_in_edge = in_edges.getInt(i) > 0;
+                    if (has_out_edge ^ has_in_edge) {
+                        matrix.putRow(i, Nd4j.zeros(size));
+                        matrix.putColumn(i, Nd4j.zeros(size));
+                        updated = true;
+                    }
+                }
+            }
         }
         return result;
     }

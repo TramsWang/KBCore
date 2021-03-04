@@ -40,8 +40,8 @@ class TarjanTest {
         graph.put(n7, new HashSet<>(Arrays.asList(n5)));
 
         Tarjan<BaseGraphNode> tarjan = new Tarjan<>(graph);
-        List<List<BaseGraphNode>> sccs = tarjan.run();
-        for (List<BaseGraphNode> scc: sccs) {
+        List<Set<BaseGraphNode>> sccs = tarjan.run();
+        for (Set<BaseGraphNode> scc: sccs) {
             System.out.print("SCC: ");
             for (BaseGraphNode n: scc) {
                 System.out.print(n + ", ");
@@ -50,7 +50,7 @@ class TarjanTest {
         }
         assertEquals(2, sccs.size());
         for (int i = 0; i < 2; i++) {
-            List<BaseGraphNode> scc = sccs.get(i);
+            Set<BaseGraphNode> scc = sccs.get(i);
             switch (scc.size()) {
                 case 3:
                     assertTrue(scc.contains(n5));
@@ -107,7 +107,7 @@ class TarjanTest {
         graph.put(n8, new HashSet<>(Arrays.asList(n14, n22)));
 
         Tarjan<BaseGraphNode> tarjan = new Tarjan<>(graph);
-        List<List<BaseGraphNode>> sccs = tarjan.run();
+        List<Set<BaseGraphNode>> sccs = tarjan.run();
         assertEquals(0, sccs.size());
     }
 
@@ -121,7 +121,7 @@ class TarjanTest {
         graph.put(n1, new HashSet<>(Arrays.asList(n2, n3)));
 
         Tarjan<BaseGraphNode> tarjan = new Tarjan<>(graph);
-        List<List<BaseGraphNode>> sccs = tarjan.run();
+        List<Set<BaseGraphNode>> sccs = tarjan.run();
         assertEquals(0, sccs.size());
     }
 }
