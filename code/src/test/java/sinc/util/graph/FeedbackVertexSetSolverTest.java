@@ -137,4 +137,31 @@ class FeedbackVertexSetSolverTest {
         assertEquals(3, (cover.contains(n1)?1:0) + (cover.contains(n2)?1:0) +
                 (cover.contains(n3)?1:0) + (cover.contains(n4)?1:0));
     }
+
+    @Test
+    void testMultipleInOneGraph() {
+        Map<GraphNodeWithName, Set<GraphNodeWithName>> graph = new HashMap<>();
+        GraphNodeWithName n1 = new GraphNodeWithName("n1");
+        GraphNodeWithName n2 = new GraphNodeWithName("n2");
+        GraphNodeWithName n3 = new GraphNodeWithName("n3");
+        GraphNodeWithName n4 = new GraphNodeWithName("n4");
+        GraphNodeWithName n5 = new GraphNodeWithName("n5");
+        graph.put(n1, new HashSet<>(Collections.singletonList(n2)));
+        graph.put(n2, new HashSet<>(Collections.singletonList(n3)));
+        graph.put(n3, new HashSet<>(Collections.singletonList(n1)));
+        graph.put(n4, new HashSet<>(Arrays.asList(n1, n2, n3, n5)));
+        graph.put(n5, new HashSet<>(Collections.singletonList(n4)));
+
+        Set<GraphNodeWithName> scc1 = new HashSet<>(Arrays.asList(n1, n2, n3));
+        FeedbackVertexSetSolver<GraphNodeWithName> solver1 = new FeedbackVertexSetSolver<>(graph, scc1);
+        Set<GraphNodeWithName> cover1 = solver1.run();
+        assertEquals(1, cover1.size());
+        assertTrue(cover1.contains(n1) || cover1.contains(n2) || cover1.contains(n3));
+
+        Set<GraphNodeWithName> scc2 = new HashSet<>(Arrays.asList(n4, n5));
+        FeedbackVertexSetSolver<GraphNodeWithName> solver2 = new FeedbackVertexSetSolver<>(graph, scc2);
+        Set<GraphNodeWithName> cover2 = solver2.run();
+        assertEquals(1, cover2.size());
+        assertTrue(cover2.contains(n4) || cover2.contains(n5));
+    }
 }

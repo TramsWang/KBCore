@@ -52,7 +52,7 @@ public class SincFullyOptimized extends SInC {
      * Assume no duplication.
      */
     @Override
-    protected void loadBk() {
+    protected int loadBk() {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(bkFilePath));
             String line;
@@ -130,9 +130,11 @@ public class SincFullyOptimized extends SInC {
                     "BK loaded: %d predicates; %d constants, %d facts\n",
                     curFunctor2FactSetMap.size(), constants.size(), total_facts
             );
+            return total_facts;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return 0;
     }
 
     @Override
@@ -626,6 +628,8 @@ public class SincFullyOptimized extends SInC {
 
         /* 找出所有SCC中的覆盖点 */
         final int start_set_size_without_scc = startSet.size();
+        int scc_total_vertices = 0;
+        int fvs_total_vertices = 0;
         Tarjan<GraphNode4Compound> tarjan = new Tarjan<>(graph);
         List<Set<GraphNode4Compound>> sccs = tarjan.run();
         for (Set<GraphNode4Compound> scc: sccs) {
@@ -635,12 +639,21 @@ public class SincFullyOptimized extends SInC {
             for (GraphNode4Compound node: fvs) {
                 startSet.add(node.compound);
             }
+            scc_total_vertices += scc.size();
+            fvs_total_vertices += fvs.size();
         }
 
-        System.out.printf(
-                "Core Found: %d in START set(%d SCCs; without SCC: %d)\n",
-                startSet.size(), sccs.size(), start_set_size_without_scc
+        System.out.println("- Core Statistics:");
+        System.out.println("---");
+        System.out.printf("# %10s %10s %10s %10s %10s\n", "|N|", "|N-SCC|", "#SCC", "|SCC|", "FVS");
+        System.out.printf("# %10d %10d %10d %10d %10d\n",
+                startSet.size(),
+                start_set_size_without_scc,
+                sccs.size(),
+                scc_total_vertices,
+                fvs_total_vertices
         );
+        System.out.println("---");
     }
 
     @Override

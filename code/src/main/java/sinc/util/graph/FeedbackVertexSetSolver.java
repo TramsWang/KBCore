@@ -14,7 +14,10 @@ public class FeedbackVertexSetSolver<T extends BaseGraphNode> {
     public FeedbackVertexSetSolver(Map<T, Set<T>> graph, Set<T> scc) {
         /* 在这里把SCC转成邻接矩阵的形式 */
         size = scc.size();
-        matrix = Nd4j.zeros(scc.size(), scc.size());
+        matrix = Nd4j.zeros(size, size);
+        if (2 == size) {
+            System.out.println("Attention!");
+        }
 
         /* 先把每个点编号 */
         nodes = new ArrayList<>(size);
@@ -24,13 +27,20 @@ public class FeedbackVertexSetSolver<T extends BaseGraphNode> {
         }
 
         /* 截取graph中属于SCC的部分 */
-        for (T node: scc) {
+        System.out.printf("Forming Matrix(%d x %d):\n", size, size);
+        for (T node: nodes) {
             Set<T> successors = graph.get(node);
             for (T successor: successors) {
                 if (T.NO_FVS_INDEX != successor.fvsIdx) {
+                    System.out.printf("%d - %d\n", node.fvsIdx, successor.fvsIdx);
                     matrix.putScalar(new int[]{node.fvsIdx, successor.fvsIdx}, 1);
                 }
             }
+        }
+
+        /* 将节点的编号取消，否则处理同一张图的其他scc时可能会引起混乱 */
+        for (T node: nodes) {
+            node.fvsIdx = T.NO_FVS_INDEX;
         }
     }
 
