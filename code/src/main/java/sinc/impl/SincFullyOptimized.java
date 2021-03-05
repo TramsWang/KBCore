@@ -33,6 +33,7 @@ public class SincFullyOptimized extends SInC {
     protected boolean shouldContinue = true;
     protected List<String> waitingHeadFunctors = new ArrayList<>();
 
+    protected final Map<Compound, GraphNode4Compound> compound2NodeMap = new HashMap<>();
     protected final Map<GraphNode4Compound, Set<GraphNode4Compound>> graph = new HashMap<>();
     protected final Set<Compound> counterExamples = new HashSet<>();
     protected final Set<Compound> startSet = new HashSet<>();
@@ -593,13 +594,13 @@ public class SincFullyOptimized extends SInC {
     ) {
         if (curFactSet.remove(head)) {
             /* 删除并在graph中加入dependency */
-            GraphNode4Compound head_node = new GraphNode4Compound(head);
+            GraphNode4Compound head_node = compound2NodeMap.computeIfAbsent(head, k -> new GraphNode4Compound(head));
             graph.compute(head_node, (k, v) -> {
                 if (null == v) {
                     v = new HashSet<>();
                 }
                 for (Compound body: bodies) {
-                    GraphNode4Compound body_node = new GraphNode4Compound(body);
+                    GraphNode4Compound body_node = compound2NodeMap.computeIfAbsent(body, kk -> new GraphNode4Compound(body));
                     v.add(body_node);
                 }
                 return v;

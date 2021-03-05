@@ -78,7 +78,7 @@ public abstract class SInC {
         }
         System.out.println("- Statistics: ");
         System.out.println("----");
-        System.out.printf("# %10s %10s %10s %10s %10s %10s\n", "|B|", "Hypo", "|H|", "R", "A", "Comp(%)");
+        System.out.printf("# %10s %10s %10s %10s %10s %10s\n", "|B|", "Hypo", "|H|", "|N|", "|A|", "Comp(%)");
         System.out.printf("  %10d %10d %10d %10d %10d %10.2f\n",
                 original_bk_size,
                 hypothesis.size(),
@@ -88,12 +88,13 @@ public abstract class SInC {
                 (start_set.size() + counter_example_set.size() + hypothesis_size) * 100.0 / original_bk_size
         );
         System.out.println("----");
-        System.out.printf("T(ms) %10s %10s %10s %10s\n", "Load", "Hypo", "R", "A");
-        System.out.printf("      %10d %10d %10d %10d\n",
+        System.out.printf("T(ms) %10s %10s %10s %10s %10s\n", "Load", "Hypo", "N", "A", "Total");
+        System.out.printf("      %10d %10d %10d %10d %10d\n",
                 time_bk_loaded - time_start,
                 time_hypothesis_found - time_bk_loaded,
                 time_start_set_found - time_hypothesis_found,
-                time_counter_examples_found - time_start_set_found
+                time_counter_examples_found - time_start_set_found,
+                time_counter_examples_found - time_start
         );
         System.out.println("----");
     }

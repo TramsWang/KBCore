@@ -15,9 +15,6 @@ public class FeedbackVertexSetSolver<T extends BaseGraphNode> {
         /* 在这里把SCC转成邻接矩阵的形式 */
         size = scc.size();
         matrix = Nd4j.zeros(size, size);
-        if (2 == size) {
-            System.out.println("Attention!");
-        }
 
         /* 先把每个点编号 */
         nodes = new ArrayList<>(size);
@@ -27,7 +24,6 @@ public class FeedbackVertexSetSolver<T extends BaseGraphNode> {
         }
 
         /* 截取graph中属于SCC的部分 */
-        System.out.printf("Forming Matrix(%d x %d):\n", size, size);
         for (T node: nodes) {
             Set<T> successors = graph.get(node);
             for (T successor: successors) {
