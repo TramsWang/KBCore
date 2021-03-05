@@ -1,9 +1,16 @@
 package sinc;
 
+import org.jpl7.Atom;
 import org.jpl7.Compound;
+import org.jpl7.Query;
+import org.jpl7.Term;
 import sinc.common.EvalMetric;
 import sinc.common.Rule;
+import sinc.util.PrologModule;
+import sinc.util.SwiplUtil;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -12,21 +19,11 @@ public abstract class SInC {
     protected final EvalMetric evalType;
 
     protected final String bkFilePath;
-    protected final String hypothesisFilePath;
-    protected final String startSetFilePath;
-    protected final String counterExampleSetFilePath;
     protected final boolean debug;
 
-    public SInC(
-            EvalMetric evalType,
-            String bkFilePath, String hypothesisFilePath, String startSetFilePath, String counterExampleSetFilePath,
-            boolean debug
-    ) {
+    public SInC(EvalMetric evalType, String bkFilePath, boolean debug) {
         this.evalType = evalType;
         this.bkFilePath = bkFilePath;
-        this.hypothesisFilePath = hypothesisFilePath;
-        this.startSetFilePath = startSetFilePath;
-        this.counterExampleSetFilePath = counterExampleSetFilePath;
         this.debug = debug;
     }
 
@@ -47,6 +44,8 @@ public abstract class SInC {
     abstract protected Set<Compound> dumpStartSet();
 
     abstract protected Set<Compound> dumpCounterExampleSet();
+
+    abstract protected Iterator<Compound> originalBkIterator();
 
     public final void run() {
         long time_start = System.currentTimeMillis();
@@ -99,5 +98,61 @@ public abstract class SInC {
         System.out.println("----");
     }
 
-    abstract public boolean validate();
+    public boolean validate() {
+        long time_start = System.currentTimeMillis();
+        List<Rule> hypothesis = dumpHypothesis();
+        Set<Compound> start_set = dumpStartSet();
+        Set<Compound> counter_examples = dumpCounterExampleSet();
+        for (Compound fact: start_set) {
+            SwiplUtil.appendKnowledge(PrologModule.VALIDATION, fact);
+        }
+        for (Rule rule: hypothesis) {
+            SwiplUtil.appendKnowledge(PrologModule.VALIDATION, Term.textToTerm(rule.toCompleteRuleString()));
+        }
+
+        /* Check all facts */
+        Set<Compound> uncovered_facts = new HashSet<>();
+        Iterator<Compound> original_bk_itr = originalBkIterator();
+        while (original_bk_itr.hasNext()) {
+            Compound fact = original_bk_itr.next();
+            if (start_set.contains(fact)) {
+                continue;
+            }
+            Query q = new Query(":", new Term[]{
+                    new Atom(PrologModule.VALIDATION.getSessionName()), fact
+            });
+            if (!q.hasSolution()) {
+                uncovered_facts.add(fact);
+            }
+            q.close();
+        }
+        if (!uncovered_facts.isEmpty()) {
+            System.out.printf("%d fact(s) uncovered:\n", uncovered_facts.size());
+            for (Compound fact: uncovered_facts) {
+                System.out.println(fact);
+            }
+        }
+
+        /* Check all counter examples */
+        Set<Compound> uncovered_counter_examples = new HashSet<>();
+        for (Compound counter_example: counter_examples) {
+            Query q = new Query(":", new Term[]{
+                    new Atom(PrologModule.VALIDATION.getSessionName()), counter_example
+            });
+            if (!q.hasSolution()) {
+                uncovered_counter_examples.add(counter_example);
+            }
+            q.close();
+        }
+        if (!uncovered_counter_examples.isEmpty()) {
+            System.out.printf("%d counter example(s) uncovered:\n", uncovered_counter_examples.size());
+            for (Compound counter_example: uncovered_counter_examples) {
+                System.out.println(counter_example);
+            }
+        }
+        long time_finished = System.currentTimeMillis();
+        System.out.printf("Validation Finished in: %d ms\n", time_finished - time_start);
+
+        return uncovered_facts.isEmpty() && uncovered_counter_examples.isEmpty();
+    }
 }

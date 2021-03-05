@@ -270,6 +270,31 @@ public class Rule {
         return builder.toString();
     }
 
+    public String toCompleteRuleString() {
+        /* 先把Free vars都加上 */
+        List<Predicate> copy = new ArrayList<>(this.rule);
+        int free_vars = boundedVars.size();
+        for (Predicate predicate: copy) {
+            for (int i = 0; i < predicate.arity(); i++) {
+                if (null == predicate.args[i]) {
+                    predicate.args[i] = new Variable(free_vars);
+                    free_vars++;
+                }
+            }
+        }
+
+        /* to string without eval */
+        StringBuilder builder = new StringBuilder(copy.get(0).toString());
+        builder.append(":-");
+        if (1 < copy.size()) {
+            builder.append(rule.get(1).toString());
+            for (int i = 2; i < copy.size(); i++) {
+                builder.append(',').append(copy.get(i).toString());
+            }
+        }
+        return builder.toString();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

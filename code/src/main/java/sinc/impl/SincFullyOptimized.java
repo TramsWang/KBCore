@@ -23,6 +23,29 @@ public class SincFullyOptimized extends SInC {
     protected static final int DEFAULT_CONST_ID = -1;
     protected static final Compound AXIOM = new Compound("⊥", new Term[0]);
 
+    public static final class OriginalFactIterator implements Iterator<Compound> {
+        Iterator<Set<Compound>> functorItr;
+        Iterator<Compound> factSetItr;
+
+        private OriginalFactIterator(Map<String, Set<Compound>> functor2FactSetMap) {
+            functorItr = functor2FactSetMap.values().iterator();
+            factSetItr = functorItr.hasNext() ? functorItr.next().iterator() : null;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return functorItr.hasNext() || (null != factSetItr && factSetItr.hasNext());
+        }
+
+        @Override
+        public Compound next() {
+            if (!factSetItr.hasNext()) {
+                factSetItr = functorItr.next().iterator();
+            }
+            return factSetItr.next();
+        }
+    }
+
     protected final Map<String, Set<Compound>> globalFunctor2FactSetMap = new HashMap<>();
     protected final Map<String, Set<Compound>> curFunctor2FactSetMap = new HashMap<>();
     protected final Map<String, Integer> functor2ArityMap = new HashMap<>();
@@ -38,12 +61,8 @@ public class SincFullyOptimized extends SInC {
     protected final Set<Compound> counterExamples = new HashSet<>();
     protected final Set<Compound> startSet = new HashSet<>();
 
-    public SincFullyOptimized(
-            EvalMetric evalType,
-            String kbFilePath, String hypothesisFilePath, String startSetFilePath, String counterExampleSetFilePath,
-            boolean debug
-    ) {
-        super(evalType, kbFilePath, hypothesisFilePath, startSetFilePath, counterExampleSetFilePath, debug);
+    public SincFullyOptimized(EvalMetric evalType, String kbFilePath, boolean debug) {
+        super(evalType, kbFilePath, debug);
     }
 
     /**
@@ -686,20 +705,21 @@ public class SincFullyOptimized extends SInC {
     }
 
     @Override
-    public boolean validate() {
-        /* Todo: Implement Here */
-        return false;
+    protected Iterator<Compound> originalBkIterator() {
+        return new OriginalFactIterator(globalFunctor2FactSetMap);
     }
 
     public static void main(String[] args) {
         SincFullyOptimized compressor = new SincFullyOptimized(
                 EvalMetric.CompressionCapacity,
                 "FamilyRelationMedium(0.00)(10x).tsv",
-                null,
-                null,
-                null,
                 false
         );
         compressor.run();
+        if (compressor.validate()) {
+            System.out.println("Validation Passed!");
+        } else {
+            System.err.println("[ERROR]Validation Failed:\n");
+        }
     }
 }

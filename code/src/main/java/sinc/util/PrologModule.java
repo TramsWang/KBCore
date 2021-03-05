@@ -1,7 +1,7 @@
 package sinc.util;
 
 public enum PrologModule {
-    GLOBAL("global"), CURRENT("current"), START_SET("start_set");
+    GLOBAL("global"), CURRENT("current"), VALIDATION("validation");
 
     private final String sessionName;
 

@@ -28,7 +28,6 @@ public class FeedbackVertexSetSolver<T extends BaseGraphNode> {
             Set<T> successors = graph.get(node);
             for (T successor: successors) {
                 if (T.NO_FVS_INDEX != successor.fvsIdx) {
-                    System.out.printf("%d - %d\n", node.fvsIdx, successor.fvsIdx);
                     matrix.putScalar(new int[]{node.fvsIdx, successor.fvsIdx}, 1);
                 }
             }

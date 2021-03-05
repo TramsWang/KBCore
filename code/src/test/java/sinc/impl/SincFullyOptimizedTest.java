@@ -3,26 +3,21 @@ package sinc.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import sinc.SInC;
 import sinc.common.EvalMetric;
 import sinc.common.Rule;
 import sinc.util.datagen.FamilyRelationGenerator;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SincFullyOptimizedTest {
-    static final String TMP_BK_FILE = "tmp_bk";
-    static final String TMP_HYPOTHESIS_FILE = "tmp_hypothesis";
-    static final String TMP_START_SET_FILE = "tmp_start_set";
-    static final String TMP_COUNTER_EXAMPLE_SET_FILE = "tmp_counter_example_set";
     static final int CONSTANT_ID = -1;
 
     @Test
@@ -32,8 +27,12 @@ class SincFullyOptimizedTest {
          *      gender(X, male) <- father(X, Y)
          *      gender(X, female) <- mother(X, Y)
          */
+        UUID id = UUID.randomUUID();
+        final String tmp_bk_file_path = id.toString() + "_bk";
+        checkFile(tmp_bk_file_path);
+
         try {
-            FamilyRelationGenerator.generateTiny(TMP_BK_FILE, 10, 0);
+            FamilyRelationGenerator.generateTiny(tmp_bk_file_path, 10, 0);
         } catch (IOException e) {
             e.printStackTrace();
             fail();
@@ -42,13 +41,11 @@ class SincFullyOptimizedTest {
         for (EvalMetric eval_type: EvalMetric.values()) {
             SincFullyOptimized sinc = new SincFullyOptimized(
                     eval_type,
-                    TMP_BK_FILE,
-                    TMP_HYPOTHESIS_FILE,
-                    TMP_START_SET_FILE,
-                    TMP_COUNTER_EXAMPLE_SET_FILE,
+                    tmp_bk_file_path,
                     false
             );
             sinc.run();
+            assertTrue(sinc.validate());
 
             try {
                 Field hypothesis_field = SincFullyOptimized.class.getDeclaredField("hypothesis");
@@ -77,6 +74,8 @@ class SincFullyOptimizedTest {
                 fail();
             }
         }
+
+        deleteFile(tmp_bk_file_path);
     }
 
     @Test
@@ -88,8 +87,12 @@ class SincFullyOptimizedTest {
          *      parent(X,Y):-father(X,Y).
          *      parent(X,Y):-mother(X,Y).
          */
+        UUID id = UUID.randomUUID();
+        final String tmp_bk_file_path = id.toString() + "_bk";
+        checkFile(tmp_bk_file_path);
+
         try {
-            FamilyRelationGenerator.generateSimple(TMP_BK_FILE, 10, 0);
+            FamilyRelationGenerator.generateSimple(tmp_bk_file_path, 10, 0);
         } catch (IOException e) {
             e.printStackTrace();
             fail();
@@ -98,13 +101,11 @@ class SincFullyOptimizedTest {
         for (EvalMetric eval_type: EvalMetric.values()) {
             SincFullyOptimized sinc = new SincFullyOptimized(
                     eval_type,
-                    TMP_BK_FILE,
-                    TMP_HYPOTHESIS_FILE,
-                    TMP_START_SET_FILE,
-                    TMP_COUNTER_EXAMPLE_SET_FILE,
+                    tmp_bk_file_path,
                     false
             );
             sinc.run();
+            assertTrue(sinc.validate());
 
             try {
                 Field hypothesis_field = SincFullyOptimized.class.getDeclaredField("hypothesis");
@@ -147,46 +148,20 @@ class SincFullyOptimizedTest {
                 fail();
             }
         }
+
+        deleteFile(tmp_bk_file_path);
     }
 
-    @BeforeEach
-    private void checkTmpFiles() {
-        File bk_file = new File(TMP_BK_FILE);
-        File hypothesis_file = new File(TMP_HYPOTHESIS_FILE);
-        File start_set_file = new File(TMP_START_SET_FILE);
-        File counter_example_file = new File(TMP_COUNTER_EXAMPLE_SET_FILE);
-
-        if (bk_file.exists()) {
-            System.err.println("Temporary BK file conflicted!");
-            fail();
-        }
-
-        if (hypothesis_file.exists()) {
-            System.err.println("Temporary Hypothesis file conflicted!");
-            fail();
-        }
-
-        if (start_set_file.exists()) {
-            System.err.println("Temporary Start Set file conflicted!");
-            fail();
-        }
-
-        if (counter_example_file.exists()) {
-            System.err.println("Temporary Counter Example Set file conflicted!");
+    private void checkFile(String filePath) {
+        File file = new File(filePath);
+        if (file.exists()) {
+            System.err.println("Temporary File Existed: " + filePath);
             fail();
         }
     }
 
-    @AfterEach
-    private void cleanTmpFiles() {
-        File bk_file = new File(TMP_BK_FILE);
-        File hypothesis_file = new File(TMP_HYPOTHESIS_FILE);
-        File start_set_file = new File(TMP_START_SET_FILE);
-        File counter_example_file = new File(TMP_COUNTER_EXAMPLE_SET_FILE);
-
-        bk_file.deleteOnExit();
-        hypothesis_file.deleteOnExit();
-        start_set_file.deleteOnExit();
-        counter_example_file.deleteOnExit();
+    private void deleteFile(String filePath) {
+        File file = new File(filePath);
+        file.deleteOnExit();
     }
 }
