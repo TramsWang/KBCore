@@ -7,7 +7,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TarjanTest {
-    class GraphNodeWithName extends BaseGraphNode {
+    static class GraphNodeWithName extends BaseGraphNode {
         String name;
 
         public GraphNodeWithName(String name) {
@@ -17,6 +17,105 @@ class TarjanTest {
         @Override
         public String toString() {
             return name;
+        }
+    }
+
+    static class MapWithAppointedKeySet implements Map<GraphNodeWithName, Set<GraphNodeWithName>> {
+        private final Map<GraphNodeWithName, Set<GraphNodeWithName>> actualMap = new HashMap<>();
+        private final Set<GraphNodeWithName> appointedKeySet = new HashSet<>();
+//        private final Set<Entry<GraphNodeWithName, Set<GraphNodeWithName>>> appointedEntrySet = new HashSet<>();
+
+        public void addAppointedKey(GraphNodeWithName key) {
+            appointedKeySet.add(key);
+        }
+
+        @Override
+        public int size() {
+            return actualMap.size();
+        }
+
+        @Override
+        public Set<GraphNodeWithName> get(Object o) {
+            return actualMap.get(o);
+        }
+
+        @Override
+        public Set<GraphNodeWithName> put(GraphNodeWithName key, Set<GraphNodeWithName> value) {
+            return actualMap.put(key, value);
+        }
+
+        @Override
+        public boolean containsKey(Object o) {
+            return actualMap.containsKey(o);
+        }
+
+        @Override
+        public boolean containsValue(Object o) {
+            return actualMap.containsValue(o);
+        }
+
+        @Override
+        public Collection<Set<GraphNodeWithName>> values() {
+            return actualMap.values();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return actualMap.isEmpty();
+        }
+
+        @Override
+        public Set<Entry<GraphNodeWithName, Set<GraphNodeWithName>>> entrySet() {
+            Set<Entry<GraphNodeWithName, Set<GraphNodeWithName>>> entry_set = new HashSet<>();
+            for (Entry<GraphNodeWithName, Set<GraphNodeWithName>> entry: actualMap.entrySet()) {
+                if (appointedKeySet.contains(entry.getKey())) {
+                    entry_set.add(entry);
+                }
+            }
+            return entry_set;
+        }
+
+        @Override
+        public Set<GraphNodeWithName> keySet() {
+            return appointedKeySet;
+        }
+
+        @Override
+        public Set<GraphNodeWithName> remove(Object o) {
+            return actualMap.remove(o);
+        }
+
+        @Override
+        public void clear() {
+            actualMap.clear();
+            appointedKeySet.clear();
+        }
+
+        @Override
+        public void putAll(Map<? extends GraphNodeWithName, ? extends Set<GraphNodeWithName>> map) {
+            actualMap.putAll(map);
+        }
+    }
+
+    @Test
+    public void testAppointedMap() {
+        MapWithAppointedKeySet map = new MapWithAppointedKeySet();
+        GraphNodeWithName n1 = new GraphNodeWithName("n1");
+        GraphNodeWithName n2 = new GraphNodeWithName("n2");
+        GraphNodeWithName n3 = new GraphNodeWithName("n3");
+        map.put(n1, new HashSet<>(Collections.singletonList(n2)));
+        map.put(n2, new HashSet<>(Collections.singletonList(n3)));
+        map.addAppointedKey(n2);
+
+        assertEquals(1, map.entrySet().size());
+        for (Map.Entry<GraphNodeWithName, Set<GraphNodeWithName>> entry: map.entrySet()) {
+            assertEquals(n2, entry.getKey());
+            assertEquals(new HashSet<GraphNodeWithName>(Collections.singletonList(n3)), entry.getValue());
+        }
+
+        assertEquals(1, map.keySet().size());
+        for (GraphNodeWithName node: map.keySet()) {
+            assertEquals(n2, node);
         }
     }
     
@@ -123,5 +222,103 @@ class TarjanTest {
         Tarjan<BaseGraphNode> tarjan = new Tarjan<>(graph);
         List<Set<BaseGraphNode>> sccs = tarjan.run();
         assertEquals(0, sccs.size());
+    }
+
+    @Test
+    public void testAppointedStartPoints1() {
+        MapWithAppointedKeySet graph = new MapWithAppointedKeySet();
+        GraphNodeWithName n1 = new GraphNodeWithName("n1");
+        GraphNodeWithName n2 = new GraphNodeWithName("n2");
+        GraphNodeWithName n3 = new GraphNodeWithName("n3");
+        graph.put(n1, new HashSet<>(Collections.singletonList(n2)));
+        graph.put(n2, new HashSet<>(Collections.singletonList(n3)));
+        graph.put(n3, new HashSet<>(Collections.singletonList(n2)));
+        graph.addAppointedKey(n1);
+
+        Tarjan<GraphNodeWithName> tarjan = new Tarjan<>(graph);
+        List<Set<GraphNodeWithName>> sccs = tarjan.run();
+        assertEquals(1, sccs.size());
+        assertTrue(sccs.contains(new HashSet<>(Arrays.asList(n2, n3))));
+    }
+
+    @Test
+    public void testAppointedStartPoints2() {
+        MapWithAppointedKeySet graph = new MapWithAppointedKeySet();
+        GraphNodeWithName n1 = new GraphNodeWithName("n1");
+        GraphNodeWithName n2 = new GraphNodeWithName("n2");
+        GraphNodeWithName n3 = new GraphNodeWithName("n3");
+        graph.put(n1, new HashSet<>(Collections.singletonList(n2)));
+        graph.put(n2, new HashSet<>(Collections.singletonList(n3)));
+        graph.put(n3, new HashSet<>(Collections.singletonList(n2)));
+        graph.addAppointedKey(n2);
+
+        Tarjan<GraphNodeWithName> tarjan = new Tarjan<>(graph);
+        List<Set<GraphNodeWithName>> sccs = tarjan.run();
+        assertEquals(1, sccs.size());
+        assertTrue(sccs.contains(new HashSet<>(Arrays.asList(n2, n3))));
+    }
+
+    @Test
+    public void testAppointedStartPoints3() {
+        MapWithAppointedKeySet graph1 = new MapWithAppointedKeySet();
+        GraphNodeWithName n1 = new GraphNodeWithName("n1");
+        GraphNodeWithName n2 = new GraphNodeWithName("n2");
+        GraphNodeWithName n3 = new GraphNodeWithName("n3");
+        GraphNodeWithName n4 = new GraphNodeWithName("n4");
+        graph1.put(n1, new HashSet<>(Collections.singletonList(n2)));
+        graph1.put(n2, new HashSet<>(Collections.singletonList(n3)));
+        graph1.put(n3, new HashSet<>(Arrays.asList(n2, n4)));
+        graph1.put(n4, new HashSet<>(Collections.singletonList(n3)));
+        graph1.addAppointedKey(n1);
+
+        Tarjan<GraphNodeWithName> tarjan = new Tarjan<>(graph1);
+        List<Set<GraphNodeWithName>> sccs = tarjan.run();
+        assertEquals(1, sccs.size());
+        assertTrue(sccs.contains(new HashSet<>(Arrays.asList(n2, n3, n4))));
+    }
+
+    @Test
+    public void testAppointedStartPoints4() {
+        MapWithAppointedKeySet graph1 = new MapWithAppointedKeySet();
+        GraphNodeWithName n1 = new GraphNodeWithName("n1");
+        GraphNodeWithName n2 = new GraphNodeWithName("n2");
+        GraphNodeWithName n3 = new GraphNodeWithName("n3");
+        GraphNodeWithName n4 = new GraphNodeWithName("n4");
+        GraphNodeWithName n5 = new GraphNodeWithName("n5");
+        GraphNodeWithName n6 = new GraphNodeWithName("n6");
+        graph1.put(n1, new HashSet<>(Collections.singletonList(n2)));
+        graph1.put(n2, new HashSet<>(Collections.singletonList(n3)));
+        graph1.put(n3, new HashSet<>(Arrays.asList(n2, n4, n5, n6)));
+        graph1.put(n4, new HashSet<>(Collections.singletonList(n3)));
+        graph1.addAppointedKey(n1);
+
+        Tarjan<GraphNodeWithName> tarjan = new Tarjan<>(graph1);
+        List<Set<GraphNodeWithName>> sccs = tarjan.run();
+        assertEquals(1, sccs.size());
+        assertTrue(sccs.contains(new HashSet<>(Arrays.asList(n2, n3, n4))));
+    }
+
+    @Test
+    public void testAppointedStartPoints5() {
+        MapWithAppointedKeySet graph1 = new MapWithAppointedKeySet();
+        GraphNodeWithName n0 = new GraphNodeWithName("n0");
+        GraphNodeWithName n1 = new GraphNodeWithName("n1");
+        GraphNodeWithName n2 = new GraphNodeWithName("n2");
+        GraphNodeWithName n3 = new GraphNodeWithName("n3");
+        GraphNodeWithName n4 = new GraphNodeWithName("n4");
+        GraphNodeWithName n5 = new GraphNodeWithName("n5");
+        GraphNodeWithName n6 = new GraphNodeWithName("n6");
+        graph1.put(n0, new HashSet<>(Collections.singletonList(n3)));
+        graph1.put(n1, new HashSet<>(Collections.singletonList(n2)));
+        graph1.put(n2, new HashSet<>(Collections.singletonList(n3)));
+        graph1.put(n3, new HashSet<>(Arrays.asList(n2, n4, n5, n6)));
+        graph1.put(n4, new HashSet<>(Collections.singletonList(n3)));
+        graph1.addAppointedKey(n1);
+        graph1.addAppointedKey(n0);
+
+        Tarjan<GraphNodeWithName> tarjan = new Tarjan<>(graph1);
+        List<Set<GraphNodeWithName>> sccs = tarjan.run();
+        assertEquals(1, sccs.size());
+        assertTrue(sccs.contains(new HashSet<>(Arrays.asList(n2, n3, n4))));
     }
 }
