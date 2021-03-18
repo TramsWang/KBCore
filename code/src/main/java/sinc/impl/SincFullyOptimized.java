@@ -8,11 +8,13 @@ import sinc.util.MultiSet;
 import sinc.util.PrologModule;
 import sinc.util.SwiplUtil;
 import sinc.util.graph.FeedbackVertexSetSolver;
+import sinc.util.graph.GraphView;
 import sinc.util.graph.Tarjan;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.Integer;
 import java.util.*;
 
@@ -128,10 +130,10 @@ public class SincFullyOptimized extends SInC {
             if (debug) {
                 Set<String> black_list = new HashSet<>();
 //                black_list.add("sibling");
-                black_list.addAll(functor2ArityMap.keySet());
+//                black_list.addAll(functor2ArityMap.keySet());
 
                 Set<String> white_list = new HashSet<>();
-                white_list.add("gender");
+//                white_list.add("gender");
 
                 for (String functor: functor2ArityMap.keySet()) {
                     if (white_list.contains(functor) || !black_list.contains(functor)) {
@@ -690,17 +692,17 @@ public class SincFullyOptimized extends SInC {
     }
 
     @Override
-    protected List<Rule> dumpHypothesis() {
+    public List<Rule> dumpHypothesis() {
         return hypothesis;
     }
 
     @Override
-    protected Set<Compound> dumpStartSet() {
+    public Set<Compound> dumpStartSet() {
         return startSet;
     }
 
     @Override
-    protected Set<Compound> dumpCounterExampleSet() {
+    public Set<Compound> dumpCounterExampleSet() {
         return counterExamples;
     }
 
@@ -709,17 +711,39 @@ public class SincFullyOptimized extends SInC {
         return new OriginalFactIterator(globalFunctor2FactSetMap);
     }
 
-    public static void main(String[] args) {
+    @Override
+    protected Map<GraphNode4Compound, Set<GraphNode4Compound>> getDependencyGraph() {
+        return graph;
+    }
+
+    public static void main(String[] args) throws IOException {
         SincFullyOptimized compressor = new SincFullyOptimized(
                 EvalMetric.CompressionCapacity,
                 "FamilyRelationMedium(0.00)(10x).tsv",
                 false
         );
         compressor.run();
-        if (compressor.validate()) {
-            System.out.println("Validation Passed!");
-        } else {
-            System.err.println("[ERROR]Validation Failed:\n");
-        }
+//        List<Rule> rules = compressor.dumpHypothesis();
+//        Set<Compound> start_set = compressor.dumpStartSet();
+//
+//        PrintWriter writer = new PrintWriter("test.pl");
+//        for (Compound fact: start_set) {
+//            writer.println(fact);
+//        }
+//        for (Rule rule: rules) {
+//            writer.println(rule.toCompleteRuleString());
+//        }
+//        writer.close();
+
+//        try {
+//            if (compressor.validate()) {
+//                System.out.println("Validation Passed!");
+//            } else {
+//                System.err.println("[ERROR]Validation Failed!\n");
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            System.err.println("[ERROR]Validation Failed with Exception!\n");
+//        }
     }
 }

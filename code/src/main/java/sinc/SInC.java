@@ -5,14 +5,13 @@ import org.jpl7.Compound;
 import org.jpl7.Query;
 import org.jpl7.Term;
 import sinc.common.EvalMetric;
+import sinc.common.GraphNode4Compound;
 import sinc.common.Rule;
 import sinc.util.PrologModule;
 import sinc.util.SwiplUtil;
+import sinc.util.graph.GraphView;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public abstract class SInC {
 
@@ -39,13 +38,15 @@ public abstract class SInC {
 
     abstract protected void findCounterExamples();
 
-    abstract protected List<Rule> dumpHypothesis();
+    abstract public List<Rule> dumpHypothesis();
 
-    abstract protected Set<Compound> dumpStartSet();
+    abstract public Set<Compound> dumpStartSet();
 
-    abstract protected Set<Compound> dumpCounterExampleSet();
+    abstract public Set<Compound> dumpCounterExampleSet();
 
     abstract protected Iterator<Compound> originalBkIterator();
+
+    abstract protected Map<GraphNode4Compound, Set<GraphNode4Compound>> getDependencyGraph();
 
     public final void run() {
         long time_start = System.currentTimeMillis();
@@ -103,6 +104,10 @@ public abstract class SInC {
         List<Rule> hypothesis = dumpHypothesis();
         Set<Compound> start_set = dumpStartSet();
         Set<Compound> counter_examples = dumpCounterExampleSet();
+        if (debug) {
+            GraphView.draw(originalBkIterator(), getDependencyGraph(), k -> !start_set.contains(k));
+        }
+
         for (Compound fact: start_set) {
             SwiplUtil.appendKnowledge(PrologModule.VALIDATION, fact);
         }
@@ -118,6 +123,7 @@ public abstract class SInC {
             if (start_set.contains(fact)) {
                 continue;
             }
+            System.out.println("Check Fact: " + fact);
             Query q = new Query(":", new Term[]{
                     new Atom(PrologModule.VALIDATION.getSessionName()), fact
             });
@@ -136,6 +142,7 @@ public abstract class SInC {
         /* Check all counter examples */
         Set<Compound> uncovered_counter_examples = new HashSet<>();
         for (Compound counter_example: counter_examples) {
+            System.out.println("Check CE: " + counter_example);
             Query q = new Query(":", new Term[]{
                     new Atom(PrologModule.VALIDATION.getSessionName()), counter_example
             });

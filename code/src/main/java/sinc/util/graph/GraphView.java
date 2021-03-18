@@ -10,7 +10,14 @@ import sinc.common.GraphNode4Compound;
 import java.util.*;
 
 public class GraphView {
-    static public void draw(Iterator<Compound> nodeItr, Map<GraphNode4Compound, Set<GraphNode4Compound>> edges) {
+    public static interface RedundancyChecker {
+        boolean isRedundant(Compound c);
+    }
+
+    static public void draw(
+            Iterator<Compound> nodeItr, Map<GraphNode4Compound, Set<GraphNode4Compound>> edges,
+            RedundancyChecker checker
+    ) {
         System.out.print("Printing Dependency Graph in Neo4j...");
 
         /* Connect to Neo4j */
@@ -26,7 +33,11 @@ public class GraphView {
         /* Create Nodes */
         while (nodeItr.hasNext()) {
             Compound node = nodeItr.next();
-            session.writeTransaction(tx -> tx.run(String.format("CREATE (e:`node`{name:\"%s\"})", node)));
+            if (checker.isRedundant(node)) {
+                session.writeTransaction(tx -> tx.run(String.format("CREATE (e:`proved`{name:\"%s\"})", node)));
+            } else {
+                session.writeTransaction(tx -> tx.run(String.format("CREATE (e:`remained`{name:\"%s\"})", node)));
+            }
         }
 
         /* Create Edges */
@@ -35,7 +46,7 @@ public class GraphView {
             for (GraphNode4Compound dst: entry.getValue()) {
                 session.writeTransaction(tx -> tx.run(
                         String.format(
-                                "MATCH (s:`node`{name:\"%s\"}), (d:`node`{name:\"%s\"}) CREATE (s)-[r:`rel`]->(d)",
+                                "MATCH (s{name:\"%s\"}), (d{name:\"%s\"}) CREATE (s)-[r:`rel`]->(d)",
                                 src.compound, dst.compound
                         )
                 ));
