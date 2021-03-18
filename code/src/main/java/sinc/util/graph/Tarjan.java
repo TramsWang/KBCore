@@ -42,9 +42,10 @@ public class Tarjan<T extends BaseGraphNode> {
 
         if (node.lowLink == node.index) {
             Set<T> scc = new HashSet<>();
-            T top = null;
+            T top;
             do {
                 top = stack.pop();
+                top.onStack = false;
                 scc.add(top);
             } while (!node.equals(top));
 
