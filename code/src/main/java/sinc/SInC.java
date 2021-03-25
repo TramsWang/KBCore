@@ -15,12 +15,16 @@ import java.util.*;
 
 public abstract class SInC {
 
+    protected final int threadNum;
+    protected final int beamWidth;
     protected final EvalMetric evalType;
 
     protected final String bkFilePath;
     protected final boolean debug;
 
-    public SInC(EvalMetric evalType, String bkFilePath, boolean debug) {
+    public SInC(int threadNum, int beamWidth, EvalMetric evalType, String bkFilePath, boolean debug) {
+        this.threadNum = threadNum;
+        this.beamWidth = beamWidth;
         this.evalType = evalType;
         this.bkFilePath = bkFilePath;
         this.debug = debug;

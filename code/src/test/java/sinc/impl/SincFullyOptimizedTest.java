@@ -40,6 +40,8 @@ class SincFullyOptimizedTest {
 
         for (EvalMetric eval_type: EvalMetric.values()) {
             SincFullyOptimized sinc = new SincFullyOptimized(
+                    1,
+                    1,
                     eval_type,
                     tmp_bk_file_path,
                     false
@@ -100,6 +102,8 @@ class SincFullyOptimizedTest {
 
         for (EvalMetric eval_type: EvalMetric.values()) {
             SincFullyOptimized sinc = new SincFullyOptimized(
+                    1,
+                    1,
                     eval_type,
                     tmp_bk_file_path,
                     false

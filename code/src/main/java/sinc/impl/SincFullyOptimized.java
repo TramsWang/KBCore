@@ -63,8 +63,8 @@ public class SincFullyOptimized extends SInC {
     protected final Set<Compound> counterExamples = new HashSet<>();
     protected final Set<Compound> startSet = new HashSet<>();
 
-    public SincFullyOptimized(EvalMetric evalType, String kbFilePath, boolean debug) {
-        super(evalType, kbFilePath, debug);
+    public SincFullyOptimized(int threadNum, int beamWidth, EvalMetric evalType, String kbFilePath, boolean debug) {
+        super(threadNum, beamWidth, evalType, kbFilePath, debug);
     }
 
     /**
@@ -185,34 +185,65 @@ public class SincFullyOptimized extends SInC {
     protected Rule findRuleHandler(Rule startRule) {
         /* 初始化Evaluation Cache */
         Map<Rule, Eval> eval_cache = new HashMap<>();
+        evalRule(startRule, eval_cache);
+
+        /* 初始化beams */
+        Set<Rule> beams = new HashSet<>();
+        beams.add(startRule);
+        PriorityQueue<Rule> optimals = new PriorityQueue<>(
+                Comparator.comparingDouble((Rule r) -> r.getEval().value(evalType)).reversed()
+        );
 
         /* 寻找局部最优（只要进入这个循环，一定有局部最优） */
-        Rule r_max = startRule;
-        evalRule(r_max, eval_cache);
         while (true) {
-            System.out.printf("Extend: %s\n", r_max);
-            Rule r_e_max = r_max;
+            /* 根据当前beam遍历下一轮的所有candidates */
+            PriorityQueue<Rule> candidates = new PriorityQueue<>(
+                    Comparator.comparingDouble((Rule r) -> r.getEval().value(evalType)).reversed()
+            );
+            for (Rule r: beams) {
+                System.out.printf("Extend: %s\n", r);
+                candidates.add(r);
+                Rule r_max = r;
 
-            /* 遍历r_max的扩展邻居 */
-            List<Rule> extensions = findExtension(r_max, eval_cache);
-            for (Rule r_e: extensions) {
-                if (r_e.getEval().value(evalType) > r_e_max.getEval().value(evalType)) {
-                    r_e_max = r_e;
+                /* 遍历r的扩展邻居 */
+                List<Rule> extensions = findExtension(r, eval_cache);
+                for (Rule r_e : extensions) {
+                    if (r_e.getEval().value(evalType) > r.getEval().value(evalType)) {
+                        candidates.add(r_e);
+                        if (r_e.getEval().value(evalType) > r_max.getEval().value(evalType)) {
+                            r_max = r_e;
+                        }
+                    }
+                }
+
+                /* 遍历r的前驱邻居 */
+                List<Rule> origins = findOrigin(r, eval_cache);
+                for (Rule r_o : origins) {
+                    if (r_o.getEval().value(evalType) > r.getEval().value(evalType)) {
+                        candidates.add(r_o);
+                        if (r_o.getEval().value(evalType) > r_max.getEval().value(evalType)) {
+                            r_max = r_o;
+                        }
+                    }
+                }
+
+                if (r_max == r) {
+                    optimals.add(r);
                 }
             }
 
-            /* 遍历r_max的前驱邻居 */
-            List<Rule> origins = findOrigin(r_max, eval_cache);
-            for (Rule r_o: origins) {
-                if (r_o.getEval().value(evalType) > r_e_max.getEval().value(evalType)) {
-                    r_e_max = r_o;
-                }
+            /* 如果有多个optimal，选择最优的返回 */
+            if (!optimals.isEmpty()) {
+                return optimals.peek();
             }
 
-            if (r_e_max == r_max) {
-                return r_max;
+            /* 找出下一轮的beams，同时检查optimal */
+            Set<Rule> new_beams = new HashSet<>();
+            Rule beam_rule;
+            while (new_beams.size() < beamWidth && (null != (beam_rule = candidates.poll()))) {
+                new_beams.add(beam_rule);
             }
-            r_max = r_e_max;
+            beams = new_beams;
         }
     }
 
@@ -718,6 +749,8 @@ public class SincFullyOptimized extends SInC {
 
     public static void main(String[] args) throws IOException {
         SincFullyOptimized compressor = new SincFullyOptimized(
+                1,
+                3,
                 EvalMetric.CompressionCapacity,
                 "FamilyRelationMedium(0.00)(10x).tsv",
                 false
