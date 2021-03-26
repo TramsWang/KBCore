@@ -8,17 +8,15 @@ import sinc.util.MultiSet;
 import sinc.util.PrologModule;
 import sinc.util.SwiplUtil;
 import sinc.util.graph.FeedbackVertexSetSolver;
-import sinc.util.graph.GraphView;
 import sinc.util.graph.Tarjan;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.Integer;
 import java.util.*;
 
-public class SincFullyOptimized extends SInC {
+public class SincBasicWithJPL extends SInC {
 
     protected static final double MIN_HEAD_COVERAGE = 0.05;
     protected static final double MIN_CONSTANT_PROPORTION = 0.25;
@@ -63,7 +61,7 @@ public class SincFullyOptimized extends SInC {
     protected final Set<Compound> counterExamples = new HashSet<>();
     protected final Set<Compound> startSet = new HashSet<>();
 
-    public SincFullyOptimized(int threadNum, int beamWidth, EvalMetric evalType, String kbFilePath, boolean debug) {
+    public SincBasicWithJPL(int threadNum, int beamWidth, EvalMetric evalType, String kbFilePath, boolean debug) {
         super(threadNum, beamWidth, evalType, kbFilePath, debug);
     }
 
@@ -334,6 +332,7 @@ public class SincFullyOptimized extends SInC {
                 bounded_vars_in_head_only.add(bv_head);
             }
         }
+        // TODO: 这里对bounded_vars_in_head_only相关的数量估计是错误的，它不一定能取所有的const
         final double all_entailments = (body_is_not_empty ? head_templates.size() : 1) * Math.pow(
                 constants.size(), free_var_cnt_in_head + bounded_vars_in_head_only.size()
         );
@@ -476,6 +475,7 @@ public class SincFullyOptimized extends SInC {
 
     protected void checkThenAddRule(Collection<Rule> collection, Rule rule, Map<Rule, Eval> evalCache) {
         if (!rule.isInvalid()) {
+            System.out.printf("\tEvaluating: %s\n", rule);
             evalRule(rule, evalCache);
             collection.add(rule);
         }
@@ -748,11 +748,13 @@ public class SincFullyOptimized extends SInC {
     }
 
     public static void main(String[] args) throws IOException {
-        SincFullyOptimized compressor = new SincFullyOptimized(
+        SincBasicWithJPL compressor = new SincBasicWithJPL(
                 1,
                 3,
                 EvalMetric.CompressionCapacity,
-                "FamilyRelationMedium(0.00)(10x).tsv",
+//                "FamilyRelationMedium(0.00)(10x).tsv",
+//                "../RKB/Elti.tsv",
+                "../RKB/StudentLoan.tsv",
                 false
         );
         compressor.run();

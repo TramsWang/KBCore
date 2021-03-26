@@ -1,7 +1,5 @@
 package sinc.impl;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import sinc.common.EvalMetric;
 import sinc.common.Rule;
@@ -17,7 +15,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SincFullyOptimizedTest {
+class SincBasicWithJPLTest {
     static final int CONSTANT_ID = -1;
 
     @Test
@@ -39,7 +37,7 @@ class SincFullyOptimizedTest {
         }
 
         for (EvalMetric eval_type: EvalMetric.values()) {
-            SincFullyOptimized sinc = new SincFullyOptimized(
+            SincBasicWithJPL sinc = new SincBasicWithJPL(
                     1,
                     1,
                     eval_type,
@@ -50,7 +48,7 @@ class SincFullyOptimizedTest {
             assertTrue(sinc.validate());
 
             try {
-                Field hypothesis_field = SincFullyOptimized.class.getDeclaredField("hypothesis");
+                Field hypothesis_field = SincBasicWithJPL.class.getDeclaredField("hypothesis");
                 List<Rule> rules_sinc = (List<Rule>) hypothesis_field.get(sinc);
                 Set<Rule> rule_set_sinc = new HashSet<>(rules_sinc);
                 Set<Rule> rule_set = new HashSet<>();
@@ -101,7 +99,7 @@ class SincFullyOptimizedTest {
         }
 
         for (EvalMetric eval_type: EvalMetric.values()) {
-            SincFullyOptimized sinc = new SincFullyOptimized(
+            SincBasicWithJPL sinc = new SincBasicWithJPL(
                     1,
                     1,
                     eval_type,
@@ -112,7 +110,7 @@ class SincFullyOptimizedTest {
             assertTrue(sinc.validate());
 
             try {
-                Field hypothesis_field = SincFullyOptimized.class.getDeclaredField("hypothesis");
+                Field hypothesis_field = SincBasicWithJPL.class.getDeclaredField("hypothesis");
                 List<Rule> rules_sinc = (List<Rule>) hypothesis_field.get(sinc);
                 Set<Rule> rule_set_sinc = new HashSet<>(rules_sinc);
                 Set<Rule> rule_set = new HashSet<>();
