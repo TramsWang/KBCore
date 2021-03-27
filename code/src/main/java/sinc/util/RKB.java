@@ -60,12 +60,13 @@ public class RKB {
             cmd_builder.append("C0");
             String arg = (null == predicate.args[0]) ? NULL_VALUE : predicate.args[0].name;
             value_builder.append('\'').append(arg).append('\'');
+            constants.add(arg);
             for (int i = 1; i < predicate.arity(); i++) {
                 cmd_builder.append(",C").append(i);
                 arg = (null == predicate.args[i]) ? NULL_VALUE : predicate.args[i].name;
                 value_builder.append(',').append('\'').append(arg).append('\'');
+                constants.add(arg);
             }
-            constants.add(arg);
         }
         cmd_builder.append(") ");
         value_builder.append(");");
@@ -88,7 +89,7 @@ public class RKB {
         return predicates;
     }
 
-    public Eval evalRuleAndGetPosEntails(Rule rule) throws SQLException {
+    public Eval evalRule(Rule rule) throws SQLException {
         /* 统计Head的参数情况，并将其转成带Free Var的Rule */
         Rule rule_with_free_vars = new Rule(rule);
         Predicate head_pred = rule_with_free_vars.getHead();
@@ -190,22 +191,22 @@ public class RKB {
                             if (null == v) {
                                 /* 第一次出现变量，放入map即可 */
                                 if (head_var_ids.contains(argument.id)) {
-                                    select_exp_builder.append(functor_alias).append('.').append(col_idx)
+                                    select_exp_builder.append(functor_alias).append(".C").append(col_idx)
                                             .append(" AS ").append(argument.name).append(',');
                                 }
                                 return new VarIndicator(functor_alias, col_idx);
                             } else {
                                 /* 再次出现变量，添加等价关系 */
-                                where_exp_builder.append(v.functor).append('.').append(v.idx)
-                                        .append('=').append(functor_alias).append('.').append(col_idx)
+                                where_exp_builder.append(v.functor).append(".C").append(v.idx)
+                                        .append('=').append(functor_alias).append(".C").append(col_idx)
                                         .append(" AND ");
                                 return v;
                             }
                         });
                     } else {
                         /* 常量则直接添加等价关系 */
-                        where_exp_builder.append(functor_alias).append('.').append(arg_idx)
-                                .append('=').append(argument.name).append(" AND ");
+                        where_exp_builder.append(functor_alias).append(".C").append(arg_idx)
+                                .append("='").append(argument.name).append("' AND ");
                     }
                 }
             }
@@ -246,8 +247,8 @@ public class RKB {
         Predicate head_pred = rule.getHead();
         String head_functor_alias = head_pred.functor + '0';
         for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
-            select_exp_builder.append(head_functor_alias).append('.').append(arg_idx)
-                    .append(" AS ").append('C').append(arg_idx).append(',');
+            select_exp_builder.append(head_functor_alias).append(".C").append(arg_idx)
+                    .append(" AS C").append(arg_idx).append(',');
         }
 
         for (int pred_idx = 0; pred_idx < rule.length(); pred_idx++) {
@@ -265,16 +266,16 @@ public class RKB {
                                 return new VarIndicator(functor_alias, col_idx);
                             } else {
                                 /* 再次出现变量，添加等价关系 */
-                                where_exp_builder.append(v.functor).append('.').append(v.idx)
-                                        .append('=').append(functor_alias).append('.').append(col_idx)
+                                where_exp_builder.append(v.functor).append(".C").append(v.idx)
+                                        .append('=').append(functor_alias).append(".C").append(col_idx)
                                         .append(" AND ");
                                 return v;
                             }
                         });
                     } else {
                         /* 常量则直接添加等价关系 */
-                        where_exp_builder.append(functor_alias).append('.').append(arg_idx)
-                                .append('=').append(argument.name).append(" AND ");
+                        where_exp_builder.append(functor_alias).append(".C").append(arg_idx)
+                                .append("='").append(argument.name).append("' AND ");
                     }
                 }
             }
@@ -295,11 +296,12 @@ public class RKB {
         } else {
             /* WHERE 语句非空 */
             where_exp_builder.delete(where_exp_builder.length() - 5, where_exp_builder.length());
+            where_exp_builder.append(' ');
             all_pos_entail_sql = select_exp_builder.toString() + from_exp_builder.toString() + where_exp_builder.toString();
         }
 
         /* 排除已经证明过的 */
-        return all_pos_entail_sql + " EXCEPT SELECT * FROM " + head_pred.functor + PROVED_TABLE_NAME_SUFFIX;
+        return all_pos_entail_sql + "EXCEPT SELECT * FROM " + head_pred.functor + PROVED_TABLE_NAME_SUFFIX;
     }
 
     public List<Predicate[]> findGroundings(Rule rule) throws SQLException {

@@ -1,5 +1,7 @@
 package sinc.common;
 
+import java.util.Objects;
+
 public class Eval {
     private static class EvalMin extends Eval {
         private EvalMin() {
@@ -69,5 +71,21 @@ public class Eval {
         return String.format(
                 "(+)%f; (-)%f; |%d|; δ=%f; τ=%f", posCnt, negCnt, ruleSize, compCapacity, compRatio
         );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Eval eval = (Eval) o;
+        return Double.compare(eval.posCnt, posCnt) == 0 &&
+                Double.compare(eval.negCnt, negCnt) == 0 &&
+                Double.compare(eval.allCnt, allCnt) == 0 &&
+                ruleSize == eval.ruleSize;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(posCnt, negCnt, allCnt, ruleSize);
     }
 }

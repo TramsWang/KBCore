@@ -2,36 +2,49 @@ package sinc.util;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import sinc.common.Constant;
+import sinc.common.Eval;
 import sinc.common.Predicate;
+import sinc.common.Rule;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// TODO: 测试dependency
 class RKBTest {
     static final String TABLE_LINKED = "linked";
     static final int ARITY_LINKED = 2;
     static final String TABLE_CONNECTED = "connected";
+    static final String TABLE_CONNECTED_PROVED = TABLE_CONNECTED + RKB.PROVED_TABLE_NAME_SUFFIX;
     static final int ARITY_CONNECTED = 2;
     static final String TABLE_MALE = "male";
+    static final String TABLE_MALE_PROVED = TABLE_MALE + RKB.PROVED_TABLE_NAME_SUFFIX;
     static final int ARITY_MALE = 1;
     static final String TABLE_FEMALE = "female";
+    static final String TABLE_FEMALE_PROVED = TABLE_FEMALE + RKB.PROVED_TABLE_NAME_SUFFIX;
     static final int ARITY_FEMALE = 1;
     static final String TABLE_FATHER = "father";
+    static final String TABLE_FATHER_PROVED = TABLE_FATHER + RKB.PROVED_TABLE_NAME_SUFFIX;
     static final int ARITY_FATHER = 2;
     static final String TABLE_MOTHER = "mother";
     static final int ARITY_MOTHER = 2;
     static final String TABLE_ROAD = "road";
+    static final String TABLE_ROAD_PROVED = TABLE_ROAD + RKB.PROVED_TABLE_NAME_SUFFIX;
     static final int ARITY_ROAD = 5;
     static final String TABLE_ROAD_TYPE = "roadType";
     static final int ARITY_ROAD_TYPE = 3;
     static final int CONSTANT_ID = RKB.CONSTANT_ID;
 
     static final RKB kb;
+    static final Connection connection;
 
     static {
         RKB tmp;
@@ -41,6 +54,16 @@ class RKBTest {
             tmp = null;
         }
         kb = tmp;
+
+        Connection con;
+        try {
+            Field field_connected = RKB.class.getDeclaredField("connection");
+            field_connected.setAccessible(true);
+            con = (Connection) field_connected.get(kb);
+        } catch (Exception e) {
+            con = null;
+        }
+        connection = con;
     }
 
     @BeforeAll
@@ -87,6 +110,16 @@ class RKBTest {
         connected8.args[0] = new Constant(CONSTANT_ID, "e");
         connected8.args[1] = new Constant(CONSTANT_ID, "d");
 
+        Predicate connected_proved1 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected_proved1.args[0] = new Constant(CONSTANT_ID, "a");
+        connected_proved1.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate connected_proved2 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected_proved2.args[0] = new Constant(CONSTANT_ID, "a");
+        connected_proved2.args[1] = new Constant(CONSTANT_ID, "d");
+        Predicate connected_proved3 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected_proved3.args[0] = new Constant(CONSTANT_ID, "f");
+        connected_proved3.args[1] = new Constant(CONSTANT_ID, "d");
+
         kb.addPredicate(linked1);
         kb.addPredicate(linked2);
         kb.addPredicate(linked3);
@@ -99,6 +132,9 @@ class RKBTest {
         kb.addPredicate(connected6);
         kb.addPredicate(connected7);
         kb.addPredicate(connected8);
+        kb.addPredicate(connected_proved1);
+        kb.addPredicate(connected_proved2);
+        kb.addPredicate(connected_proved3);
 
         /* 创建家庭KB */
         kb.defineFunctor(TABLE_MALE, ARITY_MALE);
@@ -267,6 +303,24 @@ class RKBTest {
         connected_set.add(connected8);
         System.out.println(connected8);
         assertEquals(connected_set, kb.listPredicate(TABLE_CONNECTED, ARITY_CONNECTED));
+
+        Predicate connected_proved1 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected_proved1.args[0] = new Constant(CONSTANT_ID, "a");
+        connected_proved1.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate connected_proved2 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected_proved2.args[0] = new Constant(CONSTANT_ID, "a");
+        connected_proved2.args[1] = new Constant(CONSTANT_ID, "d");
+        Predicate connected_proved3 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected_proved3.args[0] = new Constant(CONSTANT_ID, "f");
+        connected_proved3.args[1] = new Constant(CONSTANT_ID, "d");
+        Set<Predicate> connected_proved_set = new HashSet<>();
+        connected_proved_set.add(connected_proved1);
+        System.out.println(connected_proved1);
+        connected_proved_set.add(connected_proved2);
+        System.out.println(connected_proved2);
+        connected_proved_set.add(connected_proved3);
+        System.out.println(connected_proved3);
+        assertEquals(connected_proved_set, kb.listPredicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED));
         System.out.println();
 
         /* 家庭KB */
@@ -388,5 +442,557 @@ class RKBTest {
         System.out.println(road_type4);
         assertEquals(road_type_set, kb.listPredicate(TABLE_ROAD_TYPE, ARITY_ROAD_TYPE));
         System.out.println();
+    }
+
+    @Test
+    void testGraph1() throws Exception {
+        Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
+        assertEquals("(null)" + TABLE_CONNECTED + "(?,?):-", rule.toString());
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertNull(sql4all);
+        assertEquals(
+                String.format(
+                    "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1 " +
+                            "FROM %s AS %s0 " +
+                            "EXCEPT SELECT * FROM %s",
+                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED,
+                        TABLE_CONNECTED_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(6, 784, 0), eval);
+
+        Predicate predicate2 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate2.args[0] = new Constant(CONSTANT_ID, "b");
+        predicate2.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate predicate4 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate4.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate4.args[1] = new Constant(CONSTANT_ID, "a");
+        Predicate predicate5 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate5.args[0] = new Constant(CONSTANT_ID, "a");
+        predicate5.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate predicate6 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate6.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate6.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate predicate7 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate7.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate7.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate predicate8 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate8.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate8.args[1] = new Constant(CONSTANT_ID, "d");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate2);
+        new_pos_preds.add(predicate4);
+        new_pos_preds.add(predicate5);
+        new_pos_preds.add(predicate6);
+        new_pos_preds.add(predicate7);
+        new_pos_preds.add(predicate8);
+        assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED));
+    }
+
+    @Test
+    void testGraph2() throws Exception {
+        Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
+        rule.boundFreeVar2Constant(0, 0, CONSTANT_ID, "e");
+        assertEquals(String.format("(null)%s(e,?):-", TABLE_CONNECTED), rule.toString());
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertNull(sql4all);
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1 " +
+                                "FROM %s AS %s0 " +
+                                "WHERE %s0.C0='e' " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED,
+                        TABLE_CONNECTED, TABLE_CONNECTED_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(4, 28, 1), eval);
+
+        Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate1.args[1] = new Constant(CONSTANT_ID, "a");
+        Predicate predicate2 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate2.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate2.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate predicate3 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate3.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate3.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate predicate4 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate4.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate4.args[1] = new Constant(CONSTANT_ID, "d");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate1);
+        new_pos_preds.add(predicate2);
+        new_pos_preds.add(predicate3);
+        new_pos_preds.add(predicate4);
+        assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED));
+    }
+
+    @Test
+    void testGraph3() throws Exception{
+        Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
+        rule.boundFreeVars2NewVar(0, 0, 0, 1);
+        assertEquals(String.format("(null)%s(X0,X0):-", TABLE_CONNECTED), rule.toString());
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertNull(sql4all);
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1 " +
+                                "FROM %s AS %s0 " +
+                                "WHERE %s0.C0=%s0.C1 " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED,
+                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(0, 28, 1), eval);
+        assertTrue(query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED).isEmpty());
+    }
+
+    @Test
+    void testGraph4() throws Exception {
+        Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
+        rule.addPred(TABLE_LINKED, ARITY_LINKED);
+        rule.boundFreeVars2NewVar(0, 0, 1, 0);
+        rule.boundFreeVars2NewVar(0, 1, 1, 1);
+        assertEquals(
+                String.format("(null)%s(X0,X1):-%s(X0,X1)", TABLE_CONNECTED, TABLE_LINKED),
+                rule.toString()
+        );
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s1.C0 AS X0,%s1.C1 AS X1 " +
+                                "FROM %s AS %s1 ",
+                        TABLE_LINKED, TABLE_LINKED,
+                        TABLE_LINKED, TABLE_LINKED
+                ), sql4all
+        );
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C0=%s1.C0 AND %s0.C1=%s1.C1 " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_CONNECTED, TABLE_CONNECTED,
+                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_LINKED, TABLE_LINKED,
+                        TABLE_CONNECTED, TABLE_LINKED, TABLE_CONNECTED, TABLE_LINKED,
+                        TABLE_CONNECTED_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(2, 4, 2), eval);
+
+        Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "b");
+        predicate1.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate predicate2 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate2.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate2.args[1] = new Constant(CONSTANT_ID, "a");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate1);
+        new_pos_preds.add(predicate2);
+        assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED));
+    }
+
+    @Test
+    void testGraph5() throws Exception {
+        Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
+        rule.addPred(TABLE_LINKED, ARITY_LINKED);
+        rule.boundFreeVars2NewVar(0, 0, 1, 0);
+        rule.addPred(TABLE_LINKED, ARITY_LINKED);
+        rule.boundFreeVars2NewVar(0, 1, 2, 1);
+        rule.boundFreeVars2NewVar(1, 1, 2, 0);
+        assertEquals(
+                String.format("(null)%s(X0,X1):-%s(X0,X2),%s(X2,X1)",
+                        TABLE_CONNECTED, TABLE_LINKED, TABLE_LINKED
+                ), rule.toString()
+        );
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s1.C0 AS X0,%s2.C1 AS X1 " +
+                                "FROM %s AS %s1,%s AS %s2 " +
+                                "WHERE %s1.C1=%s2.C0",
+                        TABLE_LINKED, TABLE_LINKED,
+                        TABLE_LINKED, TABLE_LINKED, TABLE_LINKED, TABLE_LINKED,
+                        TABLE_LINKED, TABLE_LINKED
+                ), sql4all
+        );
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1 " +
+                                "FROM %s AS %s0,%s AS %s1,%s AS %s2 " +
+                                "WHERE %s0.C0=%s1.C0 AND %s1.C1=%s2.C0 AND %s0.C1=%s2.C1 " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_CONNECTED, TABLE_CONNECTED,
+                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_LINKED, TABLE_LINKED, TABLE_LINKED, TABLE_LINKED,
+                        TABLE_CONNECTED, TABLE_LINKED, TABLE_LINKED, TABLE_LINKED, TABLE_CONNECTED, TABLE_LINKED,
+                        TABLE_CONNECTED_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(3, 3, 3), eval);
+
+        Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "a");
+        predicate1.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate predicate2 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate2.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate2.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate predicate3 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate3.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate3.args[1] = new Constant(CONSTANT_ID, "d");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate1);
+        new_pos_preds.add(predicate2);
+        new_pos_preds.add(predicate3);
+        assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED));
+    }
+
+    @Test
+    void testFamily1() throws Exception {
+        Rule rule = new Rule(TABLE_MALE, ARITY_MALE);
+        rule.addPred(TABLE_FATHER, ARITY_FATHER);
+        rule.boundFreeVars2NewVar(0, 0, 1, 0);
+        assertEquals(
+                String.format("(null)%s(X0):-%s(X0,?)",
+                        TABLE_MALE, TABLE_FATHER
+                ), rule.toString()
+        );
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s1.C0 AS X0 " +
+                                "FROM %s AS %s1 ",
+                        TABLE_FATHER,
+                        TABLE_FATHER, TABLE_FATHER
+                ), sql4all
+        );
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C0=%s1.C0 " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_MALE,
+                        TABLE_MALE, TABLE_MALE, TABLE_FATHER, TABLE_FATHER,
+                        TABLE_MALE, TABLE_FATHER,
+                        TABLE_MALE_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(2, 2, 1), eval);
+
+        Predicate predicate1 = new Predicate(TABLE_MALE, ARITY_MALE);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "tom");
+        Predicate predicate2 = new Predicate(TABLE_MALE, ARITY_MALE);
+        predicate2.args[0] = new Constant(CONSTANT_ID, "jerry");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate1);
+        new_pos_preds.add(predicate2);
+        assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_MALE, ARITY_MALE));
+    }
+
+    @Test
+    void testFamily2() throws Exception {
+        Rule rule = new Rule(TABLE_FEMALE, ARITY_FEMALE);
+        rule.addPred(TABLE_MOTHER, ARITY_MOTHER);
+        rule.boundFreeVars2NewVar(0, 0, 1, 0);
+        assertEquals(
+                String.format("(null)%s(X0):-%s(X0,?)",
+                        TABLE_FEMALE, TABLE_MOTHER
+                ), rule.toString()
+        );
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s1.C0 AS X0 " +
+                                "FROM %s AS %s1 ",
+                        TABLE_MOTHER,
+                        TABLE_MOTHER, TABLE_MOTHER
+                ), sql4all
+        );
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C0=%s1.C0 " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_FEMALE,
+                        TABLE_FEMALE, TABLE_FEMALE, TABLE_MOTHER, TABLE_MOTHER,
+                        TABLE_FEMALE, TABLE_MOTHER,
+                        TABLE_FEMALE_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(1, 1, 1), eval);
+
+        Predicate predicate1 = new Predicate(TABLE_FEMALE, ARITY_FEMALE);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "amie");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate1);
+        assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_FEMALE, ARITY_FEMALE));
+    }
+
+    @Test
+    void testFamily3() throws Exception {
+        Rule rule = new Rule(TABLE_MALE, ARITY_MALE);
+        rule.addPred(TABLE_MOTHER, ARITY_MOTHER);
+        rule.boundFreeVars2NewVar(0, 0, 1, 0);
+        assertEquals(
+                String.format("(null)%s(X0):-%s(X0,?)",
+                        TABLE_MALE, TABLE_MOTHER
+                ), rule.toString()
+        );
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s1.C0 AS X0 " +
+                                "FROM %s AS %s1 ",
+                        TABLE_MOTHER,
+                        TABLE_MOTHER, TABLE_MOTHER
+                ), sql4all
+        );
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C0=%s1.C0 " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_MALE,
+                        TABLE_MALE, TABLE_MALE, TABLE_MOTHER, TABLE_MOTHER,
+                        TABLE_MALE, TABLE_MOTHER,
+                        TABLE_MALE_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(0, 1, 1), eval);
+        assertTrue(query4Predicates(sql4new_pos, TABLE_MALE, ARITY_MALE).isEmpty());
+    }
+
+    @Test
+    void testFamily4() throws Exception {
+        Rule rule = new Rule(TABLE_MALE, ARITY_MALE);
+        rule.addPred(TABLE_FATHER, ARITY_FATHER);
+        rule.boundFreeVars2NewVar(0, 0, 1, 0);
+        rule.addPred(TABLE_FATHER, ARITY_FATHER);
+        rule.boundFreeVars2NewVar(1, 1, 2, 0);
+        assertEquals(
+                String.format("(null)%s(X0):-%s(X0,X1),%s(X1,?)",
+                        TABLE_MALE, TABLE_FATHER, TABLE_FATHER
+                ), rule.toString()
+        );
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s1.C0 AS X0 " +
+                                "FROM %s AS %s1,%s AS %s2 " +
+                                "WHERE %s1.C1=%s2.C0",
+                        TABLE_FATHER,
+                        TABLE_FATHER, TABLE_FATHER, TABLE_FATHER, TABLE_FATHER,
+                        TABLE_FATHER, TABLE_FATHER
+                ), sql4all
+        );
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0 " +
+                                "FROM %s AS %s0,%s AS %s1,%s AS %s2 " +
+                                "WHERE %s0.C0=%s1.C0 AND %s1.C1=%s2.C0 " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_MALE,
+                        TABLE_MALE, TABLE_MALE, TABLE_FATHER, TABLE_FATHER, TABLE_FATHER, TABLE_FATHER,
+                        TABLE_MALE, TABLE_FATHER, TABLE_FATHER, TABLE_FATHER,
+                        TABLE_MALE_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(1, 1, 2), eval);
+
+        Predicate predicate1 = new Predicate(TABLE_MALE, ARITY_MALE);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "tom");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate1);
+        assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_MALE, ARITY_MALE));
+    }
+
+    @Test
+    void testFamily5() throws Exception {
+        Rule rule = new Rule(TABLE_FATHER, ARITY_FATHER);
+        rule.addPred(TABLE_MOTHER, ARITY_MOTHER);
+        rule.boundFreeVars2NewVar(0, 1, 1, 1);
+        assertEquals(
+                String.format("(null)%s(?,X0):-%s(?,X0)",
+                        TABLE_FATHER, TABLE_MOTHER
+                ), rule.toString()
+        );
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s1.C1 AS X0 " +
+                                "FROM %s AS %s1 ",
+                        TABLE_MOTHER,
+                        TABLE_MOTHER, TABLE_MOTHER
+                ), sql4all
+        );
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C1=%s1.C1 " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_FATHER, TABLE_FATHER,
+                        TABLE_FATHER, TABLE_FATHER, TABLE_MOTHER, TABLE_MOTHER,
+                        TABLE_FATHER, TABLE_MOTHER,
+                        TABLE_FATHER_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(1, 56, 1), eval);
+
+        Predicate predicate1 = new Predicate(TABLE_FATHER, ARITY_FATHER);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "jerry");
+        predicate1.args[1] = new Constant(CONSTANT_ID, "laura");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate1);
+        assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_FATHER, ARITY_FATHER));
+    }
+
+    @Test
+    void testRoad1() throws Exception {
+        Rule rule = new Rule(TABLE_ROAD, ARITY_ROAD);
+        rule.boundFreeVars2NewVar(0, 1, 0, 3);
+        rule.boundFreeVars2NewVar(0, 2, 0, 4);
+        assertEquals(String.format("(null)%s(?,X0,X1,X0,X1):-", TABLE_ROAD), rule.toString());
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertNull(sql4all);
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1,%s0.C2 AS C2,%s0.C3 AS C3,%s0.C4 AS C4 " +
+                                "FROM %s AS %s0 " +
+                                "WHERE %s0.C1=%s0.C3 AND %s0.C2=%s0.C4 " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD,
+                        TABLE_ROAD, TABLE_ROAD,
+                        TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD,
+                        TABLE_ROAD_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(1, 21952, 2), eval);
+
+        Predicate predicate1 = new Predicate(TABLE_ROAD, ARITY_ROAD);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "上海外环");
+        predicate1.args[1] = new Constant(CONSTANT_ID, "上海");
+        predicate1.args[2] = new Constant(CONSTANT_ID, "南");
+        predicate1.args[3] = new Constant(CONSTANT_ID, "上海");
+        predicate1.args[4] = new Constant(CONSTANT_ID, "南");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate1);
+        assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_ROAD, ARITY_ROAD));
+    }
+
+    @Test
+    void testRoad2() throws Exception {
+        Rule rule = new Rule(TABLE_ROAD, ARITY_ROAD);
+        rule.boundFreeVars2NewVar(0, 1, 0, 3);
+        rule.boundFreeVars2NewVar(0, 2, 0, 4);
+        rule.addPred(TABLE_ROAD_TYPE, ARITY_ROAD_TYPE);
+        rule.boundFreeVars2NewVar(0, 0, 1, 0);
+        rule.boundFreeVar2Constant(1, 2, CONSTANT_ID, "环");
+        assertEquals(
+                String.format(
+                        "(null)%s(X2,X0,X1,X0,X1):-%s(X2,?,环)", TABLE_ROAD, TABLE_ROAD_TYPE
+                ), rule.toString()
+        );
+        String sql4all = getSql4AllEntailments(rule);
+        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        Eval eval = kb.evalRule(rule);
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s1.C0 AS X2 " +
+                                "FROM %s AS %s1 " +
+                                "WHERE %s1.C2='环'",
+                        TABLE_ROAD_TYPE,
+                        TABLE_ROAD_TYPE, TABLE_ROAD_TYPE,
+                        TABLE_ROAD_TYPE
+                ), sql4all
+        );
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1,%s0.C2 AS C2,%s0.C3 AS C3,%s0.C4 AS C4 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C1=%s0.C3 AND %s0.C2=%s0.C4 AND %s0.C0=%s1.C0 AND %s1.C2='环' " +
+                                "EXCEPT SELECT * FROM %s",
+                        TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD,
+                        TABLE_ROAD, TABLE_ROAD, TABLE_ROAD_TYPE, TABLE_ROAD_TYPE,
+                        TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD_TYPE, TABLE_ROAD_TYPE,
+                        TABLE_ROAD_PROVED
+                ), sql4new_pos
+        );
+        assertEquals(new Eval(1, 1568, 4), eval);
+
+        Predicate predicate1 = new Predicate(TABLE_ROAD, ARITY_ROAD);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "上海外环");
+        predicate1.args[1] = new Constant(CONSTANT_ID, "上海");
+        predicate1.args[2] = new Constant(CONSTANT_ID, "南");
+        predicate1.args[3] = new Constant(CONSTANT_ID, "上海");
+        predicate1.args[4] = new Constant(CONSTANT_ID, "南");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate1);
+        assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_ROAD, ARITY_ROAD));
+
+    }
+
+    private String getSql4AllEntailments(Rule rule) throws Exception {
+        Method mtd = RKB.class.getDeclaredMethod("parseSql4AllEntailments", Rule.class);
+        mtd.setAccessible(true);
+        return (String) mtd.invoke(kb, rule);
+    }
+
+    private String getSql4UnprovedPosEntailments(Rule rule) throws Exception {
+        Method mtd = RKB.class.getDeclaredMethod("parseSql4UnprovedPosEntailments", Rule.class);
+        mtd.setAccessible(true);
+        return (String) mtd.invoke(kb, rule);
+    }
+
+    private Set<Predicate> query4Predicates(String sql, String functor, int arity) throws Exception {
+        Statement statement = connection.createStatement();
+        ResultSet result_set = statement.executeQuery(sql);
+        Set<Predicate> result = new HashSet<>();
+        while (result_set.next()) {
+            Predicate predicate = new Predicate(functor, arity);
+            for (int i = 0; i < arity; i++) {
+                predicate.args[i] = new Constant(CONSTANT_ID, result_set.getString("C" + i));
+            }
+            result.add(predicate);
+        }
+        return result;
     }
 }
