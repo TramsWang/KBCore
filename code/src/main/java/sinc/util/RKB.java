@@ -294,7 +294,10 @@ public class RKB {
         return all_pos_entail_sql + "EXCEPT SELECT * FROM " + head_pred.functor + PROVED_TABLE_NAME_SUFFIX;
     }
 
-    public List<Predicate[]> findGroundingsAndSetAsProved(Rule rule) throws SQLException {
+    public List<Predicate[]> findGroundings(Rule rule) throws SQLException {
+        /* 后续的操作会改动rule中的参数，首先做一个copy */
+        rule = new Rule(rule);
+
         List<Predicate[]> groundings = new ArrayList<>();
         Statement statement = connection.createStatement();
         ResultSet result_set = statement.executeQuery(parseSql4RuleGroundings(rule));
@@ -308,7 +311,18 @@ public class RKB {
         return groundings;
     }
 
+    public void addNewProofs(List<Predicate[]> groundings) throws SQLException {
+        for (Predicate[] grounding: groundings) {
+            Predicate proved_predicate = new Predicate(
+                    grounding[0].functor + PROVED_TABLE_NAME_SUFFIX, grounding[0].arity()
+            );
+            System.arraycopy(grounding[0].args, 0, proved_predicate.args, 0, grounding[0].arity());
+            addPredicate(proved_predicate);
+        }
+    }
+
     public List<Predicate> findCounterExamples(Rule rule) throws SQLException {
+        /* TODO: 这里的实现还有问题，暂时搁置 */
         List<Predicate> counter_examples = new ArrayList<>();
         Predicate head_pred = rule.getHead();
         Statement statement = connection.createStatement();
@@ -325,6 +339,8 @@ public class RKB {
         final StringBuilder from_exp_builder = new StringBuilder("FROM ");  // length=5
         final StringBuilder where_exp_builder = new StringBuilder("WHERE ");  // length=6
         final int original_where_length = where_exp_builder.length();
+        final StringBuilder group_by_exp_builder = new StringBuilder("GROUP BY ");
+        final int original_group_by_length = group_by_exp_builder.length();
         Map<Integer, ArgIndicator> first_var_info_map = new HashMap<>();
         int free_var_id = rule.usedBoundedVars();
 
@@ -361,13 +377,8 @@ public class RKB {
                     Variable free_var = new Variable(free_var_id);
                     predicate.args[arg_idx] = free_var;
                     free_var_id++;
-                    select_exp_builder.append(functor_alias).append(".C").append(col_idx);
-                    if (1 <= pred_idx) {
-                        /* Body中的自由变量取一个值就可以 */
-                        select_exp_builder.append(" AS FIRST_VALUE(").append(free_var.name).append("),");
-                    } else {
-                        select_exp_builder.append(" AS ").append(free_var.name).append(',');
-                    }
+                    select_exp_builder.append(functor_alias).append(".C").append(col_idx)
+                            .append(" AS ").append(free_var.name).append(',');
                 }
             }
         }
@@ -377,17 +388,35 @@ public class RKB {
             select_exp_builder.append(rule.getHead().functor).append("0.C0 AS C0,");
         }
 
+        /* 对Head中的变量进行group */
+        Predicate head_pred = rule.getHead();
+        Set<Integer> head_var_ids = new HashSet<>();
+        for (Argument argument: head_pred.args) {
+            if (argument.isVar && head_var_ids.add(argument.id)) {
+                group_by_exp_builder.append(argument.name).append(',');
+            }
+        }
+        if (original_group_by_length >= group_by_exp_builder.length()) {
+            /* head中没有变量，不需要group by语句 */
+            group_by_exp_builder.setLength(0);
+        } else {
+            /* 调整多余标点 */
+            group_by_exp_builder.deleteCharAt(group_by_exp_builder.length() - 1);
+        }
+
         /* 删除多余的标点 */
         select_exp_builder.deleteCharAt(select_exp_builder.length() - 1).append(' ');
         from_exp_builder.deleteCharAt(from_exp_builder.length() - 1).append(' ');
         if (original_where_length >= where_exp_builder.length()) {
             /* WHERE 语句为空 */
-            return select_exp_builder.toString() + from_exp_builder.toString();
+            return select_exp_builder.toString() + from_exp_builder.toString() +
+                    group_by_exp_builder.toString();
         } else {
             /* WHERE 语句非空 */
-            where_exp_builder.delete(where_exp_builder.length() - 5, where_exp_builder.length());
-            where_exp_builder.append(' ');
-            return select_exp_builder.toString() + from_exp_builder.toString() + where_exp_builder.toString();
+            where_exp_builder.delete(where_exp_builder.length() - 5, where_exp_builder.length())
+                    .append(' ');
+            return select_exp_builder.toString() + from_exp_builder.toString() +
+                    where_exp_builder.toString() + group_by_exp_builder.toString();
         }
     }
 

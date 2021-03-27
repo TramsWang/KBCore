@@ -13,12 +13,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: 测试dependency
+// TODO: 测试Counter Examples
 class RKBTest {
     static final String TABLE_LINKED = "linked";
     static final int ARITY_LINKED = 2;
@@ -464,9 +463,15 @@ class RKBTest {
         );
         assertEquals(new Eval(6, 784, 0), eval);
 
+        Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "a");
+        predicate1.args[1] = new Constant(CONSTANT_ID, "b");
         Predicate predicate2 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
         predicate2.args[0] = new Constant(CONSTANT_ID, "b");
         predicate2.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate predicate3 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate3.args[0] = new Constant(CONSTANT_ID, "a");
+        predicate3.args[1] = new Constant(CONSTANT_ID, "d");
         Predicate predicate4 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
         predicate4.args[0] = new Constant(CONSTANT_ID, "e");
         predicate4.args[1] = new Constant(CONSTANT_ID, "a");
@@ -490,6 +495,27 @@ class RKBTest {
         new_pos_preds.add(predicate7);
         new_pos_preds.add(predicate8);
         assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED));
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X0,%s0.C1 AS X1 " +
+                                "FROM %s AS %s0 " +
+                                "GROUP BY X0,X1",
+                        TABLE_CONNECTED, TABLE_CONNECTED,
+                        TABLE_CONNECTED, TABLE_CONNECTED
+                ), getSql4Groundings(rule)
+        );
+        Set<Predicate[]> grounding_set = new HashSet<>();
+        grounding_set.add(new Predicate[]{predicate1});
+        grounding_set.add(new Predicate[]{predicate2});
+        grounding_set.add(new Predicate[]{predicate3});
+        grounding_set.add(new Predicate[]{predicate4});
+        grounding_set.add(new Predicate[]{predicate5});
+        grounding_set.add(new Predicate[]{predicate6});
+        grounding_set.add(new Predicate[]{predicate7});
+        grounding_set.add(new Predicate[]{predicate8});
+        assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
+//        assertEquals(778, kb.findCounterExamples(rule).size());
     }
 
     @Test
@@ -532,6 +558,25 @@ class RKBTest {
         new_pos_preds.add(predicate3);
         new_pos_preds.add(predicate4);
         assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED));
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C1 AS X0 " +
+                                "FROM %s AS %s0 " +
+                                "WHERE %s0.C0='e' " +
+                                "GROUP BY X0",
+                        TABLE_CONNECTED,
+                        TABLE_CONNECTED, TABLE_CONNECTED,
+                        TABLE_CONNECTED
+                ), getSql4Groundings(rule)
+        );
+        Set<Predicate[]> grounding_set = new HashSet<>();
+        grounding_set.add(new Predicate[]{predicate1});
+        grounding_set.add(new Predicate[]{predicate2});
+        grounding_set.add(new Predicate[]{predicate3});
+        grounding_set.add(new Predicate[]{predicate4});
+        assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
+//        assertEquals(24, kb.findCounterExamples(rule).size());
     }
 
     @Test
@@ -556,6 +601,20 @@ class RKBTest {
         );
         assertEquals(new Eval(0, 28, 1), eval);
         assertTrue(query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED).isEmpty());
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X0 " +
+                                "FROM %s AS %s0 " +
+                                "WHERE %s0.C0=%s0.C1 " +
+                                "GROUP BY X0",
+                        TABLE_CONNECTED,
+                        TABLE_CONNECTED, TABLE_CONNECTED,
+                        TABLE_CONNECTED, TABLE_CONNECTED
+                ), getSql4Groundings(rule)
+        );
+        assertTrue(kb.findGroundings(rule).isEmpty());
+//        assertEquals(28, kb.findCounterExamples(rule).size());
     }
 
     @Test
@@ -595,15 +654,53 @@ class RKBTest {
         assertEquals(new Eval(2, 4, 2), eval);
 
         Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
-        predicate1.args[0] = new Constant(CONSTANT_ID, "b");
-        predicate1.args[1] = new Constant(CONSTANT_ID, "c");
+        predicate1.args[0] = new Constant(CONSTANT_ID, "a");
+        predicate1.args[1] = new Constant(CONSTANT_ID, "b");
         Predicate predicate2 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
-        predicate2.args[0] = new Constant(CONSTANT_ID, "e");
-        predicate2.args[1] = new Constant(CONSTANT_ID, "a");
+        predicate2.args[0] = new Constant(CONSTANT_ID, "b");
+        predicate2.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate predicate3 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate3.args[0] = new Constant(CONSTANT_ID, "a");
+        predicate3.args[1] = new Constant(CONSTANT_ID, "d");
+        Predicate predicate4 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate4.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate4.args[1] = new Constant(CONSTANT_ID, "a");
         Set<Predicate> new_pos_preds = new HashSet<>();
-        new_pos_preds.add(predicate1);
         new_pos_preds.add(predicate2);
+        new_pos_preds.add(predicate4);
         assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED));
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X0,%s0.C1 AS X1 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C0=%s1.C0 AND %s0.C1=%s1.C1 " +
+                                "GROUP BY X0,X1",
+                        TABLE_CONNECTED, TABLE_CONNECTED,
+                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_LINKED, TABLE_LINKED,
+                        TABLE_CONNECTED, TABLE_LINKED, TABLE_CONNECTED, TABLE_LINKED
+                ), getSql4Groundings(rule)
+        );
+        Predicate body_pred1 = new Predicate(TABLE_LINKED, ARITY_LINKED);
+        body_pred1.args[0] = new Constant(CONSTANT_ID, "a");
+        body_pred1.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate body_pred2 = new Predicate(TABLE_LINKED, ARITY_LINKED);
+        body_pred2.args[0] = new Constant(CONSTANT_ID, "b");
+        body_pred2.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate body_pred3 = new Predicate(TABLE_LINKED, ARITY_LINKED);
+        body_pred3.args[0] = new Constant(CONSTANT_ID, "a");
+        body_pred3.args[1] = new Constant(CONSTANT_ID, "d");
+        Predicate body_pred4 = new Predicate(TABLE_LINKED, ARITY_LINKED);
+        body_pred4.args[0] = new Constant(CONSTANT_ID, "e");
+        body_pred4.args[1] = new Constant(CONSTANT_ID, "a");
+
+        Set<Predicate[]> grounding_set = new HashSet<>();
+        grounding_set.add(new Predicate[]{predicate1, body_pred1});
+        grounding_set.add(new Predicate[]{predicate2, body_pred2});
+        grounding_set.add(new Predicate[]{predicate3, body_pred3});
+        grounding_set.add(new Predicate[]{predicate4, body_pred4});
+        assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
+//        assertTrue(kb.findCounterExamples(rule).isEmpty());
     }
 
     @Test
@@ -661,6 +758,37 @@ class RKBTest {
         new_pos_preds.add(predicate2);
         new_pos_preds.add(predicate3);
         assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED));
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X0,%s0.C1 AS X1,%s1.C1 AS X2 " +
+                                "FROM %s AS %s0,%s AS %s1,%s AS %s2 " +
+                                "WHERE %s0.C0=%s1.C0 AND %s1.C1=%s2.C0 AND %s0.C1=%s2.C1 " +
+                                "GROUP BY X0,X1",
+                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_LINKED,
+                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_LINKED, TABLE_LINKED, TABLE_LINKED, TABLE_LINKED,
+                        TABLE_CONNECTED, TABLE_LINKED, TABLE_LINKED, TABLE_LINKED, TABLE_CONNECTED, TABLE_LINKED
+                ), getSql4Groundings(rule)
+        );
+        Predicate body_pred1 = new Predicate(TABLE_LINKED, ARITY_LINKED);
+        body_pred1.args[0] = new Constant(CONSTANT_ID, "a");
+        body_pred1.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate body_pred2 = new Predicate(TABLE_LINKED, ARITY_LINKED);
+        body_pred2.args[0] = new Constant(CONSTANT_ID, "b");
+        body_pred2.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate body_pred3 = new Predicate(TABLE_LINKED, ARITY_LINKED);
+        body_pred3.args[0] = new Constant(CONSTANT_ID, "a");
+        body_pred3.args[1] = new Constant(CONSTANT_ID, "d");
+        Predicate body_pred4 = new Predicate(TABLE_LINKED, ARITY_LINKED);
+        body_pred4.args[0] = new Constant(CONSTANT_ID, "e");
+        body_pred4.args[1] = new Constant(CONSTANT_ID, "a");
+
+        Set<Predicate[]> grounding_set = new HashSet<>();
+        grounding_set.add(new Predicate[]{predicate1, body_pred1, body_pred2});
+        grounding_set.add(new Predicate[]{predicate2, body_pred4, body_pred1});
+        grounding_set.add(new Predicate[]{predicate3, body_pred4, body_pred3});
+        assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
+//        assertTrue(kb.findCounterExamples(rule).isEmpty());
     }
 
     @Test
@@ -707,6 +835,29 @@ class RKBTest {
         new_pos_preds.add(predicate1);
         new_pos_preds.add(predicate2);
         assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_MALE, ARITY_MALE));
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X0,%s1.C1 AS X1 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C0=%s1.C0 " +
+                                "GROUP BY X0",
+                        TABLE_MALE, TABLE_FATHER,
+                        TABLE_MALE, TABLE_MALE, TABLE_FATHER, TABLE_FATHER,
+                        TABLE_MALE, TABLE_FATHER
+                ), getSql4Groundings(rule)
+        );
+        Predicate body_pred1 = new Predicate(TABLE_FATHER, ARITY_FATHER);
+        body_pred1.args[0] = new Constant(CONSTANT_ID, "tom");
+        body_pred1.args[1] = new Constant(CONSTANT_ID, "jerry");
+        Predicate body_pred2 = new Predicate(TABLE_FATHER, ARITY_FATHER);
+        body_pred2.args[0] = new Constant(CONSTANT_ID, "jerry");
+        body_pred2.args[1] = new Constant(CONSTANT_ID, "laura");
+
+        Set<Predicate[]> grounding_set = new HashSet<>();
+        grounding_set.add(new Predicate[]{predicate1, body_pred1});
+        grounding_set.add(new Predicate[]{predicate2, body_pred2});
+        assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
     }
 
     @Test
@@ -750,6 +901,40 @@ class RKBTest {
         Set<Predicate> new_pos_preds = new HashSet<>();
         new_pos_preds.add(predicate1);
         assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_FEMALE, ARITY_FEMALE));
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X0,%s1.C1 AS X1 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C0=%s1.C0 " +
+                                "GROUP BY X0",
+                        TABLE_FEMALE, TABLE_MOTHER,
+                        TABLE_FEMALE, TABLE_FEMALE, TABLE_MOTHER, TABLE_MOTHER,
+                        TABLE_FEMALE, TABLE_MOTHER
+                ), getSql4Groundings(rule)
+        );
+        Predicate body_pred1 = new Predicate(TABLE_MOTHER, ARITY_MOTHER);
+        body_pred1.args[0] = new Constant(CONSTANT_ID, "amie");
+        body_pred1.args[1] = new Constant(CONSTANT_ID, "laura");
+        Predicate body_pred2 = new Predicate(TABLE_MOTHER, ARITY_MOTHER);
+        body_pred2.args[0] = new Constant(CONSTANT_ID, "amie");
+        body_pred2.args[1] = new Constant(CONSTANT_ID, "bob");
+
+        Set<Predicate[]> grounding_set = new HashSet<>();
+        grounding_set.add(new Predicate[]{predicate1, body_pred1});
+        grounding_set.add(new Predicate[]{predicate1, body_pred2});
+        Set<Predicate[]> actual_grounding_set = new HashSet<>(kb.findGroundings(rule));
+        assertEquals(1, actual_grounding_set.size());
+        for (Predicate[] grounding: actual_grounding_set) {
+            boolean found = false;
+            for (Predicate[] posible_grounding: grounding_set) {
+                if (Arrays.equals(posible_grounding, grounding)) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue(found);
+        }
     }
 
     @Test
@@ -788,6 +973,19 @@ class RKBTest {
         );
         assertEquals(new Eval(0, 1, 1), eval);
         assertTrue(query4Predicates(sql4new_pos, TABLE_MALE, ARITY_MALE).isEmpty());
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X0,%s1.C1 AS X1 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C0=%s1.C0 " +
+                                "GROUP BY X0",
+                        TABLE_MALE, TABLE_MOTHER,
+                        TABLE_MALE, TABLE_MALE, TABLE_MOTHER, TABLE_MOTHER,
+                        TABLE_MALE, TABLE_MOTHER
+                ), getSql4Groundings(rule)
+        );
+        assertTrue(kb.findGroundings(rule).isEmpty());
     }
 
     @Test
@@ -835,6 +1033,28 @@ class RKBTest {
         Set<Predicate> new_pos_preds = new HashSet<>();
         new_pos_preds.add(predicate1);
         assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_MALE, ARITY_MALE));
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X0,%s1.C1 AS X1,%s2.C1 AS X2 " +
+                                "FROM %s AS %s0,%s AS %s1,%s AS %s2 " +
+                                "WHERE %s0.C0=%s1.C0 AND %s1.C1=%s2.C0 " +
+                                "GROUP BY X0",
+                        TABLE_MALE, TABLE_FATHER, TABLE_FATHER,
+                        TABLE_MALE, TABLE_MALE, TABLE_FATHER, TABLE_FATHER, TABLE_FATHER, TABLE_FATHER,
+                        TABLE_MALE, TABLE_FATHER, TABLE_FATHER, TABLE_FATHER
+                ), getSql4Groundings(rule)
+        );
+        Predicate body_pred1 = new Predicate(TABLE_FATHER, ARITY_FATHER);
+        body_pred1.args[0] = new Constant(CONSTANT_ID, "tom");
+        body_pred1.args[1] = new Constant(CONSTANT_ID, "jerry");
+        Predicate body_pred2 = new Predicate(TABLE_FATHER, ARITY_FATHER);
+        body_pred2.args[0] = new Constant(CONSTANT_ID, "jerry");
+        body_pred2.args[1] = new Constant(CONSTANT_ID, "laura");
+
+        Set<Predicate[]> grounding_set = new HashSet<>();
+        grounding_set.add(new Predicate[]{predicate1, body_pred1, body_pred2});
+        assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
     }
 
     @Test
@@ -879,6 +1099,25 @@ class RKBTest {
         Set<Predicate> new_pos_preds = new HashSet<>();
         new_pos_preds.add(predicate1);
         assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_FATHER, ARITY_FATHER));
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X1,%s0.C1 AS X0,%s1.C0 AS X2 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C1=%s1.C1 " +
+                                "GROUP BY X1,X0",
+                        TABLE_FATHER, TABLE_FATHER, TABLE_MOTHER,
+                        TABLE_FATHER, TABLE_FATHER, TABLE_MOTHER, TABLE_MOTHER,
+                        TABLE_FATHER, TABLE_MOTHER
+                ), getSql4Groundings(rule)
+        );
+        Predicate body_pred1 = new Predicate(TABLE_MOTHER, ARITY_MOTHER);
+        body_pred1.args[0] = new Constant(CONSTANT_ID, "amie");
+        body_pred1.args[1] = new Constant(CONSTANT_ID, "laura");
+
+        Set<Predicate[]> grounding_set = new HashSet<>();
+        grounding_set.add(new Predicate[]{predicate1, body_pred1});
+        assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
     }
 
     @Test
@@ -915,6 +1154,22 @@ class RKBTest {
         Set<Predicate> new_pos_preds = new HashSet<>();
         new_pos_preds.add(predicate1);
         assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_ROAD, ARITY_ROAD));
+
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X2,%s0.C1 AS X0,%s0.C2 AS X1 " +
+                                "FROM %s AS %s0 " +
+                                "WHERE %s0.C1=%s0.C3 AND %s0.C2=%s0.C4 " +
+                                "GROUP BY X2,X0,X1",
+                        TABLE_ROAD, TABLE_ROAD, TABLE_ROAD,
+                        TABLE_ROAD, TABLE_ROAD,
+                        TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD
+                ), getSql4Groundings(rule)
+        );
+
+        Set<Predicate[]> grounding_set = new HashSet<>();
+        grounding_set.add(new Predicate[]{predicate1});
+        assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
     }
 
     @Test
@@ -968,6 +1223,32 @@ class RKBTest {
         new_pos_preds.add(predicate1);
         assertEquals(new_pos_preds, query4Predicates(sql4new_pos, TABLE_ROAD, ARITY_ROAD));
 
+        assertEquals(
+                String.format(
+                        "SELECT DISTINCT %s0.C0 AS X2,%s0.C1 AS X0,%s0.C2 AS X1,%s1.C1 AS X3 " +
+                                "FROM %s AS %s0,%s AS %s1 " +
+                                "WHERE %s0.C1=%s0.C3 AND %s0.C2=%s0.C4 AND %s0.C0=%s1.C0 AND %s1.C2='环' " +
+                                "GROUP BY X2,X0,X1",
+                        TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD_TYPE,
+                        TABLE_ROAD, TABLE_ROAD, TABLE_ROAD_TYPE, TABLE_ROAD_TYPE,
+                        TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD, TABLE_ROAD_TYPE, TABLE_ROAD_TYPE
+                ), getSql4Groundings(rule)
+        );
+
+        Predicate body_pred1 = new Predicate(TABLE_ROAD_TYPE, ARITY_ROAD_TYPE);
+        body_pred1.args[0] = new Constant(CONSTANT_ID, "上海外环");
+        body_pred1.args[1] = new Constant(CONSTANT_ID, "公路");
+        body_pred1.args[2] = new Constant(CONSTANT_ID, "环");
+
+        Set<Predicate[]> grounding_set = new HashSet<>();
+        grounding_set.add(new Predicate[]{predicate1, body_pred1});
+        assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
+    }
+
+    @Test
+    void testUpdateProof() throws Exception {
+        /* TODO: Implement Here */
+        fail();
     }
 
     private String getSql4AllEntailments(Rule rule) throws Exception {
@@ -978,6 +1259,12 @@ class RKBTest {
 
     private String getSql4UnprovedPosEntailments(Rule rule) throws Exception {
         Method mtd = RKB.class.getDeclaredMethod("parseSql4UnprovedPosEntailments", Rule.class);
+        mtd.setAccessible(true);
+        return (String) mtd.invoke(kb, rule);
+    }
+
+    private String getSql4Groundings(Rule rule) throws Exception {
+        Method mtd = RKB.class.getDeclaredMethod("parseSql4RuleGroundings", Rule.class);
         mtd.setAccessible(true);
         return (String) mtd.invoke(kb, rule);
     }
@@ -994,5 +1281,19 @@ class RKBTest {
             result.add(predicate);
         }
         return result;
+    }
+
+    <T> void assertEqualOfArraySets(Set<T[]> expected, Set<T[]> actual) {
+        assertEquals(expected.size(), actual.size());
+        for (T[] expected_arr: expected) {
+            boolean found = false;
+            for (T[] actual_arr: actual) {
+                if (Arrays.equals(expected_arr, actual_arr)) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue(found);
+        }
     }
 }
