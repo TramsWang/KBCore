@@ -1,7 +1,6 @@
 package sinc.util;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import sinc.common.Constant;
 import sinc.common.Eval;
 import sinc.common.Predicate;
@@ -17,7 +16,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: 测试Counter Examples
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RKBTest {
     static final String TABLE_LINKED = "linked";
     static final int ARITY_LINKED = 2;
@@ -234,6 +233,7 @@ class RKBTest {
     }
 
     @Test
+    @Order(1)
     void testKBCreation() throws SQLException {
         /* 有向图KB */
         System.out.println("有向图KB");
@@ -444,6 +444,7 @@ class RKBTest {
     }
 
     @Test
+    @Order(2)
     void testGraph1() throws Exception {
         Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
         assertEquals("(null)" + TABLE_CONNECTED + "(?,?):-", rule.toString());
@@ -515,10 +516,12 @@ class RKBTest {
         grounding_set.add(new Predicate[]{predicate7});
         grounding_set.add(new Predicate[]{predicate8});
         assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
-//        assertEquals(778, kb.findCounterExamples(rule).size());
+
+        assertEquals(776, kb.findCounterExamples(rule).size());
     }
 
     @Test
+    @Order(3)
     void testGraph2() throws Exception {
         Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
         rule.boundFreeVar2Constant(0, 0, CONSTANT_ID, "e");
@@ -576,10 +579,12 @@ class RKBTest {
         grounding_set.add(new Predicate[]{predicate3});
         grounding_set.add(new Predicate[]{predicate4});
         assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
-//        assertEquals(24, kb.findCounterExamples(rule).size());
+
+        assertEquals(24, kb.findCounterExamples(rule).size());
     }
 
     @Test
+    @Order(4)
     void testGraph3() throws Exception{
         Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
         rule.boundFreeVars2NewVar(0, 0, 0, 1);
@@ -614,10 +619,12 @@ class RKBTest {
                 ), getSql4Groundings(rule)
         );
         assertTrue(kb.findGroundings(rule).isEmpty());
-//        assertEquals(28, kb.findCounterExamples(rule).size());
+
+        assertEquals(28, kb.findCounterExamples(rule).size());
     }
 
     @Test
+    @Order(5)
     void testGraph4() throws Exception {
         Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
         rule.addPred(TABLE_LINKED, ARITY_LINKED);
@@ -700,10 +707,12 @@ class RKBTest {
         grounding_set.add(new Predicate[]{predicate3, body_pred3});
         grounding_set.add(new Predicate[]{predicate4, body_pred4});
         assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
-//        assertTrue(kb.findCounterExamples(rule).isEmpty());
+
+        assertTrue(kb.findCounterExamples(rule).isEmpty());
     }
 
     @Test
+    @Order(6)
     void testGraph5() throws Exception {
         Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
         rule.addPred(TABLE_LINKED, ARITY_LINKED);
@@ -788,10 +797,12 @@ class RKBTest {
         grounding_set.add(new Predicate[]{predicate2, body_pred4, body_pred1});
         grounding_set.add(new Predicate[]{predicate3, body_pred4, body_pred3});
         assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
-//        assertTrue(kb.findCounterExamples(rule).isEmpty());
+
+        assertTrue(kb.findCounterExamples(rule).isEmpty());
     }
 
     @Test
+    @Order(7)
     void testFamily1() throws Exception {
         Rule rule = new Rule(TABLE_MALE, ARITY_MALE);
         rule.addPred(TABLE_FATHER, ARITY_FATHER);
@@ -858,9 +869,12 @@ class RKBTest {
         grounding_set.add(new Predicate[]{predicate1, body_pred1});
         grounding_set.add(new Predicate[]{predicate2, body_pred2});
         assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
+
+        assertTrue(kb.findCounterExamples(rule).isEmpty());
     }
 
     @Test
+    @Order(8)
     void testFamily2() throws Exception {
         Rule rule = new Rule(TABLE_FEMALE, ARITY_FEMALE);
         rule.addPred(TABLE_MOTHER, ARITY_MOTHER);
@@ -935,9 +949,12 @@ class RKBTest {
             }
             assertTrue(found);
         }
+
+        assertTrue(kb.findCounterExamples(rule).isEmpty());
     }
 
     @Test
+    @Order(9)
     void testFamily3() throws Exception {
         Rule rule = new Rule(TABLE_MALE, ARITY_MALE);
         rule.addPred(TABLE_MOTHER, ARITY_MOTHER);
@@ -986,9 +1003,16 @@ class RKBTest {
                 ), getSql4Groundings(rule)
         );
         assertTrue(kb.findGroundings(rule).isEmpty());
+
+        Predicate counter1 = new Predicate(TABLE_MALE, ARITY_MALE);
+        counter1.args[0] = new Constant(CONSTANT_ID, "amie");
+        Set<Predicate> counter_example_set = new HashSet<>();
+        counter_example_set.add(counter1);
+        assertEquals(counter_example_set, new HashSet<>(kb.findCounterExamples(rule)));
     }
 
     @Test
+    @Order(10)
     void testFamily4() throws Exception {
         Rule rule = new Rule(TABLE_MALE, ARITY_MALE);
         rule.addPred(TABLE_FATHER, ARITY_FATHER);
@@ -1055,9 +1079,12 @@ class RKBTest {
         Set<Predicate[]> grounding_set = new HashSet<>();
         grounding_set.add(new Predicate[]{predicate1, body_pred1, body_pred2});
         assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
+
+        assertTrue(kb.findCounterExamples(rule).isEmpty());
     }
 
     @Test
+    @Order(11)
     void testFamily5() throws Exception {
         Rule rule = new Rule(TABLE_FATHER, ARITY_FATHER);
         rule.addPred(TABLE_MOTHER, ARITY_MOTHER);
@@ -1118,9 +1145,12 @@ class RKBTest {
         Set<Predicate[]> grounding_set = new HashSet<>();
         grounding_set.add(new Predicate[]{predicate1, body_pred1});
         assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
+
+        assertEquals(55, kb.findCounterExamples(rule).size());
     }
 
     @Test
+    @Order(12)
     void testRoad1() throws Exception {
         Rule rule = new Rule(TABLE_ROAD, ARITY_ROAD);
         rule.boundFreeVars2NewVar(0, 1, 0, 3);
@@ -1170,9 +1200,12 @@ class RKBTest {
         Set<Predicate[]> grounding_set = new HashSet<>();
         grounding_set.add(new Predicate[]{predicate1});
         assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
+
+        assertEquals(21951, kb.findCounterExamples(rule).size());
     }
 
     @Test
+    @Order(13)
     void testRoad2() throws Exception {
         Rule rule = new Rule(TABLE_ROAD, ARITY_ROAD);
         rule.boundFreeVars2NewVar(0, 1, 0, 3);
@@ -1243,12 +1276,82 @@ class RKBTest {
         Set<Predicate[]> grounding_set = new HashSet<>();
         grounding_set.add(new Predicate[]{predicate1, body_pred1});
         assertEqualOfArraySets(grounding_set, new HashSet<>(kb.findGroundings(rule)));
+
+        assertEquals(1567, kb.findCounterExamples(rule).size());
     }
 
     @Test
+    @Order(14)
     void testUpdateProof() throws Exception {
-        /* TODO: Implement Here */
-        fail();
+        Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
+        rule.addPred(TABLE_LINKED, ARITY_LINKED);
+        rule.boundFreeVars2NewVar(0, 0, 1, 0);
+        rule.addPred(TABLE_LINKED, ARITY_LINKED);
+        rule.boundFreeVars2NewVar(0, 1, 2, 1);
+        rule.boundFreeVars2NewVar(1, 1, 2, 0);
+        assertEquals(
+                String.format("(null)%s(X0,X1):-%s(X0,X2),%s(X2,X1)",
+                        TABLE_CONNECTED, TABLE_LINKED, TABLE_LINKED
+                ), rule.toString()
+        );
+        List<Predicate[]> groudings = kb.findGroundings(rule);
+        assertEquals(3, groudings.size());
+        kb.addNewProofs(groudings);
+
+        Predicate connected1 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected1.args[0] = new Constant(CONSTANT_ID, "a");
+        connected1.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate connected2 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected2.args[0] = new Constant(CONSTANT_ID, "a");
+        connected2.args[1] = new Constant(CONSTANT_ID, "d");
+        Predicate connected3 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected3.args[0] = new Constant(CONSTANT_ID, "f");
+        connected3.args[1] = new Constant(CONSTANT_ID, "d");
+        Predicate connected4 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected4.args[0] = new Constant(CONSTANT_ID, "a");
+        connected4.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate connected5 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected5.args[0] = new Constant(CONSTANT_ID, "e");
+        connected5.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate connected6 = new Predicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED);
+        connected6.args[0] = new Constant(CONSTANT_ID, "e");
+        connected6.args[1] = new Constant(CONSTANT_ID, "d");
+        Set<Predicate> connected_set = new HashSet<>();
+        connected_set.add(connected1);
+        System.out.println(connected1);
+        connected_set.add(connected2);
+        System.out.println(connected2);
+        connected_set.add(connected3);
+        System.out.println(connected3);
+        connected_set.add(connected4);
+        System.out.println(connected4);
+        connected_set.add(connected5);
+        System.out.println(connected5);
+        connected_set.add(connected6);
+        System.out.println(connected6);
+        assertEquals(connected_set, kb.listPredicate(TABLE_CONNECTED_PROVED, ARITY_CONNECTED));
+
+        Rule rule2 = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
+        rule2.boundFreeVar2Constant(0, 0, CONSTANT_ID, "e");
+        assertEquals(String.format("(null)%s(e,?):-", TABLE_CONNECTED), rule2.toString());
+        Eval eval = kb.evalRule(rule2);
+        assertEquals(new Eval(2, 28, 1), eval);
+
+        Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate1.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate1.args[1] = new Constant(CONSTANT_ID, "a");
+        Predicate predicate2 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        predicate2.args[0] = new Constant(CONSTANT_ID, "e");
+        predicate2.args[1] = new Constant(CONSTANT_ID, "c");
+        Set<Predicate> new_pos_preds = new HashSet<>();
+        new_pos_preds.add(predicate1);
+        new_pos_preds.add(predicate2);
+        assertEquals(
+                new_pos_preds,
+                query4Predicates(
+                        getSql4UnprovedPosEntailments(rule2), TABLE_CONNECTED, ARITY_CONNECTED
+                )
+        );
     }
 
     private String getSql4AllEntailments(Rule rule) throws Exception {

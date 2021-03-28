@@ -12,6 +12,7 @@ public class RKB {
 
     public final String dbName;
     private final Connection connection;
+    private final Map<String, Set<Predicate>> functor2FactSetMap = new HashMap<>();
     private final Set<String> constants = new HashSet<>();
 
     public RKB(String dbName) throws ClassNotFoundException, SQLException {
@@ -73,6 +74,27 @@ public class RKB {
         String sql = cmd_builder.toString() + value_builder.toString();
         statement.executeUpdate(sql);
         statement.close();
+
+        /* Add to local set */
+        functor2FactSetMap.compute(predicate.functor, (k, v) -> {
+            if (null == v) {
+                v = new HashSet<>();
+            }
+            v.add(predicate);
+            return v;
+        });
+    }
+
+    public int totalConstants() {
+        return constants.size();
+    }
+
+    public int totalFacts() {
+        int cnt = 0;
+        for (Set<Predicate> predicate_set: functor2FactSetMap.values()) {
+            cnt += predicate_set.size();
+        }
+        return cnt;
     }
 
     public Set<Predicate> listPredicate(String functor, int arity) throws SQLException{
@@ -322,15 +344,134 @@ public class RKB {
     }
 
     public List<Predicate> findCounterExamples(Rule rule) throws SQLException {
-        /* TODO: 这里的实现还有问题，暂时搁置 */
-        List<Predicate> counter_examples = new ArrayList<>();
-        Predicate head_pred = rule.getHead();
-        Statement statement = connection.createStatement();
-        ResultSet result_set = statement.executeQuery(parseSql4CounterExamples(rule));
-        while (result_set.next()) {
-            counter_examples.add(substitute(head_pred, result_set));
+        /* 统计Head的参数情况，并将其转成带Free Var的Rule */
+        Rule rule_with_free_vars = new Rule(rule);
+        Predicate head_pred = rule_with_free_vars.getHead();
+        Set<Integer> vars_in_head_only = new HashSet<>();
+        int free_var_id = rule_with_free_vars.usedBoundedVars();
+        for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
+            Argument argument = head_pred.args[arg_idx];
+            if (null == argument) {
+                head_pred.args[arg_idx] = new Variable(free_var_id);
+                vars_in_head_only.add(free_var_id);
+                free_var_id++;
+            } else if (argument.isVar) {
+                vars_in_head_only.add(argument.id);
+            }
         }
+
+        /* 将Body中的null转成free var，统计仅在head中的bounded vars */
+        for (int pred_idx = 1; pred_idx < rule.length(); pred_idx++) {
+            Predicate body_pred = rule_with_free_vars.getPredicate(pred_idx);
+            for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
+                Argument argument = body_pred.args[arg_idx];
+                if (null == argument) {
+                    body_pred.args[arg_idx] = new Variable(free_var_id);
+                    free_var_id++;
+                } else if (argument.isVar) {
+                    vars_in_head_only.remove(argument.id);
+                }
+            }
+        }
+
+        /* 统计head中单独出现变量的位置 */
+        List<Integer>[] head_only_var_locations;
+        if (vars_in_head_only.isEmpty()) {
+            head_only_var_locations = null;
+        } else {
+            Map<Integer, List<Integer>> var_2_locations = new HashMap<>();
+            for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
+                Argument argument = head_pred.args[arg_idx];
+                final int col = arg_idx;
+                if (argument.isVar && vars_in_head_only.contains(argument.id)) {
+                    var_2_locations.compute(argument.id, (k, v) -> {
+                        if (null == v) {
+                            v = new ArrayList<>();
+                        }
+                        v.add(col);
+                        return v;
+                    });
+                }
+            }
+            head_only_var_locations = var_2_locations.values().toArray(new List[0]);
+        }
+
+        /* Parse Body Only to get all entails */
+        Set<Predicate> fact_set = functor2FactSetMap.get(head_pred.functor);
+        List<Predicate> counter_examples = new ArrayList<>();
+        Statement statement = connection.createStatement();
+        String sql4all_entailments = parseSql4AllEntailments(rule_with_free_vars);
+        if (null != sql4all_entailments) {
+            /* 有Body，可以查询 */
+            ResultSet result_set = statement.executeQuery(sql4all_entailments);
+            if (vars_in_head_only.isEmpty()) {
+                /* 不需要替换变量 */
+                while (result_set.next()) {
+                    Predicate entailment = substitute(head_pred, result_set);
+                    if (!fact_set.contains(entailment)) {
+                        counter_examples.add(entailment);
+                    }
+                }
+            } else {
+                /* 需要替换head中的变量 */
+                for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
+                    /* 先把head中不会出现在SQL结果中的变量抹掉，否则会出错 */
+                    Argument argument = head_pred.args[arg_idx];
+                    if (argument.isVar && vars_in_head_only.contains(argument.id)) {
+                        head_pred.args[arg_idx] = new Constant(CONSTANT_ID, "?");
+                    }
+                }
+
+                while (result_set.next()) {
+                    Predicate head_template = substitute(head_pred, result_set);
+                    iterateOverConstants2FindCounterExamples(
+                            head_only_var_locations, 0, head_template, fact_set, counter_examples
+                    );
+                }
+            }
+        } else {
+            /* 没有Body */
+            if (vars_in_head_only.isEmpty()) {
+                /* 只有head自己 */
+                if (!fact_set.contains(head_pred)) {
+                    counter_examples.add(new Predicate(head_pred));
+                }
+            } else {
+                iterateOverConstants2FindCounterExamples(
+                        head_only_var_locations, 0, head_pred, fact_set, counter_examples
+                );
+            }
+        }
+
         return counter_examples;
+    }
+
+    private void iterateOverConstants2FindCounterExamples(
+            List<Integer>[] varLocations, int idx, Predicate template, Set<Predicate> facts,
+            List<Predicate> counterExamples
+    ) {
+        List<Integer> locations = varLocations[idx];
+        if (idx < varLocations.length - 1) {
+            /* 递归 */
+            for (String constant: constants) {
+                for (int loc: locations) {
+                    template.args[loc] = new Constant(CONSTANT_ID, constant);
+                }
+                iterateOverConstants2FindCounterExamples(
+                        varLocations, idx+1, template, facts, counterExamples
+                );
+            }
+        } else {
+            /* 已经到了最后的位置，不递归，完成后检查是否是Counter Example */
+            for (String constant: constants) {
+                for (int loc: locations) {
+                    template.args[loc] = new Constant(CONSTANT_ID, constant);
+                }
+                if (!facts.contains(template)) {
+                    counterExamples.add(new Predicate(template));
+                }
+            }
+        }
     }
 
     private String parseSql4RuleGroundings(Rule rule) {
@@ -418,106 +559,6 @@ public class RKB {
             return select_exp_builder.toString() + from_exp_builder.toString() +
                     where_exp_builder.toString() + group_by_exp_builder.toString();
         }
-    }
-
-    private String parseSql4CounterExamples(Rule rule) {
-        final StringBuilder select_exp_builder = new StringBuilder("SELECT DISTINCT ");  // length=16
-        final int original_select_length = select_exp_builder.length();
-        final StringBuilder from_exp_builder = new StringBuilder("FROM ");  // length=5
-        final StringBuilder where_exp_builder = new StringBuilder("WHERE ");  // length=6
-        final int original_where_length = where_exp_builder.length();
-        Map<Integer, ArgIndicator> first_var_info_map = new HashMap<>();
-
-        /* 选择head中所有的变量 */
-        Predicate head_pred = rule.getHead();
-        String head_functor_alias = head_pred.functor + '0';
-        from_exp_builder.append(head_pred.functor).append(" AS ").append(head_functor_alias).append(',');
-        int free_var_id = rule.usedBoundedVars();
-        for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
-            final int col_idx = arg_idx;
-            Argument argument = head_pred.args[col_idx];
-            if (null != argument) {
-                if (argument.isVar) {
-                    first_var_info_map.compute(argument.id, (k, v) -> {
-                        if (null == v) {
-                            /* 第一次出现变量，放入map即可 */
-                            select_exp_builder.append(head_functor_alias).append(".C").append(col_idx)
-                                    .append(" AS ").append(argument.name).append(',');
-                            return new VarIndicator(head_functor_alias, col_idx);
-                        } else {
-                            /* 再次出现变量，添加等价关系 */
-                            where_exp_builder.append(v.functor).append(".C").append(v.idx)
-                                    .append('=').append(head_functor_alias).append(".C").append(col_idx)
-                                    .append(" AND ");
-                            return v;
-                        }
-                    });
-                } else {
-                    /* 常量则直接添加等价关系 */
-                    where_exp_builder.append(head_functor_alias).append(".C").append(arg_idx)
-                            .append("='").append(argument.name).append("' AND ");
-                }
-            } else {
-                /* 自由变量 */
-                Variable free_var = new Variable(free_var_id);
-                head_pred.args[arg_idx] = free_var;
-                free_var_id++;
-                select_exp_builder.append(head_functor_alias).append(".C").append(col_idx)
-                        .append(" AS ").append(free_var.name).append(',');
-            }
-        }
-
-        for (int pred_idx = 0; pred_idx < rule.length(); pred_idx++) {
-            Predicate predicate = rule.getPredicate(pred_idx);
-            String functor_alias = predicate.functor + pred_idx;
-            from_exp_builder.append(predicate.functor).append(" AS ").append(functor_alias).append(',');
-            for (int arg_idx = 0; arg_idx < predicate.arity(); arg_idx++) {
-                final int col_idx = arg_idx;
-                Argument argument = predicate.args[col_idx];
-                if (null != argument) {
-                    if (argument.isVar) {
-                        first_var_info_map.compute(argument.id, (k, v) -> {
-                            if (null == v) {
-                                /* 第一次出现变量，放入map即可 */
-                                return new VarIndicator(functor_alias, col_idx);
-                            } else {
-                                /* 再次出现变量，添加等价关系 */
-                                where_exp_builder.append(v.functor).append(".C").append(v.idx)
-                                        .append('=').append(functor_alias).append(".C").append(col_idx)
-                                        .append(" AND ");
-                                return v;
-                            }
-                        });
-                    } else {
-                        /* 常量则直接添加等价关系 */
-                        where_exp_builder.append(functor_alias).append(".C").append(arg_idx)
-                                .append("='").append(argument.name).append("' AND ");
-                    }
-                }
-            }
-        }
-
-        if (original_select_length >= select_exp_builder.length()) {
-            /* rule中没有变量，在SELECT语句中添加一点内容，使得查询能够进行 */
-            select_exp_builder.append(head_functor_alias).append(".C0 AS C0,");
-        }
-
-        /* 删除多余的标点 */
-        select_exp_builder.deleteCharAt(select_exp_builder.length() - 1).append(' ');
-        from_exp_builder.deleteCharAt(from_exp_builder.length() - 1).append(' ');
-        String all_pos_entail_sql;
-        if (original_where_length >= where_exp_builder.length()) {
-            /* WHERE 语句为空 */
-            all_pos_entail_sql = select_exp_builder.toString() + from_exp_builder.toString();
-        } else {
-            /* WHERE 语句非空 */
-            where_exp_builder.delete(where_exp_builder.length() - 5, where_exp_builder.length());
-            where_exp_builder.append(' ');
-            all_pos_entail_sql = select_exp_builder.toString() + from_exp_builder.toString() + where_exp_builder.toString();
-        }
-
-        /* 排除已经证明过的 */
-        return all_pos_entail_sql + "EXCEPT SELECT * FROM " + head_pred.functor;
     }
 
     private Predicate substitute(Predicate predicate, ResultSet varMap) throws SQLException {
