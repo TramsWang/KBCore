@@ -167,14 +167,24 @@ public class RKB {
         }
 
         /* Parse complete rule to get all (+)entails */
-        String complete_sql = String.format(
-                "SELECT COUNT(*) FROM (%s)", parseSql4UnprovedPosEntailments(rule_with_free_vars)
+        // TODO: 这两个查询可以写成一个吗？提高性能
+        String sql4all_pos_tmp = parseSql4AllPosEntailments(rule_with_free_vars);
+        String sql4all_pos = String.format(
+                "SELECT COUNT(*) FROM (%s)", sql4all_pos_tmp
         );
-        ResultSet result_set = statement.executeQuery(complete_sql);
+        String sql4new_pos = String.format(
+                "SELECT COUNT(*) FROM (%s EXCEPT SELECT * FROM %s%s)",
+                sql4all_pos_tmp, head_pred.functor, PROVED_TABLE_NAME_SUFFIX
+        );
+        ResultSet result_set = statement.executeQuery(sql4all_pos);
+        final long all_proofs = result_set.getLong(1);
+        result_set = statement.executeQuery(sql4new_pos);
         final long new_proofs = result_set.getLong(1);
 
         /* Assign Eval */
-        Eval eval = new Eval(new_proofs, all_entailment_cnt, rule.size());
+        Eval eval = new Eval(
+                new_proofs, all_entailment_cnt - (all_proofs - new_proofs), rule.size()
+        );
         rule.setEval(eval);
         return eval;
     }
@@ -253,7 +263,7 @@ public class RKB {
         }
     }
 
-    private String parseSql4UnprovedPosEntailments(Rule rule) {
+    private String parseSql4AllPosEntailments(Rule rule) {
         final StringBuilder select_exp_builder = new StringBuilder("SELECT DISTINCT ");  // length=16
         final StringBuilder from_exp_builder = new StringBuilder("FROM ");  // length=5
         final StringBuilder where_exp_builder = new StringBuilder("WHERE ");  // length=6
@@ -312,8 +322,7 @@ public class RKB {
             all_pos_entail_sql = select_exp_builder.toString() + from_exp_builder.toString() + where_exp_builder.toString();
         }
 
-        /* 排除已经证明过的 */
-        return all_pos_entail_sql + "EXCEPT SELECT * FROM " + head_pred.functor + PROVED_TABLE_NAME_SUFFIX;
+        return all_pos_entail_sql;
     }
 
     public List<Predicate[]> findGroundings(Rule rule) throws SQLException {

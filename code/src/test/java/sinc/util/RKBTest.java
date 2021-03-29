@@ -449,20 +449,19 @@ class RKBTest {
         Rule rule = new Rule(TABLE_CONNECTED, ARITY_CONNECTED);
         assertEquals("(null)" + TABLE_CONNECTED + "(?,?):-", rule.toString());
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_CONNECTED_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertNull(sql4all);
         assertEquals(
                 String.format(
                     "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1 " +
-                            "FROM %s AS %s0 " +
-                            "EXCEPT SELECT * FROM %s",
-                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED,
-                        TABLE_CONNECTED_PROVED
-                ), sql4new_pos
+                            "FROM %s AS %s0 ",
+                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED
+                ), sql4all_pos
         );
-        assertEquals(new Eval(6, 784, 0), eval);
+        assertEquals(new Eval(6, 782, 0), eval);
 
         Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
         predicate1.args[0] = new Constant(CONSTANT_ID, "a");
@@ -527,7 +526,8 @@ class RKBTest {
         rule.boundFreeVar2Constant(0, 0, CONSTANT_ID, "e");
         assertEquals(String.format("(null)%s(e,?):-", TABLE_CONNECTED), rule.toString());
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_CONNECTED_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertNull(sql4all);
@@ -535,11 +535,10 @@ class RKBTest {
                 String.format(
                         "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1 " +
                                 "FROM %s AS %s0 " +
-                                "WHERE %s0.C0='e' " +
-                                "EXCEPT SELECT * FROM %s",
+                                "WHERE %s0.C0='e' ",
                         TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED,
-                        TABLE_CONNECTED, TABLE_CONNECTED_PROVED
-                ), sql4new_pos
+                        TABLE_CONNECTED
+                ), sql4all_pos
         );
         assertEquals(new Eval(4, 28, 1), eval);
 
@@ -590,7 +589,8 @@ class RKBTest {
         rule.boundFreeVars2NewVar(0, 0, 0, 1);
         assertEquals(String.format("(null)%s(X0,X0):-", TABLE_CONNECTED), rule.toString());
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_CONNECTED_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertNull(sql4all);
@@ -598,13 +598,13 @@ class RKBTest {
                 String.format(
                         "SELECT DISTINCT %s0.C0 AS C0,%s0.C1 AS C1 " +
                                 "FROM %s AS %s0 " +
-                                "WHERE %s0.C0=%s0.C1 " +
-                                "EXCEPT SELECT * FROM %s",
+                                "WHERE %s0.C0=%s0.C1 ",
                         TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED,
-                        TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED_PROVED
-                ), sql4new_pos
+                        TABLE_CONNECTED, TABLE_CONNECTED
+                ), sql4all_pos
         );
         assertEquals(new Eval(0, 28, 1), eval);
+        assertTrue(query4Predicates(sql4all_pos, TABLE_CONNECTED, ARITY_CONNECTED).isEmpty());
         assertTrue(query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED).isEmpty());
 
         assertEquals(
@@ -635,7 +635,8 @@ class RKBTest {
                 rule.toString()
         );
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_CONNECTED_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertEquals(
@@ -658,7 +659,7 @@ class RKBTest {
                         TABLE_CONNECTED_PROVED
                 ), sql4new_pos
         );
-        assertEquals(new Eval(2, 4, 2), eval);
+        assertEquals(new Eval(2, 2, 2), eval);
 
         Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
         predicate1.args[0] = new Constant(CONSTANT_ID, "a");
@@ -726,7 +727,8 @@ class RKBTest {
                 ), rule.toString()
         );
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_CONNECTED_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertEquals(
@@ -813,7 +815,8 @@ class RKBTest {
                 ), rule.toString()
         );
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_MALE_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertEquals(
@@ -885,7 +888,8 @@ class RKBTest {
                 ), rule.toString()
         );
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_FEMALE_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertEquals(
@@ -965,7 +969,8 @@ class RKBTest {
                 ), rule.toString()
         );
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_MALE_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertEquals(
@@ -1025,7 +1030,8 @@ class RKBTest {
                 ), rule.toString()
         );
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_MALE_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertEquals(
@@ -1095,7 +1101,8 @@ class RKBTest {
                 ), rule.toString()
         );
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_FATHER_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertEquals(
@@ -1157,7 +1164,8 @@ class RKBTest {
         rule.boundFreeVars2NewVar(0, 2, 0, 4);
         assertEquals(String.format("(null)%s(?,X0,X1,X0,X1):-", TABLE_ROAD), rule.toString());
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_ROAD_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertNull(sql4all);
@@ -1219,7 +1227,8 @@ class RKBTest {
                 ), rule.toString()
         );
         String sql4all = getSql4AllEntailments(rule);
-        String sql4new_pos = getSql4UnprovedPosEntailments(rule);
+        String sql4all_pos = getSql4AllPosEntailments(rule);
+        String sql4new_pos = sql4all_pos + "EXCEPT SELECT * FROM " + TABLE_ROAD_PROVED;
         Eval eval = kb.evalRule(rule);
 
         assertEquals(
@@ -1335,7 +1344,7 @@ class RKBTest {
         rule2.boundFreeVar2Constant(0, 0, CONSTANT_ID, "e");
         assertEquals(String.format("(null)%s(e,?):-", TABLE_CONNECTED), rule2.toString());
         Eval eval = kb.evalRule(rule2);
-        assertEquals(new Eval(2, 28, 1), eval);
+        assertEquals(new Eval(2, 26, 1), eval);
 
         Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
         predicate1.args[0] = new Constant(CONSTANT_ID, "e");
@@ -1349,7 +1358,8 @@ class RKBTest {
         assertEquals(
                 new_pos_preds,
                 query4Predicates(
-                        getSql4UnprovedPosEntailments(rule2), TABLE_CONNECTED, ARITY_CONNECTED
+                        getSql4AllPosEntailments(rule2) + "EXCEPT SELECT * FROM " + TABLE_CONNECTED_PROVED,
+                        TABLE_CONNECTED, ARITY_CONNECTED
                 )
         );
     }
@@ -1360,8 +1370,8 @@ class RKBTest {
         return (String) mtd.invoke(kb, rule);
     }
 
-    private String getSql4UnprovedPosEntailments(Rule rule) throws Exception {
-        Method mtd = RKB.class.getDeclaredMethod("parseSql4UnprovedPosEntailments", Rule.class);
+    private String getSql4AllPosEntailments(Rule rule) throws Exception {
+        Method mtd = RKB.class.getDeclaredMethod("parseSql4AllPosEntailments", Rule.class);
         mtd.setAccessible(true);
         return (String) mtd.invoke(kb, rule);
     }
