@@ -7,6 +7,7 @@ import sinc.common.*;
 import sinc.util.MultiSet;
 import sinc.util.PrologModule;
 import sinc.util.SwiplUtil;
+import sinc.util.graph.BaseGraphNode;
 import sinc.util.graph.FeedbackVertexSetSolver;
 import sinc.util.graph.Tarjan;
 
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.lang.Integer;
 import java.util.*;
 
-public class SincBasicWithJPL extends SInC {
+public class SincBasicWithJPL extends SInC<Compound> {
 
     protected static final double MIN_HEAD_COVERAGE = 0.05;
     protected static final double MIN_CONSTANT_PROPORTION = 0.25;
@@ -56,8 +57,8 @@ public class SincBasicWithJPL extends SInC {
     protected boolean shouldContinue = true;
     protected List<String> waitingHeadFunctors = new ArrayList<>();
 
-    protected final Map<Compound, GraphNode4Compound> compound2NodeMap = new HashMap<>();
-    protected final Map<GraphNode4Compound, Set<GraphNode4Compound>> graph = new HashMap<>();
+    protected final Map<Compound, BaseGraphNode<Compound>> compound2NodeMap = new HashMap<>();
+    protected final Map<BaseGraphNode<Compound>, Set<BaseGraphNode<Compound>>> graph = new HashMap<>();
     protected final Set<Compound> counterExamples = new HashSet<>();
     protected final Set<Compound> startSet = new HashSet<>();
 
@@ -646,13 +647,17 @@ public class SincBasicWithJPL extends SInC {
     ) {
         if (curFactSet.remove(head)) {
             /* 删除并在graph中加入dependency */
-            GraphNode4Compound head_node = compound2NodeMap.computeIfAbsent(head, k -> new GraphNode4Compound(head));
+            BaseGraphNode<Compound> head_node = compound2NodeMap.computeIfAbsent(
+                    head, k -> new BaseGraphNode<Compound>(head)
+            );
             graph.compute(head_node, (k, v) -> {
                 if (null == v) {
                     v = new HashSet<>();
                 }
                 for (Compound body: bodies) {
-                    GraphNode4Compound body_node = compound2NodeMap.computeIfAbsent(body, kk -> new GraphNode4Compound(body));
+                    BaseGraphNode<Compound> body_node = compound2NodeMap.computeIfAbsent(
+                            body, kk -> new BaseGraphNode<Compound>(body)
+                    );
                     v.add(body_node);
                 }
                 return v;
@@ -672,7 +677,7 @@ public class SincBasicWithJPL extends SInC {
         /* 找出所有不能被prove的点 */
         for (Set<Compound> fact_set: globalFunctor2FactSetMap.values()) {
             for (Compound fact : fact_set) {
-                GraphNode4Compound fact_node = new GraphNode4Compound(fact);
+                BaseGraphNode<Compound> fact_node = new BaseGraphNode<Compound>(fact);
                 if (!graph.containsKey(fact_node)) {
                     startSet.add(fact);
                 }
@@ -683,14 +688,14 @@ public class SincBasicWithJPL extends SInC {
         final int start_set_size_without_scc = startSet.size();
         int scc_total_vertices = 0;
         int fvs_total_vertices = 0;
-        Tarjan<GraphNode4Compound> tarjan = new Tarjan<>(graph);
-        List<Set<GraphNode4Compound>> sccs = tarjan.run();
-        for (Set<GraphNode4Compound> scc: sccs) {
+        Tarjan<BaseGraphNode<Compound>> tarjan = new Tarjan<>(graph);
+        List<Set<BaseGraphNode<Compound>>> sccs = tarjan.run();
+        for (Set<BaseGraphNode<Compound>> scc: sccs) {
             /* 找出FVS的一个解，并把之放入start_set */
-            FeedbackVertexSetSolver<GraphNode4Compound> fvs_solver = new FeedbackVertexSetSolver<>(graph, scc);
-            Set<GraphNode4Compound> fvs = fvs_solver.run();
-            for (GraphNode4Compound node: fvs) {
-                startSet.add(node.compound);
+            FeedbackVertexSetSolver<BaseGraphNode<Compound>> fvs_solver = new FeedbackVertexSetSolver<>(graph, scc);
+            Set<BaseGraphNode<Compound>> fvs = fvs_solver.run();
+            for (BaseGraphNode<Compound> node: fvs) {
+                startSet.add(node.content);
             }
             scc_total_vertices += scc.size();
             fvs_total_vertices += fvs.size();
@@ -743,8 +748,13 @@ public class SincBasicWithJPL extends SInC {
     }
 
     @Override
-    protected Map<GraphNode4Compound, Set<GraphNode4Compound>> getDependencyGraph() {
+    protected Map<BaseGraphNode<Compound>, Set<BaseGraphNode<Compound>>> getDependencyGraph() {
         return graph;
+    }
+
+    @Override
+    public Compound fact2Compound(Compound fact) {
+        return fact;
     }
 
     public static void main(String[] args) throws IOException {

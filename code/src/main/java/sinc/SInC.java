@@ -5,15 +5,15 @@ import org.jpl7.Compound;
 import org.jpl7.Query;
 import org.jpl7.Term;
 import sinc.common.EvalMetric;
-import sinc.common.GraphNode4Compound;
 import sinc.common.Rule;
 import sinc.util.PrologModule;
 import sinc.util.SwiplUtil;
+import sinc.util.graph.BaseGraphNode;
 import sinc.util.graph.GraphView;
 
 import java.util.*;
 
-public abstract class SInC {
+public abstract class SInC<T> {
 
     protected final int threadNum;
     protected final int beamWidth;
@@ -44,13 +44,13 @@ public abstract class SInC {
 
     abstract public List<Rule> dumpHypothesis();
 
-    abstract public Set<Compound> dumpStartSet();
+    abstract public Set<T> dumpStartSet();
 
-    abstract public Set<Compound> dumpCounterExampleSet();
+    abstract public Set<T> dumpCounterExampleSet();
 
-    abstract protected Iterator<Compound> originalBkIterator();
+    abstract protected Iterator<T> originalBkIterator();
 
-    abstract protected Map<GraphNode4Compound, Set<GraphNode4Compound>> getDependencyGraph();
+    abstract protected Map<BaseGraphNode<T>, Set<BaseGraphNode<T>>> getDependencyGraph();
 
     public final void run() {
         long time_start = System.currentTimeMillis();
@@ -71,8 +71,8 @@ public abstract class SInC {
 
         System.out.println(">>> Compression Finished");
         List<Rule> hypothesis = dumpHypothesis();
-        Set<Compound> start_set = dumpStartSet();
-        Set<Compound> counter_example_set = dumpCounterExampleSet();
+        Set<T> start_set = dumpStartSet();
+        Set<T> counter_example_set = dumpCounterExampleSet();
         System.out.printf("- Hypothesis(%d rules total):\n", hypothesis.size());
         int hypothesis_size = 0;
         for (int i = 0; i < hypothesis.size(); i++) {
@@ -106,30 +106,30 @@ public abstract class SInC {
     public boolean validate() {
         long time_start = System.currentTimeMillis();
         List<Rule> hypothesis = dumpHypothesis();
-        Set<Compound> start_set = dumpStartSet();
-        Set<Compound> counter_examples = dumpCounterExampleSet();
+        Set<T> start_set = dumpStartSet();
+        Set<T> counter_examples = dumpCounterExampleSet();
         if (debug) {
             GraphView.draw(originalBkIterator(), getDependencyGraph(), k -> !start_set.contains(k));
         }
 
-        for (Compound fact: start_set) {
-            SwiplUtil.appendKnowledge(PrologModule.VALIDATION, fact);
+        for (T fact: start_set) {
+            SwiplUtil.appendKnowledge(PrologModule.VALIDATION, fact2Compound(fact));
         }
         for (Rule rule: hypothesis) {
             SwiplUtil.appendKnowledge(PrologModule.VALIDATION, Term.textToTerm(rule.toCompleteRuleString()));
         }
 
         /* Check all facts */
-        Set<Compound> uncovered_facts = new HashSet<>();
-        Iterator<Compound> original_bk_itr = originalBkIterator();
+        Set<T> uncovered_facts = new HashSet<>();
+        Iterator<T> original_bk_itr = originalBkIterator();
         while (original_bk_itr.hasNext()) {
-            Compound fact = original_bk_itr.next();
+            T fact = original_bk_itr.next();
             if (start_set.contains(fact)) {
                 continue;
             }
             System.out.println("Check Fact: " + fact);
             Query q = new Query(":", new Term[]{
-                    new Atom(PrologModule.VALIDATION.getSessionName()), fact
+                    new Atom(PrologModule.VALIDATION.getSessionName()), fact2Compound(fact)
             });
             if (!q.hasSolution()) {
                 uncovered_facts.add(fact);
@@ -138,17 +138,17 @@ public abstract class SInC {
         }
         if (!uncovered_facts.isEmpty()) {
             System.out.printf("%d fact(s) uncovered:\n", uncovered_facts.size());
-            for (Compound fact: uncovered_facts) {
+            for (T fact: uncovered_facts) {
                 System.out.println(fact);
             }
         }
 
         /* Check all counter examples */
-        Set<Compound> uncovered_counter_examples = new HashSet<>();
-        for (Compound counter_example: counter_examples) {
+        Set<T> uncovered_counter_examples = new HashSet<>();
+        for (T counter_example: counter_examples) {
             System.out.println("Check CE: " + counter_example);
             Query q = new Query(":", new Term[]{
-                    new Atom(PrologModule.VALIDATION.getSessionName()), counter_example
+                    new Atom(PrologModule.VALIDATION.getSessionName()), fact2Compound(counter_example)
             });
             if (!q.hasSolution()) {
                 uncovered_counter_examples.add(counter_example);
@@ -157,7 +157,7 @@ public abstract class SInC {
         }
         if (!uncovered_counter_examples.isEmpty()) {
             System.out.printf("%d counter example(s) uncovered:\n", uncovered_counter_examples.size());
-            for (Compound counter_example: uncovered_counter_examples) {
+            for (T counter_example: uncovered_counter_examples) {
                 System.out.println(counter_example);
             }
         }
@@ -166,4 +166,6 @@ public abstract class SInC {
 
         return uncovered_facts.isEmpty() && uncovered_counter_examples.isEmpty();
     }
+
+    public abstract Compound fact2Compound(T fact);
 }

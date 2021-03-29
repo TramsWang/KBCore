@@ -1,6 +1,7 @@
 package sinc.util;
 
 import sinc.common.*;
+import sinc.impl.SincBasicWithJPL;
 
 import java.sql.*;
 import java.util.*;
@@ -10,18 +11,48 @@ public class RKB {
     public static final String NULL_VALUE = "NULL";
     public static final int CONSTANT_ID = -1;
 
+    public static final class OriginalFactIterator implements Iterator<Predicate> {
+        Iterator<Set<Predicate>> functorItr;
+        Iterator<Predicate> factSetItr;
+
+        private OriginalFactIterator(Map<String, Set<Predicate>> functor2FactSetMap) {
+            functorItr = functor2FactSetMap.values().iterator();
+            factSetItr = functorItr.hasNext() ? functorItr.next().iterator() : null;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return functorItr.hasNext() || (null != factSetItr && factSetItr.hasNext());
+        }
+
+        @Override
+        public Predicate next() {
+            if (!factSetItr.hasNext()) {
+                factSetItr = functorItr.next().iterator();
+            }
+            return factSetItr.next();
+        }
+    }
+
     public final String dbName;
+    public final double headCoverageThreshold;
     private final Connection connection;
     private final Map<String, Set<Predicate>> functor2FactSetMap = new HashMap<>();
+    private final Map<String, Integer> functor2ArityMap = new HashMap<>();
     private final Set<String> constants = new HashSet<>();
 
-    public RKB(String dbName) throws ClassNotFoundException, SQLException {
+    public RKB(String dbName, double headCoverageThreshold) {
         this.dbName = dbName;
-        Class.forName("org.sqlite.JDBC");
-        if (null == dbName) {
-            connection = DriverManager.getConnection("jdbc:sqlite::memory:");
-        } else {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + dbName + ".db");
+        this.headCoverageThreshold = headCoverageThreshold;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            if (null == dbName) {
+                connection = DriverManager.getConnection("jdbc:sqlite::memory:");
+            } else {
+                connection = DriverManager.getConnection("jdbc:sqlite:" + dbName + ".db");
+            }
+        } catch (Exception e) {
+            throw new Error(e);
         }
     }
 
@@ -50,6 +81,7 @@ public class RKB {
         statement.executeUpdate(sql);
         statement.executeUpdate(sql2);
         statement.close();
+        functor2ArityMap.put(functor, arity);
     }
 
     public void addPredicate(Predicate predicate) throws SQLException {
@@ -143,8 +175,32 @@ public class RKB {
             }
         }
 
-        /* Parse Body Only to get all entails */
+        /* Parse complete rule to get all (+)entails */
+        // TODO: 这两个查询可以写成一个吗？提高性能
+        String sql4all_pos_tmp = parseSql4AllPosEntailments(rule_with_free_vars);
+        String sql4all_pos = String.format(
+                "SELECT COUNT(*) FROM (%s)", sql4all_pos_tmp
+        );
+        String sql4new_pos = String.format(
+                "SELECT COUNT(*) FROM (%s EXCEPT SELECT * FROM %s%s)",
+                sql4all_pos_tmp, head_pred.functor, PROVED_TABLE_NAME_SUFFIX
+        );
         Statement statement = connection.createStatement();
+        ResultSet result_set = statement.executeQuery(sql4new_pos);
+        final long new_proofs = result_set.getLong(1);
+
+        /* 用HC剪枝 */
+        Set<Predicate> global_facts = functor2FactSetMap.get(head_pred.functor);
+        double head_coverage = ((double) new_proofs) / global_facts.size();
+        if (headCoverageThreshold >= head_coverage) {
+            rule.setEval(Eval.MIN);
+            return Eval.MIN;
+        }
+
+        result_set = statement.executeQuery(sql4all_pos);
+        final long all_proofs = result_set.getLong(1);
+
+        /* Parse Body Only to get all entails */
         final double all_entailment_cnt;
         String sql4all_entailments = parseSql4AllEntailments(rule_with_free_vars);
         if (null != sql4all_entailments) {
@@ -152,7 +208,7 @@ public class RKB {
             String body_sql = String.format(
                     "SELECT COUNT(*) FROM (%s)", sql4all_entailments
             );
-            ResultSet result_set = statement.executeQuery(body_sql);
+            result_set = statement.executeQuery(body_sql);
             long head_patterns = result_set.getLong(1);
 
             /* 相对于body，head中的自由变量为仅出现在head中的变量 */
@@ -165,21 +221,6 @@ public class RKB {
                     constants.size(), free_var_cnt_in_head + bounded_vars_in_head.size()
             );
         }
-
-        /* Parse complete rule to get all (+)entails */
-        // TODO: 这两个查询可以写成一个吗？提高性能
-        String sql4all_pos_tmp = parseSql4AllPosEntailments(rule_with_free_vars);
-        String sql4all_pos = String.format(
-                "SELECT COUNT(*) FROM (%s)", sql4all_pos_tmp
-        );
-        String sql4new_pos = String.format(
-                "SELECT COUNT(*) FROM (%s EXCEPT SELECT * FROM %s%s)",
-                sql4all_pos_tmp, head_pred.functor, PROVED_TABLE_NAME_SUFFIX
-        );
-        ResultSet result_set = statement.executeQuery(sql4all_pos);
-        final long all_proofs = result_set.getLong(1);
-        result_set = statement.executeQuery(sql4new_pos);
-        final long new_proofs = result_set.getLong(1);
 
         /* Assign Eval */
         Eval eval = new Eval(
@@ -579,5 +620,31 @@ public class RKB {
             ) : argument;
         }
         return substituted;
+    }
+
+    public Set<Predicate> findUnprovedPredicates() throws SQLException {
+        Set<Predicate> unproved_set = new HashSet<>();
+        Statement statement = connection.createStatement();
+        for (Map.Entry<String, Integer> entry: functor2ArityMap.entrySet()) {
+            String functor = entry.getKey();
+            int arity = entry.getValue();
+            String sql = String.format(
+                    "SELECT * FROM %s EXCEPT SELECT * FROM %s%s", functor, functor, PROVED_TABLE_NAME_SUFFIX
+            );
+            ResultSet result_set = statement.executeQuery(sql);
+            while (result_set.next()) {
+                Predicate predicate = new Predicate(functor, arity);
+                for (int arg_idx = 0; arg_idx < arity; arg_idx++) {
+                    predicate.args[arg_idx] = new Constant(CONSTANT_ID, result_set.getString(arg_idx+1));
+                }
+                unproved_set.add(predicate);
+            }
+        }
+        statement.close();
+        return unproved_set;
+    }
+
+    public Iterator<Predicate> originalFactIterator() {
+        return new OriginalFactIterator(functor2FactSetMap);
     }
 }

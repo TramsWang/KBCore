@@ -47,7 +47,7 @@ class RKBTest {
     static {
         RKB tmp;
         try {
-            tmp = new RKB(null);
+            tmp = new RKB(null, -1);
         } catch (Exception e) {
             tmp = null;
         }
@@ -1362,6 +1362,52 @@ class RKBTest {
                         TABLE_CONNECTED, ARITY_CONNECTED
                 )
         );
+    }
+
+    @Test
+    @Order(15)
+    void testFindUnprovedFacts() throws Exception {
+        Set<Predicate> unproved_facts = kb.findUnprovedPredicates();
+        assertEquals(24, unproved_facts.size());
+
+        Predicate unproved1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        unproved1.args[0] = new Constant(CONSTANT_ID, "b");
+        unproved1.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate unproved2 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        unproved2.args[0] = new Constant(CONSTANT_ID, "e");
+        unproved2.args[1] = new Constant(CONSTANT_ID, "a");
+        Predicate unproved3 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        unproved3.args[0] = new Constant(CONSTANT_ID, "e");
+        unproved3.args[1] = new Constant(CONSTANT_ID, "c");
+
+        Predicate proved1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        proved1.args[0] = new Constant(CONSTANT_ID, "a");
+        proved1.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate proved2 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        proved2.args[0] = new Constant(CONSTANT_ID, "a");
+        proved2.args[1] = new Constant(CONSTANT_ID, "d");
+        Predicate proved3 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        proved3.args[0] = new Constant(CONSTANT_ID, "f");
+        proved3.args[1] = new Constant(CONSTANT_ID, "d");
+        Predicate proved4 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        proved4.args[0] = new Constant(CONSTANT_ID, "a");
+        proved4.args[1] = new Constant(CONSTANT_ID, "c");
+        Predicate proved5 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        proved5.args[0] = new Constant(CONSTANT_ID, "e");
+        proved5.args[1] = new Constant(CONSTANT_ID, "b");
+        Predicate proved6 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
+        proved6.args[0] = new Constant(CONSTANT_ID, "e");
+        proved6.args[1] = new Constant(CONSTANT_ID, "d");
+
+        assertTrue(unproved_facts.contains(unproved1));
+        assertTrue(unproved_facts.contains(unproved2));
+        assertTrue(unproved_facts.contains(unproved3));
+        assertFalse(unproved_facts.contains(proved1));
+        assertFalse(unproved_facts.contains(proved2));
+        assertFalse(unproved_facts.contains(proved3));
+        assertFalse(unproved_facts.contains(proved4));
+        assertFalse(unproved_facts.contains(proved5));
+        assertFalse(unproved_facts.contains(proved6));
     }
 
     private String getSql4AllEntailments(Rule rule) throws Exception {

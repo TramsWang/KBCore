@@ -5,18 +5,17 @@ import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Session;
-import sinc.common.GraphNode4Compound;
 
 import java.util.*;
 
 public class GraphView {
-    public static interface RedundancyChecker {
-        boolean isRedundant(Compound c);
+    public static interface RedundancyChecker<T> {
+        boolean isRedundant(T fact);
     }
 
-    static public void draw(
-            Iterator<Compound> nodeItr, Map<GraphNode4Compound, Set<GraphNode4Compound>> edges,
-            RedundancyChecker checker
+    static public <T> void draw(
+            Iterator<T> nodeItr, Map<BaseGraphNode<T>, Set<BaseGraphNode<T>>> edges,
+            RedundancyChecker<T> checker
     ) {
         System.out.print("Printing Dependency Graph in Neo4j...");
 
@@ -32,22 +31,22 @@ public class GraphView {
 
         /* Create Nodes */
         while (nodeItr.hasNext()) {
-            Compound node = nodeItr.next();
+            T node = nodeItr.next();
             if (checker.isRedundant(node)) {
-                session.writeTransaction(tx -> tx.run(String.format("CREATE (e:`proved`{name:\"%s\"})", node)));
+                session.writeTransaction(tx -> tx.run(String.format("CREATE (e:`proved`{name:\"%s\"})", node.toString())));
             } else {
-                session.writeTransaction(tx -> tx.run(String.format("CREATE (e:`remained`{name:\"%s\"})", node)));
+                session.writeTransaction(tx -> tx.run(String.format("CREATE (e:`remained`{name:\"%s\"})", node.toString())));
             }
         }
 
         /* Create Edges */
-        for (Map.Entry<GraphNode4Compound, Set<GraphNode4Compound>> entry: edges.entrySet()) {
-            GraphNode4Compound src = entry.getKey();
-            for (GraphNode4Compound dst: entry.getValue()) {
+        for (Map.Entry<BaseGraphNode<T>, Set<BaseGraphNode<T>>> entry: edges.entrySet()) {
+            BaseGraphNode<T> src = entry.getKey();
+            for (BaseGraphNode<T> dst: entry.getValue()) {
                 session.writeTransaction(tx -> tx.run(
                         String.format(
                                 "MATCH (s{name:\"%s\"}), (d{name:\"%s\"}) CREATE (s)-[r:`rel`]->(d)",
-                                src.compound, dst.compound
+                                src.content.toString(), dst.content.toString()
                         )
                 ));
             }
