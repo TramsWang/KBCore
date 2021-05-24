@@ -23,12 +23,6 @@
 !/code/pom.xml
 
 ### Experiments ###
-!/experiments/NaiveWithFamilyRelation/
-/experiments/NaiveWithFamilyRelation/*
-!/experiments/NaiveWithFamilyRelation/run.sh
-!/experiments/NaiveWithFamilyRelation/result*
-!/experiments/NaiveWithFamilyRelation/Multiset*.xlsx
 
 ### Documents ###
 /doc/*
-!/doc/report/
