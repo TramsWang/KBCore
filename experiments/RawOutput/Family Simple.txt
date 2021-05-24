@@ -1,0 +1,45 @@
+Family Simple:
+BK loaded: 4 predicates; 82 constants, 240 facts
+
+- Core Statistics:
+---
+#        |N|    |N-SCC|       #SCC      |SCC|        FVS
+#        100        100          0          0          0
+---
+Counter Examples Found: 0 in COUNTER EXAMPLE set
+>>> Compression Finished
+- Hypothesis(4 rules total):
+0. ((+)30.000000; (-)0.000000; |2|; δ=28.000000; τ=0.937500)gender(X0,male):-father(X0,?)
+1. ((+)30.000000; (-)0.000000; |2|; δ=28.000000; τ=0.937500)gender(X0,female):-mother(X0,?)
+2. ((+)40.000000; (-)0.000000; |2|; δ=38.000000; τ=0.952381)parent(X0,X1):-mother(X0,X1)
+3. ((+)40.000000; (-)0.000000; |2|; δ=38.000000; τ=0.952381)parent(X0,X1):-father(X0,X1)
+- Statistics: 
+----
+#        |B|       Hypo        |H|        |N|        |A|    Comp(%)
+         240          4          8        100          0      45.00
+----
+T(ms)       Load       Hypo          N          A      Total
+              63        717          2          0        782
+----
+
+>>> Heuristic=CompressionRate
+- Core Statistics:
+---
+#        |N|    |N-SCC|       #SCC      |SCC|        FVS
+#        100        100          0          0          0
+---
+Counter Examples Found: 0 in COUNTER EXAMPLE set
+>>> Compression Finished
+- Hypothesis(4 rules total):
+0. ((+)30.000000; (-)0.000000; |2|; δ=28.000000; τ=0.937500)gender(X0,male):-father(X0,?)
+1. ((+)30.000000; (-)0.000000; |2|; δ=28.000000; τ=0.937500)gender(X0,female):-mother(X0,?)
+2. ((+)40.000000; (-)0.000000; |2|; δ=38.000000; τ=0.952381)parent(X1,X0):-mother(X1,X0)
+3. ((+)40.000000; (-)0.000000; |2|; δ=38.000000; τ=0.952381)parent(X0,X1):-father(X0,X1)
+- Statistics: 
+----
+#        |B|       Hypo        |H|        |N|        |A|    Comp(%)
+         240          4          8        100          0      45.00
+----
+T(ms)       Load       Hypo          N          A      Total
+              53       1247          2          0       1302
+----

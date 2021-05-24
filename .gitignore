@@ -23,7 +23,6 @@
 !/code/pom.xml
 
 ### Experiments ###
-/experiments/*
 !/experiments/NaiveWithFamilyRelation/
 /experiments/NaiveWithFamilyRelation/*
 !/experiments/NaiveWithFamilyRelation/run.sh
