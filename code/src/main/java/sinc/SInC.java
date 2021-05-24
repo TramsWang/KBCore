@@ -57,9 +57,16 @@ public abstract class SInC<T> {
         int original_bk_size = loadBk();
         long time_bk_loaded = System.currentTimeMillis();
 
+        long total_time_for_rule_finding = 0;
+        long total_time_for_kb_updating = 0;
         while (shouldContinue()) {
+            long find_begin = System.nanoTime();
             Rule rule = findRule();
+            long find_done = System.nanoTime();
             updateKb(rule);
+            long update_done = System.nanoTime();
+            total_time_for_rule_finding += find_done - find_begin;
+            total_time_for_kb_updating += update_done - find_done;
         }
         long time_hypothesis_found = System.currentTimeMillis();
 
@@ -92,10 +99,12 @@ public abstract class SInC<T> {
                 (start_set.size() + counter_example_set.size() + hypothesis_size) * 100.0 / original_bk_size
         );
         System.out.println("----");
-        System.out.printf("T(ms) %10s %10s %10s %10s %10s\n", "Load", "Hypo", "N", "A", "Total");
-        System.out.printf("      %10d %10d %10d %10d %10d\n",
+        System.out.printf("T(ms) %10s %10s %10s %10s %10s %10s %10s\n", "Load", "Hypo", "(Find", "Update)", "N", "A", "Total");
+        System.out.printf("      %10d %10d %10d %10d %10d %10d %10d\n",
                 time_bk_loaded - time_start,
                 time_hypothesis_found - time_bk_loaded,
+                total_time_for_rule_finding / 1000000,
+                total_time_for_kb_updating / 1000000,
                 time_start_set_found - time_hypothesis_found,
                 time_counter_examples_found - time_start_set_found,
                 time_counter_examples_found - time_start
@@ -168,4 +177,8 @@ public abstract class SInC<T> {
     }
 
     public abstract Compound fact2Compound(T fact);
+
+    public void showMonitoredInfo() {
+        System.out.println("No Monitored Info.");
+    }
 }

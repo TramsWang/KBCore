@@ -49,7 +49,7 @@ public class RuleStatistic {
         return predicate;
     }
 
-    public static void run(String bkFilePath, String rulePath) throws IOException {
+    public static void run(String bkFilePath) throws IOException {
         Map<String, MultiSet<String>[]> functor2ArgSetsMap = new HashMap<>();
 //        List<List<Predicate>> rules = new ArrayList<>();
 
@@ -66,7 +66,7 @@ public class RuleStatistic {
                 }
                 return _arg_set_list;
             });
-            for (int i = 1; i < components.length; i++) {
+            for (int i = 1; i < components.length && i <= arg_set_list.length; i++) {
                 arg_set_list[i-1].add(components[i]);
             }
         }
@@ -142,7 +142,7 @@ public class RuleStatistic {
 //        }
 
         /* Output */
-        System.out.printf("KB: %s; Rule: %s\n", bkFilePath, rulePath);
+        System.out.printf("KB: %s\n", bkFilePath);
         System.out.println(Arrays.toString(jaccards.toArray(new Double[0])));
 //        System.out.println("---");
 //        System.out.printf("%10s %10s %10s\n", "Rules", "Conds", "Compares");
@@ -180,31 +180,22 @@ public class RuleStatistic {
 
     public static void main(String[] args) throws Exception {
         testParser();
-        String[][] path_pairs = new String[][] {
-                new String[] {
-                        "testData/familyRelation/FamilyRelationSimple(0.00)(10x).tsv",
-                        "testData/familyRelation/HypothesisSincSimple.pl"
-                },
-                new String[] {
-                        "testData/familyRelation/FamilyRelationMedium(0.00)(10x).tsv",
-                        "testData/familyRelation/HypothesisSincMedium.pl"
-                },
-                new String[] {
-                        "testData/RKB/Elti.tsv",
-                        "testData/RKB/HypothesisSincElti.pl"
-                },
-                new String[] {
-                        "testData/RKB/StudentLoan.tsv",
-                        "testData/RKB/HypothesisSincStudentLoan.pl"
-                },
-                new String[] {
-                        "testData/RKB/dbpedia_factbook.tsv",
-                        "testData/RKB/HypothesisSincDbpediaFactbook.pl"
-                },
+        String[] bk_paths = new String[]{
+                "testData/familyRelation/FamilyRelationSimple(0.00)(10x).tsv",
+                "testData/familyRelation/FamilyRelationMedium(0.00)(10x).tsv",
+                "testData/RKB/Elti.tsv",
+                "testData/RKB/Dunur.tsv",
+                "testData/RKB/StudentLoan.tsv",
+                "testData/RKB/dbpedia_factbook.tsv",
+                "testData/RKB/dbpedia_lobidorg.tsv",
+                "testData/RKB/webkb.cornell.tsv",
+                "testData/RKB/webkb.texas.tsv",
+                "testData/RKB/webkb.washington.tsv",
+                "testData/RKB/webkb.wisconsin.tsv",
         };
 
-        for (String[] pair: path_pairs) {
-            run(pair[0], pair[1]);
+        for (String bk_path: bk_paths) {
+            run(bk_path);
         }
     }
 }

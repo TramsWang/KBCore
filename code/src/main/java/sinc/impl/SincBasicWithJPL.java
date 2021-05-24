@@ -62,6 +62,28 @@ public class SincBasicWithJPL extends SInC<Compound> {
     protected final Set<Compound> counterExamples = new HashSet<>();
     protected final Set<Compound> startSet = new HashSet<>();
 
+    /* 性能检测数据 */
+    static class BranchInfo {
+        int ruleSize;
+        int extNum;
+        int orgNum;
+
+        public BranchInfo(int ruleSize, int extNum, int orgNum) {
+            this.ruleSize = ruleSize;
+            this.extNum = extNum;
+            this.orgNum = orgNum;
+        }
+    }
+    private final List<BranchInfo> branch_progress = new ArrayList<>();
+    long preComputingCostInNano = 0;
+    long allEntailQueryCostInNano = 0;
+    long posEntailQueryCostInNano = 0;
+    long headTemplateBuildCostInNano = 0;
+    long allEntailJplQueryCostInNano = 0;
+    long substituteCostInNano = 0;
+    int cacheHits = 0;
+    int totalEvalNum = 0;
+
     public SincBasicWithJPL(int threadNum, int beamWidth, EvalMetric evalType, String kbFilePath, boolean debug) {
         super(threadNum, beamWidth, evalType, kbFilePath, debug);
     }
@@ -229,6 +251,9 @@ public class SincBasicWithJPL extends SInC<Compound> {
                 if (r_max == r) {
                     optimals.add(r);
                 }
+
+                /* 监测：分支数量信息 */
+                branch_progress.add(new BranchInfo(r.size(), extensions.size(), origins.size()));
             }
 
             /* 如果有多个optimal，选择最优的返回 */
@@ -247,13 +272,16 @@ public class SincBasicWithJPL extends SInC<Compound> {
     }
 
     protected void evalRule(Rule rule, Map<Rule, Eval> evalCache) {
+        totalEvalNum++;
         Eval cache = evalCache.get(rule);
         if (null != cache) {
             rule.setEval(cache);
+            cacheHits++;
             return;
         }
 
         /* 统计Head的参数情况，并将其转成带Free Var的Jpl Arg Array */
+        long pre_computing_start = System.nanoTime();
         Predicate head_pred = rule.getHead();
         List<String> bounded_vars_in_head = new ArrayList<>();
         Term[] head_args = new Term[head_pred.args.length];
@@ -289,6 +317,7 @@ public class SincBasicWithJPL extends SInC<Compound> {
         }
 
         /* 计算all entailments */
+        long all_entailments_query_begin = System.nanoTime();
         Set<String> bounded_vars_in_body = new HashSet<>();
         StringBuilder query_builder = new StringBuilder();
         if (2 <= rule.length()) {
@@ -315,17 +344,23 @@ public class SincBasicWithJPL extends SInC<Compound> {
         Set<Compound> head_templates = new HashSet<>();
         boolean body_is_not_empty = !"".equals(query_str);
         if (body_is_not_empty) {
+            long query_begin = System.nanoTime();
             Query q = new Query(":", new Term[]{
                     new Atom(PrologModule.GLOBAL.getSessionName()), Term.textToTerm(query_str)
             });
             for (Map<String, Term> binding : q) {
+                long build_head_template_begin = System.nanoTime();
                 Term[] template_args = new Term[bounded_vars_in_head.size()];
                 for (int arg_idx = 0; arg_idx < template_args.length; arg_idx++) {
                     template_args[arg_idx] = binding.get(bounded_vars_in_head.get(arg_idx));
                 }
                 head_templates.add(new Compound("h", template_args));
+                long build_head_template_done = System.nanoTime();
+                headTemplateBuildCostInNano += build_head_template_done - build_head_template_begin;
             }
             q.close();
+            long query_done = System.nanoTime();
+            allEntailJplQueryCostInNano += query_done - query_begin;
         }
         Set<String> bounded_vars_in_head_only = new HashSet<>();
         for (String bv_head : bounded_vars_in_head) {
@@ -340,6 +375,7 @@ public class SincBasicWithJPL extends SInC<Compound> {
         );
 
         /* 计算positive entailments */
+        long positive_entailments_query_begin = System.nanoTime();
         Compound head_compound = new Compound(head_pred.functor, head_args);
         query_str = body_is_not_empty ? head_compound.toString() + ',' + query_str :
                 head_compound.toString();
@@ -349,7 +385,10 @@ public class SincBasicWithJPL extends SInC<Compound> {
         });
         Set<Compound> head_instances = new HashSet<>();
         for (Map<String, Term> binding: q) {
+            long substitute_begin = System.nanoTime();
             head_instances.add(SwiplUtil.substitute(head_compound, binding));
+            long substitute_done = System.nanoTime();
+            substituteCostInNano += substitute_done - substitute_begin;
         }
         q.close();
 
@@ -362,6 +401,10 @@ public class SincBasicWithJPL extends SInC<Compound> {
                 already_entailed++;
             }
         }
+        long positive_entailments_query_done = System.nanoTime();
+        preComputingCostInNano += all_entailments_query_begin - pre_computing_start;
+        allEntailQueryCostInNano += positive_entailments_query_begin - all_entailments_query_begin;
+        posEntailQueryCostInNano += positive_entailments_query_done - positive_entailments_query_begin;
 
         /* 用HC剪枝 */
         double head_coverage = ((double) positive_entailments) / global_facts.size();
@@ -764,6 +807,31 @@ public class SincBasicWithJPL extends SInC<Compound> {
         return fact;
     }
 
+    @Override
+    public void showMonitoredInfo() {
+        System.out.println("\n- Monitored Info:");
+        System.out.println("Branch Progress:");
+        System.out.println("|r|\t#Ext\t#Org");
+        for (BranchInfo branch_info: branch_progress) {
+            System.out.printf("%d\t%d\t%d\n", branch_info.ruleSize, branch_info.extNum, branch_info.orgNum);
+        }
+
+        System.out.println("\nEval Rule Costs In Detail:");
+        System.out.println("----");
+        System.out.printf("T(ms) %10s %10s %10s %15s %10s %10s\n",
+                "Pre", "AllEntail", "+Entail", "AllEnt(JPL)", "HeadTmpl", "Substitute");
+        System.out.printf("      %10d %10d %10d %15d %10d %10d\n",
+                preComputingCostInNano / 1000000,
+                allEntailQueryCostInNano / 1000000,
+                posEntailQueryCostInNano / 1000000,
+                (allEntailJplQueryCostInNano - headTemplateBuildCostInNano) / 1000000,
+                headTemplateBuildCostInNano / 1000000,
+                substituteCostInNano / 1000000
+        );
+        System.out.println("----");
+        System.out.printf("Cache Hits: %d/%d\n", cacheHits, totalEvalNum);
+    }
+
     public static void main(String[] args) throws IOException {
         SincBasicWithJPL compressor = new SincBasicWithJPL(
                 1,
@@ -772,19 +840,20 @@ public class SincBasicWithJPL extends SInC<Compound> {
                 EvalMetric.CompressionRate,
 //                EvalMetric.InfoGain,
 //                "testData/familyRelation/FamilyRelationSimple(0.00)(10x).tsv",
-//                "testData/familyRelation/FamilyRelationMedium(0.00)(10x).tsv",
+                "testData/familyRelation/FamilyRelationMedium(0.00)(10x).tsv",
 //                "testData/RKB/Elti.tsv",
 //                "testData/RKB/Dunur.tsv",
 //                "testData/RKB/StudentLoan.tsv",
 //                "testData/RKB/dbpedia_factbook.tsv",
 //                "testData/RKB/dbpedia_lobidorg.tsv",
-                "testData/RKB/webkb.cornell.tsv",
+//                "testData/RKB/webkb.cornell.tsv",
 //                "testData/RKB/webkb.texas.tsv",
 //                "testData/RKB/webkb.washington.tsv",
 //                "testData/RKB/webkb.wisconsin.tsv",
                 false
         );
         compressor.run();
+        compressor.showMonitoredInfo();
 //        List<Rule> rules = compressor.dumpHypothesis();
 //        Set<Compound> start_set = compressor.dumpStartSet();
 //

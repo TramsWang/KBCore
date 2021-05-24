@@ -16,6 +16,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class SincBasicWithRKB extends SInC<Predicate> {
 
@@ -145,7 +146,7 @@ public class SincBasicWithRKB extends SInC<Predicate> {
 
     protected Rule findRuleHandler(Rule startRule) {
         /* 初始化Evaluation Cache */
-        Map<Rule, Eval> eval_cache = new HashMap<>();
+        ConcurrentMap<Rule, Eval> eval_cache = new ConcurrentHashMap<>();
         evalRule(startRule, eval_cache);
 
         /* 初始化beams */
@@ -166,21 +167,47 @@ public class SincBasicWithRKB extends SInC<Predicate> {
                 candidates.add(r);
                 Rule r_max = r;
 
-                /* 遍历r的扩展邻居 */
+                /* 遍历r的邻居，然后集中对所有邻居进行并行eval */
+                ThreadPoolExecutor thread_pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadNum);
                 List<Rule> extensions = findExtension(r, eval_cache);
+                List<Rule> origins = findOrigin(r, eval_cache);
+                for (Rule r_e: extensions) {
+                    thread_pool.execute(() -> evalRule(r_e, eval_cache));
+                }
+                for (Rule r_o: origins) {
+                    thread_pool.execute(() -> evalRule(r_o, eval_cache));
+                }
+
+                /* 在全部Evaluation结束之后比较得分 */
+                thread_pool.shutdown();
+                try {
+                    if (!thread_pool.awaitTermination(10, TimeUnit.MINUTES)) {
+                        /* 线程池到时前还有任务未完成 */
+//                        int running_tasks =
+                        List<Runnable> unscheduled_tasks = thread_pool.shutdownNow();
+                        System.out.printf(
+                                "[WARNING] Thread pool shutdown before all tasks finished. %d unscheduled.\n",
+                                unscheduled_tasks.size()
+                        );
+                        if (!thread_pool.awaitTermination(10, TimeUnit.SECONDS)) {
+                            System.err.println("Pool did not terminate");
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    thread_pool.shutdownNow();
+                    Thread.currentThread().interrupt();
+                }
                 for (Rule r_e : extensions) {
-                    if (r_e.getEval().value(evalType) > r.getEval().value(evalType)) {
+                    if (null != r_e.getEval() && r_e.getEval().value(evalType) > r.getEval().value(evalType)) {
                         candidates.add(r_e);
                         if (r_e.getEval().value(evalType) > r_max.getEval().value(evalType)) {
                             r_max = r_e;
                         }
                     }
                 }
-
-                /* 遍历r的前驱邻居 */
-                List<Rule> origins = findOrigin(r, eval_cache);
                 for (Rule r_o : origins) {
-                    if (r_o.getEval().value(evalType) > r.getEval().value(evalType)) {
+                    if (null != r_o.getEval() && r_o.getEval().value(evalType) > r.getEval().value(evalType)) {
                         candidates.add(r_o);
                         if (r_o.getEval().value(evalType) > r_max.getEval().value(evalType)) {
                             r_max = r_o;
@@ -208,7 +235,7 @@ public class SincBasicWithRKB extends SInC<Predicate> {
         }
     }
 
-    protected void evalRule(Rule rule, Map<Rule, Eval> evalCache) {
+    protected void evalRule(Rule rule, ConcurrentMap<Rule, Eval> evalCache) {
         Eval cache = evalCache.get(rule);
         if (null != cache) {
             rule.setEval(cache);
@@ -326,8 +353,6 @@ public class SincBasicWithRKB extends SInC<Predicate> {
 
     protected void checkThenAddRule(Collection<Rule> collection, Rule rule, Map<Rule, Eval> evalCache) {
         if (!rule.isInvalid()) {
-//            System.out.printf("\tEvaluating: %s\n", rule);
-            evalRule(rule, evalCache);
             collection.add(rule);
         }
     }
@@ -462,19 +487,19 @@ public class SincBasicWithRKB extends SInC<Predicate> {
 
     public static void main(String[] args) throws IOException {
         SincBasicWithRKB compressor = new SincBasicWithRKB(
-                1,
+                10,
                 3,
                 EvalMetric.CompressionCapacity,
 //                EvalMetric.CompressionRate,
 //                EvalMetric.InfoGain,
 //                "testData/familyRelation/FamilyRelationSimple(0.00)(10x).tsv",
-//                "testData/familyRelation/FamilyRelationMedium(0.00)(10x).tsv",
+                "testData/familyRelation/FamilyRelationMedium(0.00)(10x).tsv",
 //                "testData/RKB/Elti.tsv",
 //                "testData/RKB/Dunur.tsv",
 //                "testData/RKB/StudentLoan.tsv",
 //                "testData/RKB/dbpedia_factbook.tsv",
 //                "testData/RKB/dbpedia_lobidorg.tsv",
-                "testData/RKB/webkb.cornell.tsv",
+//                "testData/RKB/webkb.cornell.tsv",
 //                "testData/RKB/webkb.texas.tsv",
 //                "testData/RKB/webkb.washington.tsv",
 //                "testData/RKB/webkb.wisconsin.tsv",

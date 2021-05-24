@@ -89,9 +89,14 @@ public class ConstantStatistic {
                 "testData/familyRelation/FamilyRelationSimple(0.00)(10x).tsv",
                 "testData/familyRelation/FamilyRelationMedium(0.00)(10x).tsv",
                 "testData/RKB/Elti.tsv",
+                "testData/RKB/Dunur.tsv",
                 "testData/RKB/StudentLoan.tsv",
                 "testData/RKB/dbpedia_factbook.tsv",
                 "testData/RKB/dbpedia_lobidorg.tsv",
+                "testData/RKB/webkb.cornell.tsv",
+                "testData/RKB/webkb.texas.tsv",
+                "testData/RKB/webkb.washington.tsv",
+                "testData/RKB/webkb.wisconsin.tsv",
         };
 
         for (String bk_path: bk_paths) {
