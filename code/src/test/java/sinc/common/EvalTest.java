@@ -9,9 +9,9 @@ class EvalTest {
     public void testEvalMin() {
         Eval min = Eval.MIN;
         Eval[] evs = new Eval[]{
-                new Eval(0, 1, 2),
-                new Eval(100, 100, 2),
-                new Eval(100, 120, 3),
+                new Eval(null, 0, 1, 2),
+                new Eval(null, 100, 100, 2),
+                new Eval(null, 100, 120, 3),
                 Eval.MIN
         };
 

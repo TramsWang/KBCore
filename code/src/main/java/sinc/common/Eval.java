@@ -5,7 +5,7 @@ import java.util.Objects;
 public class Eval {
     private static class EvalMin extends Eval {
         private EvalMin() {
-            super(0, Double.POSITIVE_INFINITY, Integer.MAX_VALUE);
+            super(null, 0, Double.POSITIVE_INFINITY, Integer.MAX_VALUE);
         }
 
         @Override
@@ -23,6 +23,7 @@ public class Eval {
 
     private static final double COMP_RATIO_USEFUL_THRESHOLD = 0.5;
     private static final double COMP_CAPACITY_USEFUL_THRESHOLD = 0.0;
+    private static final double INFO_GAIN_USEFUL_THRESHOLD = 0.00;
 
     private final double posCnt;
     private final double negCnt;
@@ -31,8 +32,9 @@ public class Eval {
 
     private final double compRatio;
     private final double compCapacity;
+    private final double infoGain;
 
-    public Eval(double posCnt, double allCnt, int ruleSize) {
+    public Eval(Eval previousEval, double posCnt, double allCnt, int ruleSize) {
         this.posCnt = posCnt;
         this.negCnt = allCnt - posCnt;
         this.allCnt = allCnt;
@@ -42,14 +44,28 @@ public class Eval {
         this.compRatio = Double.isNaN(tmp_ratio) ? 0 : tmp_ratio;
 
         this.compCapacity = posCnt - negCnt - ruleSize;
+
+        if (0 == posCnt) {
+            this.infoGain = 0;
+        } else {
+            if (null == previousEval || 0 == previousEval.posCnt) {
+                this.infoGain = posCnt * Math.log(posCnt / allCnt);
+            } else {
+                this.infoGain = posCnt * (
+                        Math.log(posCnt / allCnt) - Math.log(previousEval.posCnt / previousEval.allCnt)
+                );
+            }
+        }
     }
 
     public double value(EvalMetric type) {
         switch (type) {
-            case CompressRatio:
+            case CompressionRate:
                 return compRatio;
             case CompressionCapacity:
                 return compCapacity;
+            case InfoGain:
+                return infoGain;
             default:
                 return 0;
         }
@@ -57,10 +73,12 @@ public class Eval {
 
     public boolean useful(EvalMetric type) {
         switch (type) {
-            case CompressRatio:
+            case CompressionRate:
                 return compRatio > COMP_RATIO_USEFUL_THRESHOLD;
             case CompressionCapacity:
                 return compCapacity > COMP_CAPACITY_USEFUL_THRESHOLD;
+            case InfoGain:
+                return infoGain > INFO_GAIN_USEFUL_THRESHOLD;
             default:
                 return false;
         }
@@ -69,7 +87,7 @@ public class Eval {
     @Override
     public String toString() {
         return String.format(
-                "(+)%f; (-)%f; |%d|; δ=%f; τ=%f", posCnt, negCnt, ruleSize, compCapacity, compRatio
+                "(+)%f; (-)%f; |%d|; δ=%f; τ=%f; h=%f", posCnt, negCnt, ruleSize, compCapacity, compRatio, infoGain
         );
     }
 

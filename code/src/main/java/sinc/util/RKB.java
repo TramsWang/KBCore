@@ -80,6 +80,16 @@ public class RKB {
         String sql2 = sql_builder2.toString();
         statement.executeUpdate(sql);
         statement.executeUpdate(sql2);
+        for (int i = 0; i < arity; i++) {
+            statement.executeUpdate(String.format(
+                    "CREATE INDEX %s_index_%d ON %s (C%d)", functor, i, functor, i
+            ));
+            statement.executeUpdate(String.format(
+                    "CREATE INDEX %s%s_index_%d ON %s%s (C%d)",
+                    functor, PROVED_TABLE_NAME_SUFFIX, i,
+                    functor, PROVED_TABLE_NAME_SUFFIX, i
+            ));
+        }
         statement.close();
         functor2ArityMap.put(functor, arity);
     }
@@ -224,7 +234,7 @@ public class RKB {
 
         /* Assign Eval */
         Eval eval = new Eval(
-                new_proofs, all_entailment_cnt - (all_proofs - new_proofs), rule.size()
+                rule.getEval(), new_proofs, all_entailment_cnt - (all_proofs - new_proofs), rule.size()
         );
         rule.setEval(eval);
         return eval;

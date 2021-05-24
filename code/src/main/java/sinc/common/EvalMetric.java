@@ -1,5 +1,5 @@
 package sinc.common;
 
 public enum EvalMetric {
-    CompressRatio, CompressionCapacity;
+    CompressionRate, CompressionCapacity, InfoGain
 }

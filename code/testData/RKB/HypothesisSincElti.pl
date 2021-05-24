@@ -1,0 +1,10 @@
+sister(X0,X1):-mother(X0,?),sister(X1,X0)
+brother(X1,X0):-sister(X0,X1),son(X1,?)
+husband(X1,X0):-wife(X0,X1)
+father(X0,X1):-husband(X0,?),daughter(X1,X0)
+person(?):-
+wife(X0,X1):-husband(X1,X0)
+elti(X1,X0):-elti(X0,X1),elti(?,X1)
+mother(X0,X1):-elti(X0,?),daughter(X1,X0)
+mother(X0,X1):-elti(?,X0),son(X1,X0)
+mother(X0,X1):-sister(X0,?),daughter(X1,X0)

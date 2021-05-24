@@ -326,7 +326,7 @@ public class SincBasicWithRKB extends SInC<Predicate> {
 
     protected void checkThenAddRule(Collection<Rule> collection, Rule rule, Map<Rule, Eval> evalCache) {
         if (!rule.isInvalid()) {
-            System.out.printf("\tEvaluating: %s\n", rule);
+//            System.out.printf("\tEvaluating: %s\n", rule);
             evalRule(rule, evalCache);
             collection.add(rule);
         }
@@ -458,6 +458,51 @@ public class SincBasicWithRKB extends SInC<Predicate> {
             args[arg_idx] = new Atom(fact.args[arg_idx].name);
         }
         return new Compound(fact.functor, args);
+    }
+
+    public static void main(String[] args) throws IOException {
+        SincBasicWithRKB compressor = new SincBasicWithRKB(
+                1,
+                3,
+                EvalMetric.CompressionCapacity,
+//                EvalMetric.CompressionRate,
+//                EvalMetric.InfoGain,
+//                "testData/familyRelation/FamilyRelationSimple(0.00)(10x).tsv",
+//                "testData/familyRelation/FamilyRelationMedium(0.00)(10x).tsv",
+//                "testData/RKB/Elti.tsv",
+//                "testData/RKB/Dunur.tsv",
+//                "testData/RKB/StudentLoan.tsv",
+//                "testData/RKB/dbpedia_factbook.tsv",
+//                "testData/RKB/dbpedia_lobidorg.tsv",
+                "testData/RKB/webkb.cornell.tsv",
+//                "testData/RKB/webkb.texas.tsv",
+//                "testData/RKB/webkb.washington.tsv",
+//                "testData/RKB/webkb.wisconsin.tsv",
+                false
+        );
+        compressor.run();
+//        List<Rule> rules = compressor.dumpHypothesis();
+//        Set<Compound> start_set = compressor.dumpStartSet();
+//
+//        PrintWriter writer = new PrintWriter("test.pl");
+//        for (Compound fact: start_set) {
+//            writer.println(fact);
+//        }
+//        for (Rule rule: rules) {
+//            writer.println(rule.toCompleteRuleString());
+//        }
+//        writer.close();
+
+//        try {
+//            if (compressor.validate()) {
+//                System.out.println("Validation Passed!");
+//            } else {
+//                System.err.println("[ERROR]Validation Failed!\n");
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            System.err.println("[ERROR]Validation Failed with Exception!\n");
+//        }
     }
 
 }

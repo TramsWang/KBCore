@@ -1,0 +1,271 @@
+brother	ali1	fatma
+brother	ali1	ismail
+brother	ali1	mehmet1
+brother	ali1	neriman
+brother	ali1	nesrin
+brother	ali2	mete
+brother	ali2	sevcan
+brother	alp	batuhan
+brother	anil	secil
+brother	batuhan	alp
+brother	cagdas	melis
+brother	erdem	nida
+brother	halis	murat2
+brother	ismail	ali1
+brother	ismail	fatma
+brother	ismail	mehmet1
+brother	ismail	neriman
+brother	ismail	nesrin
+brother	mehmet1	ali1
+brother	mehmet1	fatma
+brother	mehmet1	ismail
+brother	mehmet1	neriman
+brother	mehmet1	nesrin
+brother	mete	ali2
+brother	mete	sevcan
+brother	murat1	mediha2
+brother	murat2	halis
+brother	sadullah	firdevs
+brother	sadullah	yildirim
+brother	yildirim	firdevs
+brother	yildirim	sadullah
+brother	yusuf2	dilber
+brother	yusuf3	zeynep
+daughter	dilber	ali1
+daughter	dilber	ayse
+daughter	dilek	cemile
+daughter	dilek	mehmet1
+daughter	esra	sibel
+daughter	esra	yusuf2
+daughter	fatma	mediha1
+daughter	fatma	yusuf1
+daughter	firdevs	huseyin
+daughter	firdevs	neriman
+daughter	kubra	cemile
+daughter	kubra	mehmet1
+daughter	mediha2	ayten
+daughter	mediha2	ismail
+daughter	melis	nalan
+daughter	melis	sadullah
+daughter	neriman	mediha1
+daughter	neriman	yusuf1
+daughter	nesrin	mediha1
+daughter	nesrin	yusuf1
+daughter	nida	kubra
+daughter	nida	muhammer
+daughter	secil	firdevs
+daughter	secil	levent
+daughter	sevcan	fatma
+daughter	sevcan	mehmet2
+daughter	zeynep	bedriye
+daughter	zeynep	yildirim
+elti	ayse	ayten
+elti	ayse	cemile
+elti	ayten	ayse
+elti	ayten	cemile
+elti	bedriye	nalan
+elti	cemile	ayse
+elti	cemile	ayten
+elti	nalan	bedriye
+father	ali1	dilber
+father	ali1	yusuf2
+father	gunay	halis
+father	gunay	murat2
+father	huseyin	firdevs
+father	huseyin	sadullah
+father	huseyin	yildirim
+father	ismail	mediha2
+father	ismail	murat1
+father	levent	anil
+father	levent	secil
+father	mehmet1	dilek
+father	mehmet1	kubra
+father	mehmet2	ali2
+father	mehmet2	mete
+father	mehmet2	sevcan
+father	muhammer	erdem
+father	muhammer	nida
+father	muhittin	yavuz
+father	recep	alp
+father	recep	batuhan
+father	sadullah	cagdas
+father	sadullah	melis
+father	yildirim	yusuf3
+father	yildirim	zeynep
+father	yusuf1	ali1
+father	yusuf1	fatma
+father	yusuf1	ismail
+father	yusuf1	mehmet1
+father	yusuf1	neriman
+father	yusuf1	nesrin
+father	yusuf2	esra
+husband	ali1	ayse
+husband	gunay	nesrin
+husband	huseyin	neriman
+husband	ismail	ayten
+husband	levent	firdevs
+husband	mehmet1	cemile
+husband	mehmet2	fatma
+husband	muhammer	kubra
+husband	muhittin	dilber
+husband	recep	mediha2
+husband	sadullah	nalan
+husband	yildirim	bedriye
+husband	yusuf1	mediha1
+husband	yusuf2	sibel
+mother	ayse	dilber
+mother	ayse	yusuf2
+mother	ayten	mediha2
+mother	ayten	murat1
+mother	bedriye	yusuf3
+mother	bedriye	zeynep
+mother	cemile	dilek
+mother	cemile	kubra
+mother	dilber	yavuz
+mother	fatma	ali2
+mother	fatma	mete
+mother	fatma	sevcan
+mother	firdevs	anil
+mother	firdevs	secil
+mother	kubra	erdem
+mother	kubra	nida
+mother	mediha1	ali1
+mother	mediha1	fatma
+mother	mediha1	ismail
+mother	mediha1	mehmet1
+mother	mediha1	neriman
+mother	mediha1	nesrin
+mother	mediha2	alp
+mother	mediha2	batuhan
+mother	nalan	cagdas
+mother	nalan	melis
+mother	neriman	firdevs
+mother	neriman	sadullah
+mother	neriman	yildirim
+mother	nesrin	halis
+mother	nesrin	murat2
+mother	sibel	esra
+person	ali1
+person	ali2
+person	alp
+person	anil
+person	ayse
+person	ayten
+person	batuhan
+person	bedriye
+person	cagdas
+person	cemile
+person	dilber
+person	dilek
+person	erdem
+person	esra
+person	fatma
+person	firdevs
+person	gunay
+person	halis
+person	huseyin
+person	ismail
+person	kubra
+person	levent
+person	mediha1
+person	mediha2
+person	mehmet1
+person	mehmet2
+person	melis
+person	mete
+person	muhammer
+person	muhittin
+person	murat1
+person	murat2
+person	nalan
+person	neriman
+person	nesrin
+person	nida
+person	recep
+person	sadullah
+person	secil
+person	sevcan
+person	sibel
+person	yavuz
+person	yildirim
+person	yusuf1
+person	yusuf2
+person	yusuf3
+person	zeynep
+sister	dilber	yusuf2
+sister	dilek	kubra
+sister	fatma	ali1
+sister	fatma	ismail
+sister	fatma	mehmet1
+sister	fatma	neriman
+sister	fatma	nesrin
+sister	firdevs	sadullah
+sister	firdevs	yildirim
+sister	kubra	dilek
+sister	mediha2	murat1
+sister	melis	cagdas
+sister	neriman	ali1
+sister	neriman	fatma
+sister	neriman	ismail
+sister	neriman	mehmet1
+sister	neriman	nesrin
+sister	nesrin	ali1
+sister	nesrin	fatma
+sister	nesrin	ismail
+sister	nesrin	mehmet1
+sister	nesrin	neriman
+sister	nida	erdem
+sister	secil	anil
+sister	sevcan	ali2
+sister	sevcan	mete
+sister	zeynep	yusuf3
+son	ali1	mediha1
+son	ali1	yusuf1
+son	ali2	fatma
+son	ali2	mehmet2
+son	alp	mediha2
+son	alp	recep
+son	anil	firdevs
+son	anil	levent
+son	batuhan	mediha2
+son	batuhan	recep
+son	cagdas	nalan
+son	cagdas	sadullah
+son	erdem	kubra
+son	erdem	muhammer
+son	halis	gunay
+son	halis	nesrin
+son	ismail	mediha1
+son	ismail	yusuf1
+son	mehmet1	mediha1
+son	mehmet1	yusuf1
+son	mete	fatma
+son	mete	mehmet2
+son	murat1	ayten
+son	murat1	ismail
+son	murat2	gunay
+son	murat2	nesrin
+son	sadullah	huseyin
+son	sadullah	neriman
+son	yavuz	dilber
+son	yavuz	muhittin
+son	yildirim	huseyin
+son	yildirim	neriman
+son	yusuf2	ali1
+son	yusuf2	ayse
+son	yusuf3	bedriye
+son	yusuf3	yildirim
+wife	ayse	ali1
+wife	ayten	ismail
+wife	bedriye	yildirim
+wife	cemile	mehmet1
+wife	dilber	muhittin
+wife	fatma	mehmet2
+wife	firdevs	levent
+wife	kubra	muhammer
+wife	mediha1	yusuf1
+wife	mediha2	recep
+wife	nalan	sadullah
+wife	neriman	huseyin
+wife	nesrin	gunay
+wife	sibel	yusuf2

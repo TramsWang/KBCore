@@ -461,7 +461,7 @@ class RKBTest {
                         TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED, TABLE_CONNECTED
                 ), sql4all_pos
         );
-        assertEquals(new Eval(6, 782, 0), eval);
+        assertEquals(new Eval(null,6, 782, 0), eval);
 
         Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
         predicate1.args[0] = new Constant(CONSTANT_ID, "a");
@@ -540,7 +540,7 @@ class RKBTest {
                         TABLE_CONNECTED
                 ), sql4all_pos
         );
-        assertEquals(new Eval(4, 28, 1), eval);
+        assertEquals(new Eval(null,4, 28, 1), eval);
 
         Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
         predicate1.args[0] = new Constant(CONSTANT_ID, "e");
@@ -603,7 +603,7 @@ class RKBTest {
                         TABLE_CONNECTED, TABLE_CONNECTED
                 ), sql4all_pos
         );
-        assertEquals(new Eval(0, 28, 1), eval);
+        assertEquals(new Eval(null,0, 28, 1), eval);
         assertTrue(query4Predicates(sql4all_pos, TABLE_CONNECTED, ARITY_CONNECTED).isEmpty());
         assertTrue(query4Predicates(sql4new_pos, TABLE_CONNECTED, ARITY_CONNECTED).isEmpty());
 
@@ -659,7 +659,7 @@ class RKBTest {
                         TABLE_CONNECTED_PROVED
                 ), sql4new_pos
         );
-        assertEquals(new Eval(2, 2, 2), eval);
+        assertEquals(new Eval(null,2, 2, 2), eval);
 
         Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
         predicate1.args[0] = new Constant(CONSTANT_ID, "a");
@@ -753,7 +753,7 @@ class RKBTest {
                         TABLE_CONNECTED_PROVED
                 ), sql4new_pos
         );
-        assertEquals(new Eval(3, 3, 3), eval);
+        assertEquals(new Eval(null,3, 3, 3), eval);
 
         Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
         predicate1.args[0] = new Constant(CONSTANT_ID, "a");
@@ -839,7 +839,7 @@ class RKBTest {
                         TABLE_MALE_PROVED
                 ), sql4new_pos
         );
-        assertEquals(new Eval(2, 2, 1), eval);
+        assertEquals(new Eval(null,2, 2, 1), eval);
 
         Predicate predicate1 = new Predicate(TABLE_MALE, ARITY_MALE);
         predicate1.args[0] = new Constant(CONSTANT_ID, "tom");
@@ -912,7 +912,7 @@ class RKBTest {
                         TABLE_FEMALE_PROVED
                 ), sql4new_pos
         );
-        assertEquals(new Eval(1, 1, 1), eval);
+        assertEquals(new Eval(null,1, 1, 1), eval);
 
         Predicate predicate1 = new Predicate(TABLE_FEMALE, ARITY_FEMALE);
         predicate1.args[0] = new Constant(CONSTANT_ID, "amie");
@@ -993,7 +993,7 @@ class RKBTest {
                         TABLE_MALE_PROVED
                 ), sql4new_pos
         );
-        assertEquals(new Eval(0, 1, 1), eval);
+        assertEquals(new Eval(null,0, 1, 1), eval);
         assertTrue(query4Predicates(sql4new_pos, TABLE_MALE, ARITY_MALE).isEmpty());
 
         assertEquals(
@@ -1056,7 +1056,7 @@ class RKBTest {
                         TABLE_MALE_PROVED
                 ), sql4new_pos
         );
-        assertEquals(new Eval(1, 1, 2), eval);
+        assertEquals(new Eval(null,1, 1, 2), eval);
 
         Predicate predicate1 = new Predicate(TABLE_MALE, ARITY_MALE);
         predicate1.args[0] = new Constant(CONSTANT_ID, "tom");
@@ -1125,7 +1125,7 @@ class RKBTest {
                         TABLE_FATHER_PROVED
                 ), sql4new_pos
         );
-        assertEquals(new Eval(1, 56, 1), eval);
+        assertEquals(new Eval(null,1, 56, 1), eval);
 
         Predicate predicate1 = new Predicate(TABLE_FATHER, ARITY_FATHER);
         predicate1.args[0] = new Constant(CONSTANT_ID, "jerry");
@@ -1181,7 +1181,7 @@ class RKBTest {
                         TABLE_ROAD_PROVED
                 ), sql4new_pos
         );
-        assertEquals(new Eval(1, 21952, 2), eval);
+        assertEquals(new Eval(null,1, 21952, 2), eval);
 
         Predicate predicate1 = new Predicate(TABLE_ROAD, ARITY_ROAD);
         predicate1.args[0] = new Constant(CONSTANT_ID, "上海外环");
@@ -1253,7 +1253,7 @@ class RKBTest {
                         TABLE_ROAD_PROVED
                 ), sql4new_pos
         );
-        assertEquals(new Eval(1, 1568, 4), eval);
+        assertEquals(new Eval(null,1, 1568, 4), eval);
 
         Predicate predicate1 = new Predicate(TABLE_ROAD, ARITY_ROAD);
         predicate1.args[0] = new Constant(CONSTANT_ID, "上海外环");
@@ -1344,7 +1344,7 @@ class RKBTest {
         rule2.boundFreeVar2Constant(0, 0, CONSTANT_ID, "e");
         assertEquals(String.format("(null)%s(e,?):-", TABLE_CONNECTED), rule2.toString());
         Eval eval = kb.evalRule(rule2);
-        assertEquals(new Eval(2, 26, 1), eval);
+        assertEquals(new Eval(null,2, 26, 1), eval);
 
         Predicate predicate1 = new Predicate(TABLE_CONNECTED, ARITY_CONNECTED);
         predicate1.args[0] = new Constant(CONSTANT_ID, "e");

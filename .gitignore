@@ -15,10 +15,11 @@
 !/code/testData/diffKB/
 !/code/testData/familyRelation/
 /code/testData/familyRelation/*
-!/code/testData/familyRelation/HypothesisHumanSimple.amie
-!/code/testData/familyRelation/HypothesisHumanMedium.amie
-!/code/testData/familyRelation/HypothesisHumanSimple.pl
-!/code/testData/familyRelation/HypothesisHumanMedium.pl
+!/code/testData/familyRelation/Hypothesis*.pl
+!/code/testData/RKB/
+/code/testData/RKB/*
+!/code/testData/RKB/*.tsv
+!/code/testData/RKB/Hypothesis*.pl
 !/code/pom.xml
 
 ### Experiments ###

@@ -277,6 +277,7 @@ public class SincBasicWithJPL extends SInC<Compound> {
         if (head_pred.arity() == free_var_cnt_in_head) {
             rule.setEval(
                     new Eval(
+                            rule.getEval(),
                             cur_facts.size(),
                             Math.pow(constants.size(), head_pred.arity()) -
                                     global_facts.size() + cur_facts.size(),
@@ -370,7 +371,9 @@ public class SincBasicWithJPL extends SInC<Compound> {
             return;
         }
 
-        rule.setEval(new Eval(positive_entailments, all_entailments - already_entailed, rule.size()));
+        rule.setEval(new Eval(
+                rule.getEval(), positive_entailments, all_entailments - already_entailed, rule.size())
+        );
         evalCache.put(rule, rule.getEval());
     }
 
@@ -476,7 +479,7 @@ public class SincBasicWithJPL extends SInC<Compound> {
 
     protected void checkThenAddRule(Collection<Rule> collection, Rule rule, Map<Rule, Eval> evalCache) {
         if (!rule.isInvalid()) {
-            System.out.printf("\tEvaluating: %s\n", rule);
+//            System.out.printf("\tEvaluating: %s\n", rule);
             evalRule(rule, evalCache);
             collection.add(rule);
         }
@@ -623,6 +626,7 @@ public class SincBasicWithJPL extends SInC<Compound> {
                     removed_cnt++;
                 }
             } else {
+                // TODO: 这里有问题，如果规则是： head(X,X):- 则不能找到任何positive example
                 /* 如果head中带有free var需要遍历所有可能值 */
                 Query q_4_head_grounding = new Query(":", new Term[]{
                         new Atom(PrologModule.GLOBAL.getSessionName()), head_compound
@@ -638,6 +642,9 @@ public class SincBasicWithJPL extends SInC<Compound> {
                 }
                 q_4_head_grounding.close();
             }
+        }
+        if (0 == removed_cnt) {
+            throw new Error("Accepted Rule Should Remove Something...");
         }
         System.out.printf("Update: %d removed\n", removed_cnt);
     }
@@ -761,10 +768,20 @@ public class SincBasicWithJPL extends SInC<Compound> {
         SincBasicWithJPL compressor = new SincBasicWithJPL(
                 1,
                 3,
-                EvalMetric.CompressionCapacity,
-//                "FamilyRelationMedium(0.00)(10x).tsv",
-//                "../RKB/Elti.tsv",
-                "../RKB/StudentLoan.tsv",
+//                EvalMetric.CompressionCapacity,
+                EvalMetric.CompressionRate,
+//                EvalMetric.InfoGain,
+//                "testData/familyRelation/FamilyRelationSimple(0.00)(10x).tsv",
+//                "testData/familyRelation/FamilyRelationMedium(0.00)(10x).tsv",
+//                "testData/RKB/Elti.tsv",
+//                "testData/RKB/Dunur.tsv",
+//                "testData/RKB/StudentLoan.tsv",
+//                "testData/RKB/dbpedia_factbook.tsv",
+//                "testData/RKB/dbpedia_lobidorg.tsv",
+                "testData/RKB/webkb.cornell.tsv",
+//                "testData/RKB/webkb.texas.tsv",
+//                "testData/RKB/webkb.washington.tsv",
+//                "testData/RKB/webkb.wisconsin.tsv",
                 false
         );
         compressor.run();
