@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Rule {
     private final List<Predicate> rule;
-    private final List<sinc.common.Variable> boundedVars;  // Bounded vars use non-negative ids(list index)
+    private final List<Variable> boundedVars;  // Bounded vars use non-negative ids(list index)
     private final List<Integer> boundedVarCnts;
     private RuleFingerPrint fingerPrint;
     private int equivConds;
@@ -82,7 +82,7 @@ public class Rule {
         Predicate predicate1 = rule.get(predIdx1);
         Predicate predicate2 = rule.get(predIdx2);
         if (null == predicate1.args[argIdx1] && null == predicate2.args[argIdx2]) {
-            sinc.common.Variable new_var = new sinc.common.Variable(boundedVars.size());
+            Variable new_var = new Variable(boundedVars.size());
             predicate1.args[argIdx1] = new_var;
             predicate2.args[argIdx2] = new_var;
             boundedVars.add(new_var);
