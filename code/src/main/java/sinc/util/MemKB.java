@@ -9,6 +9,7 @@ public class MemKB {
     private final Map<String, Set<Predicate>> functor2Facts = new HashMap<>();
     private final Map<String, Map<String, Set<Predicate>>[]> functor2ArgIdx = new HashMap<>();
     private final Set<String> constants = new HashSet<>();
+    private final Set<Predicate> provedFacts = new HashSet<>();
 
     public void addFact(Predicate predicate) {
         /* 添加到functor索引 */
@@ -56,6 +57,18 @@ public class MemKB {
 
     public Set<String> getValueSet(String functor, int argIdx) {
         return functor2ArgIdx.get(functor)[argIdx].keySet();
+    }
+
+    public Map<String, Set<Predicate>> getIndices(String functor, int argIdx) {
+        return functor2ArgIdx.get(functor)[argIdx];
+    }
+
+    public void proveFact(Predicate fact) {
+        provedFacts.add(fact);
+    }
+
+    public boolean hasProved(Predicate predicate) {
+        return provedFacts.contains(predicate);
     }
 
     public Iterator<Predicate> factIterator() {
