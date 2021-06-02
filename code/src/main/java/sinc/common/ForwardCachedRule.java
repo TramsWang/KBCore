@@ -20,7 +20,8 @@ public class ForwardCachedRule {
     /* 记录符合条件的grounding的中间结果 */
     private static class PredicateCache {
         public final Predicate predicate;
-        public Set<Predicate> inclusion;
+        public Set<Predicate> inclusion;  /* 对这个Set的操作仅限于读取以及替换，不要向其中添加或删除元素，
+                                             这样可以做到copy on write */
 
         public PredicateCache(Predicate predicate) {
             this.predicate = predicate;
@@ -29,19 +30,18 @@ public class ForwardCachedRule {
 
         public PredicateCache(PredicateCache another) {
             this.predicate = new Predicate(another.predicate);
-            this.inclusion = new HashSet<>(another.inclusion);
+            this.inclusion = another.inclusion;  // copy on write
         }
     }
     private final MemKB kb;
-    private final Set<ForwardCachedRule> cache;
+    private final Set<RuleFingerPrint> cache;
     private final List<List<PredicateCache>> groundings = new LinkedList<>();
     private final List<List<PredicateCache>> groundingsBody = new LinkedList<>();
 
-    public ForwardCachedRule(MemKB kb, String headFunctor, Set<ForwardCachedRule> cache) {
+    public ForwardCachedRule(MemKB kb, String headFunctor, Set<RuleFingerPrint> cache) {
         structure = new ArrayList<>();
         boundedVars = new ArrayList<>();
         boundedVarCnts = new ArrayList<>();
-        fingerPrint = new RuleFingerPrint(structure);
         equivConds = 0;
         eval = null;
         this.kb = kb;
@@ -51,14 +51,16 @@ public class ForwardCachedRule {
         final Predicate head = new Predicate(headFunctor, kb.getArity(headFunctor));
         structure.add(head);
         final PredicateCache head_cache = new PredicateCache(new Predicate(headFunctor, head.arity()));
-        head_cache.inclusion.addAll(kb.getAllFacts(headFunctor));
+        head_cache.inclusion = kb.getAllFacts(headFunctor);
         final List<PredicateCache> grounding = new ArrayList<>();
         grounding.add(head_cache);
         groundings.add(grounding);
 
         final List<PredicateCache> grounding_body = new ArrayList<>();
-        grounding_body.add(null);
+        grounding_body.add(null);  // 保持两种cache的index一致
         groundingsBody.add(grounding_body);
+
+        fingerPrint = new RuleFingerPrint(structure);
     }
 
     public ForwardCachedRule(ForwardCachedRule another) {
@@ -111,11 +113,11 @@ public class ForwardCachedRule {
      *   2. Trivial
      *   3. Independent Fragment
      *
-     * @return
+     * @return 是否invalid
      */
     private boolean isInvalid() {
         /* 在Cache中已经有了，就不用再计算了 */
-        if (!cache.add(this)) {
+        if (!cache.add(fingerPrint)) {
             return true;
         }
 
@@ -127,7 +129,7 @@ public class ForwardCachedRule {
         /* Trivial(用Set检查) */
         /* 1. 用Set检查 */
         /* 2. 为了防止进入和Head重复的情况，检查和Head存在相同位置相同参数的情况 */
-        Predicate head_pred = structure.get(0);
+        Predicate head_pred = structure.get(HEAD_PRED_IDX);
         {
             /* 先把Head中的变量进行统计加入disjoint set */
             List<Integer> bounded_var_ids = new ArrayList<>();
@@ -152,7 +154,7 @@ public class ForwardCachedRule {
         }
 
         Set<Predicate> predicate_set = new HashSet<>();
-        for (int pred_idx = 1; pred_idx < structure.size(); pred_idx++) {
+        for (int pred_idx = FIRST_BODY_PRED_IDX; pred_idx < structure.size(); pred_idx++) {
             Predicate body_pred = structure.get(pred_idx);
             if (head_pred.functor.equals(body_pred.functor)) {
                 for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
@@ -200,9 +202,6 @@ public class ForwardCachedRule {
     /**
      * 将当前已有的一个FV绑定成一个已有的BV
      *
-     * @param predIdx
-     * @param argIdx
-     * @param varId
      * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
      */
     public boolean boundFreeVar2ExistingVar(final int predIdx, final int argIdx, final int varId) {
@@ -218,10 +217,8 @@ public class ForwardCachedRule {
             return false;
         }
 
-        /* 更新整体Rule的Cache */
+        /* 更新Cache */
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, false);
-
-        /* 更新只含Body的Cache */
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, true);
 
         /* 更新Eval */
@@ -231,17 +228,14 @@ public class ForwardCachedRule {
 
     /**
      * 在对应的情况下更新Cache
-     * @param predIdx
-     * @param argIdx
-     * @param varId
-     * @param bodyOnly
+     *
+     * @param bodyOnly 更新的目标是否仅对于body
      */
     private void boundFreeVar2ExistingVarUpdateCache(
             final int predIdx, final int argIdx, final int varId, boolean bodyOnly
     ) {
         final int pred_idx_start;
         final List<List<PredicateCache>> grounding_list;
-//        final List<Set<Predicate>> exclusion_list;
         if (bodyOnly) {
             if (HEAD_PRED_IDX == predIdx) {
                 /* 修改不涉及body的时候，body的cache不需要更新 */
@@ -249,16 +243,13 @@ public class ForwardCachedRule {
             }
             pred_idx_start = FIRST_BODY_PRED_IDX;
             grounding_list = groundingsBody;
-//            exclusion_list = exclusionBody;
         } else {
             pred_idx_start = HEAD_PRED_IDX;
             grounding_list = groundings;
-//            exclusion_list = exclusion;
         }
 
-        final Predicate target_predicate = structure.get(predIdx);
-        final Set<String> possible_substitutions = kb.getValueSet(target_predicate.functor, argIdx);
         boolean found = false;
+        final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
         for (int pred_idx = pred_idx_start; pred_idx < structure.size() && !found; pred_idx++) {
             final Predicate predicate = structure.get(pred_idx);
 
@@ -269,52 +260,27 @@ public class ForwardCachedRule {
                         (pred_idx != predIdx || arg_idx != argIdx)) {  // 不要和刚设置的变量比较
                     found = true;
 
-                    /* 更新变量可用值 */
-                    final Set<String> original_substitutions = new HashSet<>();
-                    for (List<PredicateCache> grounding : grounding_list) {
-                        original_substitutions.add(grounding.get(pred_idx).predicate.args[arg_idx].name);
-                    }
-                    final Set<String> filtered_substitutions = setIntersection(
-                            possible_substitutions, original_substitutions
-                    );
-
-                    /* 根据当前pred过滤grounding */
-                    final Iterator<List<PredicateCache>> grounding_itr = grounding_list.iterator();
+                    /* 根据当前pred和新绑定的参数列过滤grounding */
                     while (grounding_itr.hasNext()) {
                         final List<PredicateCache> grounding = grounding_itr.next();
-                        final PredicateCache pred_cache = grounding.get(pred_idx);
-                        final Argument grounding_argument = pred_cache.predicate.args[arg_idx];
-                        boolean grounding_invalid = false;
-
-                        /* 如果变量值不在可选范围内，当前grounding不可取，删除 */
-                        if (!filtered_substitutions.contains(grounding_argument.name)) {
-                            grounding_invalid = true;
-                        } else {
-                            /* 根据新绑定的参数列过滤FV的集合 */
-                            final PredicateCache target_pred_cache = grounding.get(predIdx);
-                            final Iterator<Predicate> fv_itr = target_pred_cache.inclusion.iterator();
-                            while (fv_itr.hasNext()) {
-                                final Predicate fv_pred = fv_itr.next();
-                                final Argument fv_arg = fv_pred.args[argIdx];
-                                if (!grounding_argument.name.equals(fv_arg.name)) {
-                                    fv_itr.remove();
-                                }
-                            }
-
-                            /* 如果过滤之后FV集合为空，那么说明当前的grounding也不能用 */
-                            if (target_pred_cache.inclusion.isEmpty()) {
-                                grounding_invalid = true;
-                            } else {
-                                /* 如果当前grounding仍然满足要求，则更新对应参数 */
-                                target_pred_cache.predicate.args[argIdx] = grounding_argument;
+                        final PredicateCache compared_pred_cache = grounding.get(pred_idx);
+                        final Argument compared_argument = compared_pred_cache.predicate.args[arg_idx];
+                        final PredicateCache target_pred_cache = grounding.get(predIdx);
+                        final Set<Predicate> filtered_predicates = new HashSet<>();
+                        for (Predicate fv_pred: target_pred_cache.inclusion) {
+                            final Argument fv_arg = fv_pred.args[argIdx];
+                            if (compared_argument.name.equals(fv_arg.name)) {
+                                filtered_predicates.add(fv_pred);
                             }
                         }
 
-                        if (grounding_invalid) {
+                        if (filtered_predicates.isEmpty()) {
+                            /* 如果过滤之后FV集合为空，那么说明当前的grounding不能用 */
                             grounding_itr.remove();
-//                            for (int pred_idx2 = pred_idx_start; pred_idx2 < structure.size(); pred_idx2++) {
-//                                exclusion_list.get(pred_idx2).addAll(grounding.get(pred_idx2).inclusion);
-//                            }
+                        } else {
+                            /* 如果当前grounding仍然满足要求，则更新对应参数 */
+                            target_pred_cache.predicate.args[argIdx] = compared_argument;
+                            target_pred_cache.inclusion = filtered_predicates;  // copy on write
                         }
                     }
                     break;
@@ -324,7 +290,6 @@ public class ForwardCachedRule {
 
         if (bodyOnly && !found) {
             /* 如果body中没有找到其他相同的BV，那么目标参数对应的列应该按照所有值展开inclusion并设置对应的值 */
-            final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
             while (grounding_itr.hasNext()) {
                 final List<PredicateCache> grounding = grounding_itr.next();
                 final PredicateCache target_pred_cache = grounding.get(predIdx);
@@ -365,12 +330,9 @@ public class ForwardCachedRule {
     /**
      * 新添加一个Predicate，然后将其中的一个FV绑定成一个已有的BV
      *
-     * @param functor
-     * @param argIdx
-     * @param varId
      * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
      */
-    public boolean boundFreeVar2ExistingVar(String functor, int argIdx, int varId) {
+    public boolean boundFreeVar2ExistingVar(final String functor, final int argIdx, final int varId) {
         /* 改变Rule结构 */
         final Predicate target_predicate = new Predicate(functor, kb.getArity(functor));
         structure.add(target_predicate);
@@ -385,7 +347,6 @@ public class ForwardCachedRule {
         }
 
         /* 更新Cache */
-        final int pred_idx = structure.size() - 1;
         boundFreeVar2ExistingVarUpdateCache(argIdx, varId, false);
         boundFreeVar2ExistingVarUpdateCache(argIdx, varId, true);
 
@@ -396,9 +357,8 @@ public class ForwardCachedRule {
 
     /**
      * 在对应的情况下更新Cache
-     * @param argIdx
-     * @param varId
-     * @param bodyOnly
+     *
+     * @param bodyOnly 更新的目标是否仅对于body
      */
     private void boundFreeVar2ExistingVarUpdateCache(
             final int argIdx, final int varId, boolean bodyOnly
@@ -417,6 +377,7 @@ public class ForwardCachedRule {
         final Predicate target_predicate = structure.get(structure.size() - 1);
         final Map<String, Set<Predicate>> arg_indices_map = kb.getIndices(target_predicate.functor, argIdx);
         boolean found = false;
+        final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
         for (int pred_idx = pred_idx_start; pred_idx < structure.size() - 1 && !found; pred_idx++) {  // 不要和刚设置的变量比较
             final Predicate predicate = structure.get(pred_idx);
 
@@ -427,12 +388,11 @@ public class ForwardCachedRule {
                     found = true;
 
                     /* 根据当前pred过滤grounding */
-                    final Iterator<List<PredicateCache>> grounding_itr = grounding_list.iterator();
                     while (grounding_itr.hasNext()) {
                         final List<PredicateCache> grounding = grounding_itr.next();
-                        final PredicateCache pred_cache = grounding.get(pred_idx);
-                        final Argument grounding_argument = pred_cache.predicate.args[arg_idx];
-                        final Set<Predicate> inclusion = arg_indices_map.get(grounding_argument.name);
+                        final PredicateCache compared_pred_cache = grounding.get(pred_idx);
+                        final Argument compared_argument = compared_pred_cache.predicate.args[arg_idx];
+                        final Set<Predicate> inclusion = arg_indices_map.get(compared_argument.name);
 
                         if (null == inclusion) {
                             /* 对应变量在新参数中没有，删除grounding */
@@ -442,8 +402,8 @@ public class ForwardCachedRule {
                             final PredicateCache new_pred_cache = new PredicateCache(
                                     new Predicate(target_predicate.functor, target_predicate.arity())
                             );
-                            new_pred_cache.predicate.args[argIdx] = grounding_argument;
-                            new_pred_cache.inclusion.addAll(inclusion);
+                            new_pred_cache.predicate.args[argIdx] = compared_argument;
+                            new_pred_cache.inclusion = inclusion;  // copy on write
                             grounding.add(new_pred_cache);
                         }
                     }
@@ -454,7 +414,6 @@ public class ForwardCachedRule {
 
         if (bodyOnly && !found) {
             /* 如果在body中没有找到其他相同的BV，那么就根据所有值展开grounding */
-            final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
             while (grounding_itr.hasNext()) {
                 final List<PredicateCache> grounding = grounding_itr.next();
                 grounding_itr.remove();
@@ -475,13 +434,11 @@ public class ForwardCachedRule {
     /**
      * 将两个已有的FV绑定成同一个新的BV
      *
-     * @param predIdx1
-     * @param argIdx1
-     * @param predIdx2
-     * @param argIdx2
      * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
      */
-    public boolean boundFreeVars2NewVar(int predIdx1, int argIdx1, int predIdx2, int argIdx2) {
+    public boolean boundFreeVars2NewVar(
+            final int predIdx1, final int argIdx1, final int predIdx2, final int argIdx2
+    ) {
         /* 改变Rule结构 */
         final Predicate target_predicate1 = structure.get(predIdx1);
         final Predicate target_predicate2 = structure.get(predIdx2);
@@ -509,11 +466,8 @@ public class ForwardCachedRule {
 
     /**
      * 在对应的情况下更新Cache
-     * @param predIdx1
-     * @param argIdx1
-     * @param predIdx2
-     * @param argIdx2
-     * @param bodyOnly
+     *
+     * @param bodyOnly 更新的目标是否仅对于body
      */
     private void boundFreeVars2NewVarUpdateCache(
             final int predIdx1, final int argIdx1, final int predIdx2, final int argIdx2, final boolean bodyOnly
@@ -529,13 +483,12 @@ public class ForwardCachedRule {
             grounding_list = groundings;
         }
 
+        ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
         if (predIdx1 == predIdx2) {
             /* 在一张表内进行过滤 */
-            final int pred_idx = predIdx1;
-            ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
             while (grounding_itr.hasNext()) {
                 final List<PredicateCache> grounding = grounding_itr.next();
-                final PredicateCache target_pred_cache = grounding.get(pred_idx);
+                final PredicateCache target_pred_cache = grounding.get(predIdx1);
                 final Map<String, Set<Predicate>> inclusion_map = new HashMap<>();
                 for (Predicate predicate: target_pred_cache.inclusion) {
                     final Argument argument1 = predicate.args[argIdx1];
@@ -555,7 +508,7 @@ public class ForwardCachedRule {
                 grounding_itr.remove();
                 for (Map.Entry<String, Set<Predicate>> entry: inclusion_map.entrySet()) {
                     final List<PredicateCache> new_grounding = dupGrounding(grounding, bodyOnly);
-                    final PredicateCache new_target_pred_cache = new_grounding.get(pred_idx);
+                    final PredicateCache new_target_pred_cache = new_grounding.get(predIdx1);
                     final Constant constant = new Constant(CONSTANT_ARG_ID, entry.getKey());
                     new_target_pred_cache.predicate.args[argIdx1] = constant;
                     new_target_pred_cache.predicate.args[argIdx2] = constant;
@@ -565,7 +518,6 @@ public class ForwardCachedRule {
         } else {
             if (!bodyOnly || (HEAD_PRED_IDX != predIdx1 && HEAD_PRED_IDX != predIdx2)) {
                 /* 两张表一起过滤 */
-                final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
                 while (grounding_itr.hasNext()) {
                     final List<PredicateCache> grounding = grounding_itr.next();
 
@@ -586,7 +538,7 @@ public class ForwardCachedRule {
                     final PredicateCache target_pred_cache2 = grounding.get(predIdx2);
                     final Map<String, Set<Predicate>> inclusion_map2 = new HashMap<>();
                     for (Predicate predicate : target_pred_cache2.inclusion) {
-                        final Argument argument2 = predicate.args[argIdx1];
+                        final Argument argument2 = predicate.args[argIdx2];
                         inclusion_map2.compute(argument2.name, (constant, set) -> {
                             if (null == set) {
                                 set = new HashSet<>();
@@ -647,16 +599,16 @@ public class ForwardCachedRule {
                     arg_idx = argIdx2;
                 } else {
                     pred_idx = predIdx1;
-                    arg_idx = argIdx2;
+                    arg_idx = argIdx1;
                 }
-                final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
                 while (grounding_itr.hasNext()) {
                     final List<PredicateCache> grounding = grounding_itr.next();
                     final PredicateCache target_pred_cache = grounding.get(pred_idx);
 
                     final Map<String, Set<Predicate>> inclusion_map = new HashMap<>();
                     for (Predicate predicate: target_pred_cache.inclusion) {
-                        inclusion_map.compute(predicate.args[arg_idx].name, (constant, set) -> {
+                        final Argument argument = predicate.args[arg_idx];
+                        inclusion_map.compute(argument.name, (constant, set) -> {
                             if (null == set) {
                                 set = new HashSet<>();
                             }
@@ -665,13 +617,19 @@ public class ForwardCachedRule {
                         });
                     }
 
-                    grounding_itr.remove();
-                    for (Map.Entry<String, Set<Predicate>> entry: inclusion_map.entrySet()) {
-                        final List<PredicateCache> new_grounding = dupGrounding(grounding, true);
-                        final PredicateCache new_target_pred_cache = new_grounding.get(pred_idx);
-                        new_target_pred_cache.predicate.args[arg_idx] = new Constant(CONSTANT_ARG_ID, entry.getKey());
-                        new_target_pred_cache.inclusion = entry.getValue();
-                        grounding_itr.add(new_grounding);
+                    if (1 == inclusion_map.size()) {
+                        target_pred_cache.predicate.args[arg_idx] = new Constant(
+                                CONSTANT_ARG_ID, inclusion_map.keySet().iterator().next()
+                        );
+                    } else {
+                        grounding_itr.remove();
+                        for (Map.Entry<String, Set<Predicate>> entry : inclusion_map.entrySet()) {
+                            final List<PredicateCache> new_grounding = dupGrounding(grounding, true);
+                            final PredicateCache new_target_pred_cache = new_grounding.get(pred_idx);
+                            new_target_pred_cache.predicate.args[arg_idx] = new Constant(CONSTANT_ARG_ID, entry.getKey());
+                            new_target_pred_cache.inclusion = entry.getValue();
+                            grounding_itr.add(new_grounding);
+                        }
                     }
                 }
             }
@@ -681,13 +639,11 @@ public class ForwardCachedRule {
     /**
      * 添加一个新的Predicate，然后将其中的一个FV以及一个已有的FV绑定成同一个新的BV
      *
-     * @param functor
-     * @param argIdx1
-     * @param predIdx2
-     * @param argIdx2
      * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
      */
-    public boolean boundFreeVars2NewVar(String functor, int argIdx1, int predIdx2, int argIdx2) {
+    public boolean boundFreeVars2NewVar(
+            final String functor, final int argIdx1, final int predIdx2, final int argIdx2
+    ) {
         /* 改变Rule结构 */
         final Predicate target_predicate1 = new Predicate(functor, kb.getArity(functor));
         structure.add(target_predicate1);
@@ -716,10 +672,8 @@ public class ForwardCachedRule {
 
     /**
      * 在对应的情况下更新Cache
-     * @param argIdx1
-     * @param predIdx2
-     * @param argIdx2
-     * @param bodyOnly
+     *
+     * @param bodyOnly 更新的目标是否仅对于body
      */
     private void boundFreeVars2NewVarUpdateCache(
             final int argIdx1, final int predIdx2, final int argIdx2, final boolean bodyOnly
@@ -748,12 +702,13 @@ public class ForwardCachedRule {
                             new Predicate(target_predicate.functor, target_predicate.arity())
                     );
                     new_pred_cache.predicate.args[argIdx1] = new Constant(CONSTANT_ARG_ID, entry.getKey());
-                    new_pred_cache.inclusion.addAll(entry.getValue());
+                    new_pred_cache.inclusion = entry.getValue();  // copy on write
                     new_grounding.add(new_pred_cache);
                     grounding_itr.add(new_grounding);
                 }
             }
         } else {
+            /* 两张表一起过滤 */
             while (grounding_itr.hasNext()) {
                 final List<PredicateCache> grounding = grounding_itr.next();
 
@@ -761,7 +716,7 @@ public class ForwardCachedRule {
                 final PredicateCache target_pred_cache2 = grounding.get(predIdx2);
                 final Map<String, Set<Predicate>> inclusion_map2 = new HashMap<>();
                 for (Predicate predicate : target_pred_cache2.inclusion) {
-                    final Argument argument2 = predicate.args[argIdx1];
+                    final Argument argument2 = predicate.args[argIdx2];
                     inclusion_map2.compute(argument2.name, (constant, set) -> {
                         if (null == set) {
                             set = new HashSet<>();
@@ -802,7 +757,9 @@ public class ForwardCachedRule {
                         final Constant constant = new Constant(CONSTANT_ARG_ID, constant_symbol);
 
                         final List<PredicateCache> new_grounding = dupGrounding(grounding, bodyOnly);
-                        new_grounding.add(new PredicateCache(target_predicate));
+                        new_grounding.add(new PredicateCache(
+                                new Predicate(target_predicate.functor, target_predicate.arity())
+                        ));
 
                         final PredicateCache comparing_pred_cache = new_grounding.get(comparing_pred_idx);
                         comparing_pred_cache.predicate.args[comparing_arg_idx] = constant;
@@ -820,12 +777,9 @@ public class ForwardCachedRule {
     /**
      * 将一个已有的FV绑定成常量
      *
-     * @param predIdx
-     * @param argIdx
-     * @param constantSymbol
      * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
      */
-    public boolean boundFreeVar2Constant(int predIdx, int argIdx, String constantSymbol) {
+    public boolean boundFreeVar2Constant(final int predIdx, final int argIdx, final String constantSymbol) {
         /* 改变Rule结构 */
         final Predicate predicate = structure.get(predIdx);
         predicate.args[argIdx] = new Constant(CONSTANT_ARG_ID, constantSymbol);
@@ -848,10 +802,8 @@ public class ForwardCachedRule {
 
     /**
      * 在对应的情况下更新Cache
-     * @param predIdx
-     * @param argIdx
-     * @param constantSymbol
-     * @param bodyOnly
+     *
+     * @param bodyOnly 更新的目标是否仅对于body
      */
     private void boundFreeVar2ConstantUpdateCache(
             final int predIdx, final int argIdx, final String constantSymbol, boolean bodyOnly
@@ -873,13 +825,18 @@ public class ForwardCachedRule {
         while (grounding_itr.hasNext()) {
             final List<PredicateCache> grounding = grounding_itr.next();
             final PredicateCache target_pred_cache = grounding.get(predIdx);
-            target_pred_cache.inclusion.removeIf(
-                    predicate -> !constantSymbol.equals(predicate.args[argIdx].name)
-            );
-            if (target_pred_cache.inclusion.isEmpty()) {
+            final Set<Predicate> filtered_inclusion = new HashSet<>();
+            for (Predicate predicate: target_pred_cache.inclusion) {
+                final Argument argument = predicate.args[argIdx];
+                if (constantSymbol.equals(argument.name)) {
+                    filtered_inclusion.add(predicate);
+                }
+            }
+            if (filtered_inclusion.isEmpty()) {
                 grounding_itr.remove();
             } else {
                 target_pred_cache.predicate.args[argIdx] = constant;
+                target_pred_cache.inclusion = filtered_inclusion;  // copy on write
             }
         }
     }
@@ -899,7 +856,7 @@ public class ForwardCachedRule {
             }
         }
 
-        /* 在body中找出所有generative的变量位置 */
+        /* 在body中找出所有generative var 第一次出现的变量位置 */
         class PredArgPos {
             final int predIdx;
             final int argIdx;
@@ -925,7 +882,7 @@ public class ForwardCachedRule {
         for (final List<PredicateCache> grounding_body: groundingsBody) {
             final ArrayList<String> binding = new ArrayList<>(body_gv_pos.size());
             for (final PredArgPos pos: body_gv_pos) {
-                final Predicate body_pred = structure.get(pos.predIdx);
+                final Predicate body_pred = grounding_body.get(pos.predIdx).predicate;
                 final Argument argument = body_pred.args[pos.argIdx];
                 binding.add(argument.name);
             }
@@ -936,29 +893,34 @@ public class ForwardCachedRule {
         );
 
         /* 计算new pos entail的数量 */
-        int unproved_cnt = 0;
+        final Set<Predicate> new_pos_entails = new HashSet<>();
         if (0 == head_fv_cnt) {
             for (final List<PredicateCache> grounding : groundings) {
-                if (!kb.hasProved(grounding.get(HEAD_PRED_IDX).predicate)) {
-                    unproved_cnt++;
+                final Predicate predicate = grounding.get(HEAD_PRED_IDX).predicate;
+                if (!kb.hasProved(predicate)) {
+                    new_pos_entails.add(predicate);
                 }
             }
         } else {
             for (final List<PredicateCache> grounding: groundings) {
                 for (Predicate predicate: grounding.get(HEAD_PRED_IDX).inclusion) {
                     if (!kb.hasProved(predicate)) {
-                        unproved_cnt++;
+                        new_pos_entails.add(predicate);
                     }
                 }
             }
         }
 
         /* 更新eval */
-        eval = new Eval(null, unproved_cnt, all_entails, size());
+        eval = new Eval(null, new_pos_entails.size(), all_entails, size());
     }
 
+    /**
+     * @return 只返回那些首次被entail的head对应的一个grounding
+     */
     public List<Predicate[]> getGroundingsAndUpdateKb() {
-        List<Predicate[]> grounding_list = new ArrayList<>(groundings.size());
+        final List<Predicate[]> grounding_list = new ArrayList<>();
+        final Set<Predicate> entailed_head = new HashSet<>();
         for (final List<PredicateCache> grounding_cache: groundings) {
             /* 找出grounding body */
             final Predicate[] grounding_body = new Predicate[structure.size()];
@@ -970,30 +932,15 @@ public class ForwardCachedRule {
             /* 构造其所有的head */
             final PredicateCache head_pred_cache = grounding_cache.get(HEAD_PRED_IDX);
             for (Predicate head_pred: head_pred_cache.inclusion) {
-                final Predicate[] grounding = dupGrounding(grounding_body, true);
-                grounding_list.add(grounding);
-                kb.proveFact(head_pred);
+                if (!kb.hasProved(head_pred) && entailed_head.add(head_pred)) {
+                    final Predicate[] grounding = dupGrounding(grounding_body, true);
+                    grounding[HEAD_PRED_IDX] = head_pred;
+                    grounding_list.add(grounding);
+                    kb.proveFact(head_pred);
+                }
             }
         }
         return grounding_list;
-    }
-
-    private <T> HashSet<T> setIntersection(Set<T> s1, Set<T> s2) {
-        HashSet<T> result = new HashSet<>();
-        if (s1.size() <= s2.size()) {
-            for (T t: s1) {
-                if (s2.contains(t)) {
-                    result.add(t);
-                }
-            }
-        } else {
-            for (T t: s2) {
-                if (s1.contains(t)) {
-                    result.add(t);
-                }
-            }
-        }
-        return result;
     }
 
     private List<PredicateCache> dupGrounding(List<PredicateCache> grounding, boolean bodyOnly) {
