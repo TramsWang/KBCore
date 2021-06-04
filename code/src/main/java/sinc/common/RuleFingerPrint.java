@@ -8,18 +8,20 @@ public class RuleFingerPrint {
     private final String headFunctor;
     private final MultiSet<ArgIndicator>[] headEquivClasses;
 //    private final Set<MultiSet<ArgIndicator>> otherEquivClasses;
+    /* Todo: 'otherEquivClasses'可以不必是Multiset，可以用Set代替，因为Extension操作中不会引入Independent Fragment */
     private final MultiSet<MultiSet<ArgIndicator>> otherEquivClasses;
 
     public RuleFingerPrint(List<Predicate> rule) {
-        Predicate head_predicate = rule.get(0);
+        final Predicate head_predicate = rule.get(0);
         headFunctor = head_predicate.functor;
         headEquivClasses = new MultiSet[head_predicate.arity()];
         otherEquivClasses = new MultiSet<>();
-        Map<Integer, MultiSet<ArgIndicator>> bounded_equiv_classes = new HashMap<>();
+        final Map<Integer, MultiSet<ArgIndicator>> bounded_equiv_classes = new HashMap<>();
+        final Set<Integer> body_bv_ids = new HashSet<>();
 
         /* 先处理Head */
         for (int arg_idx = 0; arg_idx < head_predicate.arity(); arg_idx++) {
-            Argument argument = head_predicate.args[arg_idx];
+            final Argument argument = head_predicate.args[arg_idx];
             if (null == argument) {
                 /* Free Var */
                 headEquivClasses[arg_idx] = new MultiSet<>();
@@ -27,13 +29,13 @@ public class RuleFingerPrint {
             } else {
                 if (argument.isVar) {
                     final int tmp_idx = arg_idx;
-                    bounded_equiv_classes.compute(argument.id, (k, v) -> {
-                        if (null == v) {
-                            v = new MultiSet<>();
+                    bounded_equiv_classes.compute(argument.id, (id, mset) -> {
+                        if (null == mset) {
+                            mset = new MultiSet<>();
                         }
-                        v.add(new VarIndicator(head_predicate.functor, tmp_idx));
-                        headEquivClasses[tmp_idx] = v;
-                        return v;
+                        mset.add(new VarIndicator(head_predicate.functor, tmp_idx));
+                        headEquivClasses[tmp_idx] = mset;
+                        return mset;
                     });
                 } else {
                     /* Constant */
@@ -48,22 +50,27 @@ public class RuleFingerPrint {
         for (int pred_idx = 1; pred_idx < rule.size(); pred_idx++) {
             Predicate body_predicate = rule.get(pred_idx);
             for (int arg_idx = 0; arg_idx < body_predicate.arity(); arg_idx++) {
-                Argument argument = body_predicate.args[arg_idx];
+                final Argument argument = body_predicate.args[arg_idx];
                 if (null == argument) {
                     /* Free Var */
-                    MultiSet<ArgIndicator> new_equiv_class = new MultiSet<>();
+                    final MultiSet<ArgIndicator> new_equiv_class = new MultiSet<>();
                     new_equiv_class.add(new VarIndicator(body_predicate.functor, arg_idx));
                     otherEquivClasses.add(new_equiv_class);
                 } else {
                     if (argument.isVar) {
                         final int tmp_idx = arg_idx;
-                        bounded_equiv_classes.compute(argument.id, (k, v) -> {
-                            if (null == v) {
-                                v = new MultiSet<>();
-                                otherEquivClasses.add(v);
+                        bounded_equiv_classes.compute(argument.id, (id, mset) -> {
+                            if (null == mset) {
+                                mset = new MultiSet<>();
+                                // otherEquivClasses.add(mset);
+                                /* 这里不能直接添加mest，因为这个mest中的元素后面可能会变，导致其hash改变，从而使得equal()函数
+                                 * 的结果错误。
+                                 * Body中的所有BV对应的等价类应该等到完全构造完毕之后统一加入Multiset
+                                 */
+                                body_bv_ids.add(id);  // 标记body bv
                             }
-                            v.add(new VarIndicator(body_predicate.functor, tmp_idx));
-                            return v;
+                            mset.add(new VarIndicator(body_predicate.functor, tmp_idx));
+                            return mset;
                         });
                     } else {
                         /* Constant */
@@ -74,6 +81,10 @@ public class RuleFingerPrint {
                     }
                 }
             }
+        }
+
+        for (int id: body_bv_ids) {
+            otherEquivClasses.add(bounded_equiv_classes.get(id));
         }
     }
 

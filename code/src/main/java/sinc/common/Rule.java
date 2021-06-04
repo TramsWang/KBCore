@@ -173,8 +173,6 @@ public class Rule {
      * 以下几种情况为Invalid：
      *   1. Trivial
      *   2. Independent Fragment
-     *
-     * @return
      */
     public boolean isInvalid() {
         /* Independent Fragment(可能在找origin的时候出现) */
@@ -272,7 +270,10 @@ public class Rule {
 
     public String toCompleteRuleString() {
         /* 先把Free vars都加上 */
-        List<Predicate> copy = new ArrayList<>(this.rule);
+        List<Predicate> copy = new ArrayList<>(this.rule.size());
+        for (Predicate predicate: rule) {
+            copy.add(new Predicate(predicate));
+        }
         int free_vars = boundedVars.size();
         for (Predicate predicate: copy) {
             for (int i = 0; i < predicate.arity(); i++) {
@@ -287,7 +288,7 @@ public class Rule {
         StringBuilder builder = new StringBuilder(copy.get(0).toString());
         builder.append(":-");
         if (1 < copy.size()) {
-            builder.append(rule.get(1).toString());
+            builder.append(copy.get(1).toString());
             for (int i = 2; i < copy.size(); i++) {
                 builder.append(',').append(copy.get(i).toString());
             }

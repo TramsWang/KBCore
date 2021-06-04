@@ -1,6 +1,8 @@
 package sinc.util;
 
 import org.junit.jupiter.api.Test;
+import sinc.common.ArgIndicator;
+import sinc.common.VarIndicator;
 
 import java.util.HashSet;
 import java.util.List;
@@ -152,5 +154,28 @@ class MultiSetTest {
         e_set2.add("b");
 
         assertEquals(e_set, e_set2);
+    }
+
+    @Test
+    void testEquality() {
+        final String PARENT = "parent";
+        final String FATHER = "father";
+        final MultiSet<ArgIndicator> set1 = new MultiSet<>();
+        set1.add(new VarIndicator(PARENT, 1));
+        set1.add(new VarIndicator(FATHER, 0));
+
+        final MultiSet<ArgIndicator> set2 = new MultiSet<>();
+        set2.add(new VarIndicator(PARENT, 1));
+        set2.add(new VarIndicator(FATHER, 0));
+
+        assertEquals(set1, set2);
+
+        final MultiSet<MultiSet<ArgIndicator>> wrapper_set1 = new MultiSet<>();
+        wrapper_set1.add(set1);
+
+        final MultiSet<MultiSet<ArgIndicator>> wrapper_set2 = new MultiSet<>();
+        wrapper_set2.add(set2);
+
+        assertEquals(wrapper_set1, wrapper_set2);
     }
 }

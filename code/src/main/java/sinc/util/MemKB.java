@@ -71,6 +71,14 @@ public class MemKB {
         return provedFacts.contains(predicate);
     }
 
+    public boolean containsFact(Predicate predicate) {
+        return originalKB.contains(predicate);
+    }
+
+    public Set<String> allConstants() {
+        return constants;
+    }
+
     public Iterator<Predicate> factIterator() {
         return originalKB.iterator();
     }

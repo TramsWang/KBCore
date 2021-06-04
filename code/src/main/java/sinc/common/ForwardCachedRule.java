@@ -10,6 +10,16 @@ public class ForwardCachedRule {
     public static final int FIRST_BODY_PRED_IDX = HEAD_PRED_IDX + 1;
     public static final int CONSTANT_ARG_ID = -1;
 
+    public static class UpdateResult {
+        public final List<Predicate[]> groundings;
+        public final Set<Predicate> counterExamples;
+
+        public UpdateResult(List<Predicate[]> groundings, Set<Predicate> counterExamples) {
+            this.groundings = groundings;
+            this.counterExamples = counterExamples;
+        }
+    }
+
     private final List<Predicate> structure;
     private final List<Variable> boundedVars;  // Bounded vars use non-negative ids(list index)
     private final List<Integer> boundedVarCnts;
@@ -61,6 +71,8 @@ public class ForwardCachedRule {
         groundingsBody.add(grounding_body);
 
         fingerPrint = new RuleFingerPrint(structure);
+        updateEval();
+        cache.add(fingerPrint);
     }
 
     public ForwardCachedRule(ForwardCachedRule another) {
@@ -586,6 +598,8 @@ public class ForwardCachedRule {
                             final PredicateCache compared_pred_cache = new_grounding.get(compared_pred_idx);
                             compared_pred_cache.predicate.args[compared_arg_idx] = constant;
                             compared_pred_cache.inclusion = compared_inclusion;
+
+                            grounding_itr.add(new_grounding);
                         }
                     }
                 }
@@ -768,6 +782,8 @@ public class ForwardCachedRule {
                         final PredicateCache compared_pred_cache = new_grounding.get(compared_pred_idx);
                         compared_pred_cache.predicate.args[compared_arg_idx] = constant;
                         compared_pred_cache.inclusion = compared_inclusion;
+
+                        grounding_itr.add(new_grounding);
                     }
                 }
             }
@@ -893,32 +909,155 @@ public class ForwardCachedRule {
         );
 
         /* 计算new pos entail的数量 */
-        final Set<Predicate> new_pos_entails = new HashSet<>();
+        final Set<Predicate> newly_proved = new HashSet<>();
+        final Set<Predicate> already_proved = new HashSet<>();
         if (0 == head_fv_cnt) {
             for (final List<PredicateCache> grounding : groundings) {
                 final Predicate predicate = grounding.get(HEAD_PRED_IDX).predicate;
                 if (!kb.hasProved(predicate)) {
-                    new_pos_entails.add(predicate);
+                    newly_proved.add(predicate);
+                } else {
+                    already_proved.add(predicate);
                 }
             }
         } else {
             for (final List<PredicateCache> grounding: groundings) {
                 for (Predicate predicate: grounding.get(HEAD_PRED_IDX).inclusion) {
                     if (!kb.hasProved(predicate)) {
-                        new_pos_entails.add(predicate);
+                        newly_proved.add(predicate);
+                    } else {
+                        already_proved.add(predicate);
                     }
                 }
             }
         }
 
         /* 更新eval */
-        eval = new Eval(null, new_pos_entails.size(), all_entails, size());
+        /* all entailments中需要刨除已经被证明的，否则这些默认被算作了counter examples的数量 */
+        eval = new Eval(
+                null, newly_proved.size(), all_entails - already_proved.size(), size()
+        );
     }
 
     /**
      * @return 只返回那些首次被entail的head对应的一个grounding
      */
-    public List<Predicate[]> getGroundingsAndUpdateKb() {
+    public UpdateResult updateInKb() {
+        return new UpdateResult(findGroundings(), findCounterExamples());
+    }
+
+    private Set<Predicate> findCounterExamples() {
+        class GVBindingInfo {
+            final int bodyPredIdx;
+            final int bodyArgIdx;
+            final Integer[] headVarLocs;
+
+            public GVBindingInfo(int bodyPredIdx, int bodyArgIdx, Integer[] headVarLocs) {
+                this.bodyPredIdx = bodyPredIdx;
+                this.bodyArgIdx = bodyArgIdx;
+                this.headVarLocs = headVarLocs;
+            }
+        }
+        final Set<Predicate> counter_example_set = new HashSet<>();
+
+        /* 统计head中的变量信息 */
+        /* 如果是FV，则创建具体变量，方便替换 */
+        final Map<Integer, List<Integer>> head_var_2_loc_map = new HashMap<>();
+        int fv_id = boundedVars.size();
+        final Predicate head_pred = new Predicate(getHead());
+        for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
+            final Argument argument = head_pred.args[arg_idx];
+            if (null == argument) {
+//                final Variable fv = new Variable(fv_id);
+//                head_pred.args[arg_idx] = fv;
+                head_var_2_loc_map.put(fv_id, new ArrayList<>(Collections.singleton(arg_idx)));
+                fv_id++;
+            } else {
+                if (argument.isVar) {
+                    final int idx = arg_idx;
+                    head_var_2_loc_map.compute(argument.id, (id, locs) -> {
+                        if (null == locs) {
+                            locs = new ArrayList<>();
+                        }
+                        locs.add(idx);
+                        return locs;
+                    });
+                }
+            }
+        }
+
+        /* 在body中找出所有generative var 第一次出现的变量位置 */
+        final List<GVBindingInfo> body_gv_pos = new ArrayList<>();
+        for (int pred_idx = FIRST_BODY_PRED_IDX; pred_idx < structure.size(); pred_idx++) {
+            final Predicate body_pred = structure.get(pred_idx);
+            for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
+                final Argument argument = body_pred.args[arg_idx];
+                if (null != argument && argument.isVar) {
+                    List<Integer> head_var_locs = head_var_2_loc_map.remove(argument.id);
+                    if (null != head_var_locs) {
+                        body_gv_pos.add(new GVBindingInfo(
+                                pred_idx, arg_idx, head_var_locs.toArray(new Integer[0])
+                        ));
+                    }
+                }
+            }
+        }
+        final Integer[][] head_only_var_locs = new Integer[head_var_2_loc_map.size()][];
+        {
+            int i = 0;
+            for (List<Integer> loc_list: head_var_2_loc_map.values()) {
+                head_only_var_locs[i] = loc_list.toArray(new Integer[0]);
+                i++;
+            }
+        }
+
+        /* 根据Rule结构找Counter Example */
+        if (1 == structure.size()) {
+            /* 没有body */
+            if (0 == head_only_var_locs.length) {
+                /* head中全是常量 */
+                if (!kb.containsFact(head_pred)) {
+                    counter_example_set.add(head_pred);
+                }
+            } else {
+                /* head中有变量，而且全部当做自由变量处理 */
+                iterate4CounterExamples(counter_example_set, head_pred, 0, head_only_var_locs);
+            }
+        } else {
+            /* 找到所有head template */
+            final Set<Predicate> head_templates = new HashSet<>();
+            for (final List<PredicateCache> grounding_body : groundingsBody) {
+                final Predicate head_template = new Predicate(head_pred);
+                for (final GVBindingInfo pos : body_gv_pos) {
+                    final Predicate body_pred = grounding_body.get(pos.bodyPredIdx).predicate;
+                    final Argument argument = body_pred.args[pos.bodyArgIdx];
+                    for (int loc: pos.headVarLocs) {
+                        head_template.args[loc] = argument;
+                    }
+                }
+                head_templates.add(head_template);
+            }
+
+            /* 遍历head template 找反例 */
+            if (0 == head_only_var_locs.length) {
+                /* 不需要替换变量 */
+                for (Predicate head_template : head_templates) {
+                    if (!kb.containsFact(head_template)) {
+                        counter_example_set.add(head_template);
+                    }
+                }
+            } else {
+                /* 需要替换head中的变量 */
+                for (Predicate head_template: head_templates) {
+                    iterate4CounterExamples(counter_example_set, head_template, 0, head_only_var_locs);
+                }
+            }
+        }
+
+        return counter_example_set;
+    }
+
+    private List<Predicate[]> findGroundings() {
         final List<Predicate[]> grounding_list = new ArrayList<>();
         final Set<Predicate> entailed_head = new HashSet<>();
         for (final List<PredicateCache> grounding_cache: groundings) {
@@ -966,6 +1105,36 @@ public class ForwardCachedRule {
         return new_grounding;
     }
 
+    private void iterate4CounterExamples(
+            final Set<Predicate> counterExamples, final Predicate template, final int idx,
+            final Integer[][] varLocs
+    ) {
+        final Integer[] locations = varLocs[idx];
+        if (idx < varLocs.length - 1) {
+            /* 递归 */
+            for (String constant_symbol: kb.allConstants()) {
+                final Constant constant = new Constant(CONSTANT_ARG_ID, constant_symbol);
+                for (int loc: locations) {
+                    template.args[loc] = constant;
+                }
+                iterate4CounterExamples(
+                        counterExamples, template, idx + 1, varLocs
+                );
+            }
+        } else {
+            /* 已经到了最后的位置，不递归，完成后检查是否是Counter Example */
+            for (String constant_symbol: kb.allConstants()) {
+                final Constant constant = new Constant(CONSTANT_ARG_ID, constant_symbol);
+                for (int loc: locations) {
+                    template.args[loc] = constant;
+                }
+                if (!kb.containsFact(template)) {
+                    counterExamples.add(new Predicate(template));
+                }
+            }
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("(");
@@ -983,7 +1152,10 @@ public class ForwardCachedRule {
 
     public String toCompleteRuleString() {
         /* 先把Free vars都加上 */
-        List<Predicate> copy = new ArrayList<>(this.structure);
+        List<Predicate> copy = new ArrayList<>(this.structure.size());
+        for (Predicate predicate: structure) {
+            copy.add(new Predicate(predicate));
+        }
         int free_vars = boundedVars.size();
         for (Predicate predicate: copy) {
             for (int i = 0; i < predicate.arity(); i++) {
@@ -998,7 +1170,7 @@ public class ForwardCachedRule {
         StringBuilder builder = new StringBuilder(copy.get(0).toString());
         builder.append(":-");
         if (1 < copy.size()) {
-            builder.append(structure.get(1).toString());
+            builder.append(copy.get(1).toString());
             for (int i = 2; i < copy.size(); i++) {
                 builder.append(',').append(copy.get(i).toString());
             }
