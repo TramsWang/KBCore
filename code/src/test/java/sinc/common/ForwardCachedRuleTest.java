@@ -787,6 +787,134 @@ class ForwardCachedRuleTest {
     }
 
     @Test
+    void testFamilyRule8() {
+        final MemKB kb = kbFamily();
+        final Set<RuleFingerPrint> cache = new HashSet<>();
+
+        /* father(?, ?):- */
+        final ForwardCachedRule rule = new ForwardCachedRule(kb, FUNCTOR_FATHER, cache);
+        assertTrue(rule.toString().contains("father(?,?):-"));
+        assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-"));
+        assertEquals(
+                new Eval(null, 5, 16 * 16, 0),
+                rule.getEval()
+        );
+        assertEquals(0, rule.usedBoundedVars());
+        assertEquals(1, rule.length());
+        assertEquals(1, cache.size());
+
+        /* father(X, ?):- parent(?, X) */
+        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_PARENT, 1, 0, 0));
+        assertTrue(rule.toString().contains("father(X0,?):-parent(?,X0)"));
+        assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-parent(X2,X0)"));
+        assertEquals(
+                new Eval(null, 4, 8 * 16, 1),
+                rule.getEval()
+        );
+        assertEquals(1, rule.usedBoundedVars());
+        assertEquals(2, rule.length());
+        assertEquals(2, cache.size());
+
+        /* father(X, ?):- parent(?, X), parent(X, ?) */
+        assertTrue(rule.boundFreeVar2ExistingVar(FUNCTOR_PARENT, 0, 0));
+        assertTrue(rule.toString().contains("father(X0,?):-parent(?,X0),parent(X0,?)"));
+        assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-parent(X2,X0),parent(X0,X3)"));
+        assertEquals(
+                new Eval(null, 3, 3 * 16, 2),
+                rule.getEval()
+        );
+        assertEquals(1, rule.usedBoundedVars());
+        assertEquals(3, rule.length());
+        assertEquals(3, cache.size());
+        ForwardCachedRule.UpdateResult update_result = rule.updateInKb();
+        final Set<List<Predicate>> actual_grounding_set = new HashSet<>();
+        for (Predicate[] grounding: update_result.groundings) {
+            actual_grounding_set.add(new ArrayList<>(Arrays.asList(grounding)));
+        }
+        Predicate father1 = new Predicate(FUNCTOR_FATHER, ARITY_FATHER);
+        father1.args[0] = new Constant(CONST_ID, "f1");
+        father1.args[1] = new Constant(CONST_ID, "s1");
+        Predicate father2 = new Predicate(FUNCTOR_FATHER, ARITY_FATHER);
+        father2.args[0] = new Constant(CONST_ID, "f2");
+        father2.args[1] = new Constant(CONST_ID, "s2");
+        Predicate father3 = new Predicate(FUNCTOR_FATHER, ARITY_FATHER);
+        father3.args[0] = new Constant(CONST_ID, "f2");
+        father3.args[1] = new Constant(CONST_ID, "d2");
+        Predicate parent1 = new Predicate(FUNCTOR_PARENT, ARITY_PARENT);
+        parent1.args[0] = new Constant(CONST_ID, "f1");
+        parent1.args[1] = new Constant(CONST_ID, "s1");
+        Predicate parent2 = new Predicate(FUNCTOR_PARENT, ARITY_PARENT);
+        parent2.args[0] = new Constant(CONST_ID, "f1");
+        parent2.args[1] = new Constant(CONST_ID, "d1");
+        Predicate parent3 = new Predicate(FUNCTOR_PARENT, ARITY_PARENT);
+        parent3.args[0] = new Constant(CONST_ID, "f2");
+        parent3.args[1] = new Constant(CONST_ID, "s2");
+        Predicate parent4 = new Predicate(FUNCTOR_PARENT, ARITY_PARENT);
+        parent4.args[0] = new Constant(CONST_ID, "f2");
+        parent4.args[1] = new Constant(CONST_ID, "d2");
+        Predicate parent6 = new Predicate(FUNCTOR_PARENT, ARITY_PARENT);
+        parent6.args[0] = new Constant(CONST_ID, "g1");
+        parent6.args[1] = new Constant(CONST_ID, "f1");
+        Predicate parent7 = new Predicate(FUNCTOR_PARENT, ARITY_PARENT);
+        parent7.args[0] = new Constant(CONST_ID, "g2");
+        parent7.args[1] = new Constant(CONST_ID, "f2");
+        final Set<List<Predicate>> expected_grounding_set1 = new HashSet<>();
+        expected_grounding_set1.add(new ArrayList<>(Arrays.asList(father1, parent6, parent1)));
+        expected_grounding_set1.add(new ArrayList<>(Arrays.asList(father2, parent7, parent3)));
+        expected_grounding_set1.add(new ArrayList<>(Arrays.asList(father3, parent7, parent3)));
+        final Set<List<Predicate>> expected_grounding_set2 = new HashSet<>();
+        expected_grounding_set2.add(new ArrayList<>(Arrays.asList(father1, parent6, parent1)));
+        expected_grounding_set2.add(new ArrayList<>(Arrays.asList(father2, parent7, parent3)));
+        expected_grounding_set2.add(new ArrayList<>(Arrays.asList(father3, parent7, parent4)));
+        final Set<List<Predicate>> expected_grounding_set3 = new HashSet<>();
+        expected_grounding_set3.add(new ArrayList<>(Arrays.asList(father1, parent6, parent1)));
+        expected_grounding_set3.add(new ArrayList<>(Arrays.asList(father2, parent7, parent4)));
+        expected_grounding_set3.add(new ArrayList<>(Arrays.asList(father3, parent7, parent3)));
+        final Set<List<Predicate>> expected_grounding_set4 = new HashSet<>();
+        expected_grounding_set4.add(new ArrayList<>(Arrays.asList(father1, parent6, parent1)));
+        expected_grounding_set4.add(new ArrayList<>(Arrays.asList(father2, parent7, parent4)));
+        expected_grounding_set4.add(new ArrayList<>(Arrays.asList(father3, parent7, parent4)));
+        final Set<List<Predicate>> expected_grounding_set5 = new HashSet<>();
+        expected_grounding_set5.add(new ArrayList<>(Arrays.asList(father1, parent6, parent2)));
+        expected_grounding_set5.add(new ArrayList<>(Arrays.asList(father2, parent7, parent3)));
+        expected_grounding_set5.add(new ArrayList<>(Arrays.asList(father3, parent7, parent3)));
+        final Set<List<Predicate>> expected_grounding_set6 = new HashSet<>();
+        expected_grounding_set6.add(new ArrayList<>(Arrays.asList(father1, parent6, parent2)));
+        expected_grounding_set6.add(new ArrayList<>(Arrays.asList(father2, parent7, parent3)));
+        expected_grounding_set6.add(new ArrayList<>(Arrays.asList(father3, parent7, parent4)));
+        final Set<List<Predicate>> expected_grounding_set7 = new HashSet<>();
+        expected_grounding_set7.add(new ArrayList<>(Arrays.asList(father1, parent6, parent2)));
+        expected_grounding_set7.add(new ArrayList<>(Arrays.asList(father2, parent7, parent4)));
+        expected_grounding_set7.add(new ArrayList<>(Arrays.asList(father3, parent7, parent3)));
+        final Set<List<Predicate>> expected_grounding_set8 = new HashSet<>();
+        expected_grounding_set8.add(new ArrayList<>(Arrays.asList(father1, parent6, parent2)));
+        expected_grounding_set8.add(new ArrayList<>(Arrays.asList(father2, parent7, parent4)));
+        expected_grounding_set8.add(new ArrayList<>(Arrays.asList(father3, parent7, parent4)));
+        assertTrue(expected_grounding_set1.equals(actual_grounding_set) ||
+                expected_grounding_set2.equals(actual_grounding_set) ||
+                expected_grounding_set3.equals(actual_grounding_set) ||
+                expected_grounding_set4.equals(actual_grounding_set) ||
+                expected_grounding_set5.equals(actual_grounding_set) ||
+                expected_grounding_set6.equals(actual_grounding_set) ||
+                expected_grounding_set7.equals(actual_grounding_set) ||
+                expected_grounding_set8.equals(actual_grounding_set)
+        );
+        Set<Predicate> expected_counter_examples = new HashSet<>();
+        for (String arg1: new String[]{"f1", "f2", "m2"}) {
+            for (String arg2: kb.allConstants()) {
+                final Predicate counter_example = new Predicate(FUNCTOR_FATHER, ARITY_FATHER);
+                counter_example.args[0] = new Constant(CONST_ID, arg1);
+                counter_example.args[1] = new Constant(CONST_ID, arg2);
+                expected_counter_examples.add(counter_example);
+            }
+        }
+        expected_counter_examples.remove(father1);
+        expected_counter_examples.remove(father2);
+        expected_counter_examples.remove(father3);
+        assertEquals(expected_counter_examples, update_result.counterExamples);
+    }
+
+    @Test
     void testFamilyWithCopy1() {
         final MemKB kb = kbFamily();
         final Set<RuleFingerPrint> cache = new HashSet<>();
@@ -1016,16 +1144,47 @@ class ForwardCachedRuleTest {
 
     @Test
     void testValidity1() {
-        fail();
+        final MemKB kb = kbFamily();
+        final Set<RuleFingerPrint> cache = new HashSet<>();
+
         /* father(?,?):- */
+        final ForwardCachedRule rule = new ForwardCachedRule(kb, FUNCTOR_FATHER, cache);
+        assertTrue(rule.toString().contains("father(?,?):-"));
+        assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-"));
 
         /* #1: father(X,?) :- father(?,X) */
+        final ForwardCachedRule rule1 = new ForwardCachedRule(rule);
+        assertTrue(rule1.boundFreeVars2NewVar(FUNCTOR_FATHER, 1, 0, 0));
+        assertTrue(rule1.toString().contains("father(X0,?):-father(?,X0)"));
+        assertTrue(rule1.toCompleteRuleString().contains("father(X0,X1):-father(X2,X0)"));
+
         /* #1: father(X,Y) :- father(Y,X) */
+        assertTrue(rule1.boundFreeVars2NewVar(0, 1, 1, 0));
+        assertTrue(rule1.toString().contains("father(X0,X1):-father(X1,X0)"));
+        assertTrue(rule1.toCompleteRuleString().contains("father(X0,X1):-father(X1,X0)"));
 
         /* #2: father(X,?) :- father(X,?) [invalid] */
+        final ForwardCachedRule rule2 = new ForwardCachedRule(rule);
+        assertFalse(rule2.boundFreeVars2NewVar(FUNCTOR_FATHER, 0, 0, 0));
+    }
 
-        /* #3: father(X,?) :- father(?,X) */
-        /* #3: father(X,?) :- father(?,X), father(?,X) */
-        /* #3: father(X,?) :- father(Y,X), father(Y,X) [invalid] */
+    @Test
+    void testValidity2() {
+        final MemKB kb = kbFamily();
+        final Set<RuleFingerPrint> cache = new HashSet<>();
+
+        /* father(X,?) :- father(?,X) */
+        final ForwardCachedRule rule = new ForwardCachedRule(kb, FUNCTOR_FATHER, cache);
+        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, 1, 0, 0));
+        assertTrue(rule.toString().contains("father(X0,?):-father(?,X0)"));
+        assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-father(X2,X0)"));
+
+        /* father(X,?) :- father(?,X), father(?,X) */
+        assertTrue(rule.boundFreeVar2ExistingVar(FUNCTOR_FATHER, 1, 0));
+        assertTrue(rule.toString().contains("father(X0,?):-father(?,X0),father(?,X0)"));
+        assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-father(X2,X0),father(X3,X0)"));
+
+        /* father(X,?) :- father(Y,X), father(Y,X) [invalid] */
+        assertFalse(rule.boundFreeVars2NewVar(1, 0, 2, 0));
     }
 }
