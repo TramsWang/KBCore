@@ -1,6 +1,7 @@
 # Track ONLY source code project and experimental data
 /*
 !/code
+!/SInC2
 !/experiments
 !/doc
 !/README.md
@@ -21,6 +22,11 @@
 !/code/testData/RKB/*.tsv
 !/code/testData/RKB/Hypothesis*.pl
 !/code/pom.xml
+
+### Source Code Version 2 ###
+/SInC2/*
+!/SInC2/src/
+!/SInC2/pom.xml
 
 ### Experiments ###
 
