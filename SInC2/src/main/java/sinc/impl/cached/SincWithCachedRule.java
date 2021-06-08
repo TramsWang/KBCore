@@ -1,4 +1,4 @@
-package sinc.impl.basic;
+package sinc.impl.cached;
 
 import sinc.SInC;
 import sinc.SincConfig;
@@ -11,27 +11,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class SincWithJpl extends SInC {
+public class SincWithCachedRule extends SInC {
 
-    private final PrologKb kb = new PrologKb();
+    private final MemKB kb = new MemKB();
 
-    public SincWithJpl(SincConfig config, String bkPath, String dumpPath) {
+    public SincWithCachedRule(SincConfig config, String kbPath, String dumpPath) {
         super(
                 new SincConfig(
                         config.threads,
                         config.validation,
                         config.debug,
                         config.beamWidth,
-                        config.searchOrigins,
+                        false,
                         config.evalMetric,
                         config.minHeadCoverage,
                         config.minConstantProportion,
-                        false,
+                        true,
                         -1.0,
                         false,
                         false
                 ),
-                bkPath,
+                kbPath,
                 dumpPath
         );
     }
@@ -65,7 +65,7 @@ public class SincWithJpl extends SInC {
 
     @Override
     protected Rule getStartRule(String headFunctor, Set<RuleFingerPrint> cache) {
-        return new JplRule(headFunctor, cache, kb);
+        return new ForwardCachedRule(headFunctor, cache, kb);
     }
 
     @Override
@@ -80,12 +80,12 @@ public class SincWithJpl extends SInC {
 
     @Override
     protected UpdateResult updateKb(Rule rule) {
-        JplRule jpl_rule = (JplRule) rule;
-        return jpl_rule.updateInKb();
+        ForwardCachedRule forward_cached_rule = (ForwardCachedRule) rule;
+        return forward_cached_rule.updateInKb();
     }
 
     @Override
     protected Set<Predicate> getOriginalKb() {
-        return kb.originalKb;
+        return kb.getOriginalKB();
     }
 }

@@ -18,9 +18,10 @@ public class JplRule extends Rule {
     long allEntailJplQueryCostInNano = 0;
     long substituteCostInNano = 0;
 
-    public JplRule(String headFunctor, int arity, Set<RuleFingerPrint> cache, PrologKb kb) {
-        super(headFunctor, arity, cache);
+    public JplRule(String headFunctor, Set<RuleFingerPrint> cache, PrologKb kb) {
+        super(headFunctor, kb.getArity(headFunctor), cache);
         this.kb = kb;
+        this.eval = calculateEval();
     }
 
     public JplRule(JplRule another) {

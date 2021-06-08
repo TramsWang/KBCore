@@ -168,6 +168,11 @@ public abstract class Rule {
         return 2 <= disjoint_set.totalSets();
     }
 
+    /**
+     * 将当前已有的一个FV绑定成一个已有的BV
+     *
+     * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
+     */
     public boolean boundFreeVar2ExistingVar(
             final int predIdx, final int argIdx, final int varId
     ) {
@@ -199,6 +204,11 @@ public abstract class Rule {
             final int predIdx, final int argIdx, final int varId
     );
 
+    /**
+     * 新添加一个Predicate，然后将其中的一个FV绑定成一个已有的BV
+     *
+     * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
+     */
     public boolean boundFreeVar2ExistingVar(
             final String functor, final int arity, final int argIdx, final int varId
     ) {
@@ -231,6 +241,11 @@ public abstract class Rule {
             final Predicate newPredicate, final int argIdx, final int varId
     );
 
+    /**
+     * 将两个已有的FV绑定成同一个新的BV
+     *
+     * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
+     */
     public boolean boundFreeVars2NewVar(
             final int predIdx1, final int argIdx1, final int predIdx2, final int argIdx2
     ) {
@@ -266,6 +281,11 @@ public abstract class Rule {
             final int predIdx1, final int argIdx1, final int predIdx2, final int argIdx2
     );
 
+    /**
+     * 添加一个新的Predicate，然后将其中的一个FV以及一个已有的FV绑定成同一个新的BV
+     *
+     * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
+     */
     public boolean boundFreeVars2NewVar(
             final String functor, final int arity, final int argIdx1, final int predIdx2, final int argIdx2
     ) {
@@ -302,6 +322,11 @@ public abstract class Rule {
             final Predicate newPredicate, final int argIdx1, final int predIdx2, final int argIdx2
     );
 
+    /**
+     * 将一个已有的FV绑定成常量
+     *
+     * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
+     */
     public boolean boundFreeVar2Constant(final int predIdx, final int argIdx, final String constantSymbol) {
         /* 改变Rule结构 */
         final Predicate predicate = structure.get(predIdx);
