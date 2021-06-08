@@ -9,6 +9,8 @@ public abstract class Rule {
     public static final int FIRST_BODY_PRED_IDX = HEAD_PRED_IDX + 1;
     public static final int CONSTANT_ARG_ID = -1;
 
+    public static double MIN_HEAD_COVERAGE = 0.0;
+
     /* 统计Cache命中数 */
     public static int cacheHits = 0;
 
@@ -63,7 +65,9 @@ public abstract class Rule {
         return structure.size();
     }
 
-    public abstract int usedBoundedVars();
+    public int usedBoundedVars() {
+        return boundedVars.size();
+    }
 
     public int size() {
         return equivConds;
@@ -183,7 +187,11 @@ public abstract class Rule {
         boundFreeVar2ExistingVarHandler(predIdx, argIdx, varId);
 
         /* 更新Eval */
-        updateEval();
+        Eval new_eval = calculateEval();
+        if (null == new_eval) {
+            return false;
+        }
+        this.eval = new_eval;
         return true;
     }
 
@@ -211,7 +219,11 @@ public abstract class Rule {
         boundFreeVar2ExistingVarHandler(target_predicate, argIdx, varId);
 
         /* 更新Eval */
-        updateEval();
+        Eval new_eval = calculateEval();
+        if (null == new_eval) {
+            return false;
+        }
+        this.eval = new_eval;
         return true;
     }
 
@@ -242,7 +254,11 @@ public abstract class Rule {
         boundFreeVars2NewVarHandler(predIdx1, argIdx1, predIdx2, argIdx2);
 
         /* 更新Eval */
-        updateEval();
+        Eval new_eval = calculateEval();
+        if (null == new_eval) {
+            return false;
+        }
+        this.eval = new_eval;
         return true;
     }
 
@@ -274,7 +290,11 @@ public abstract class Rule {
         boundFreeVars2NewVarHandler(target_predicate1, argIdx1, predIdx2, argIdx2);
 
         /* 更新Eval */
-        updateEval();
+        Eval new_eval = calculateEval();
+        if (null == new_eval) {
+            return false;
+        }
+        this.eval = new_eval;
         return true;
     }
 
@@ -298,7 +318,11 @@ public abstract class Rule {
         boundFreeVar2ConstantHandler(predIdx, argIdx, constantSymbol);
 
         /* 更新Eval */
-        updateEval();
+        Eval new_eval = calculateEval();
+        if (null == new_eval) {
+            return false;
+        }
+        this.eval = new_eval;
         return true;
     }
 
@@ -377,13 +401,17 @@ public abstract class Rule {
         removeBoundedArgHandler(predIdx, argIdx);
 
         /* 更新Eval */
-        updateEval();
+        Eval new_eval = calculateEval();
+        if (null == new_eval) {
+            return false;
+        }
+        this.eval = new_eval;
         return true;
     }
 
     public abstract void removeBoundedArgHandler(final int predIdx, final int argIdx);
 
-    protected abstract void updateEval();
+    protected abstract Eval calculateEval();
 
     @Override
     public String toString() {

@@ -9,8 +9,11 @@ import java.util.*;
 
 public abstract class SInC {
 
+    protected static final int CONST_ID = -1;
+    protected static final BaseGraphNode<Predicate> AXIOM_NODE = new BaseGraphNode<>(new Predicate("⊥", 0));
+
     protected final SincConfig config;
-    protected final String bkPath;
+    protected final String kbPath;
     protected final String dumpPath;
 
     private final List<Rule> hypothesis = new ArrayList<>();
@@ -28,13 +31,19 @@ public abstract class SInC {
         public int fvsVertices = 0;
     }
 
-    public SInC(SincConfig config, String bkPath, String dumpPath) {
+    public SInC(SincConfig config, String kbPath, String dumpPath) {
         this.config = config;
-        this.bkPath = bkPath;
+        this.kbPath = kbPath;
         this.dumpPath = dumpPath;
+        Rule.MIN_HEAD_COVERAGE = config.minHeadCoverage;
     }
 
     /**
+     * BK format(each line):
+     * [pred]\t[arg1]\t[arg2]\t...\t[argn]
+     *
+     * Assume no duplication.
+     *
      * @return 原KB的fact数量，|B|
      */
     abstract protected int loadKb();
@@ -245,12 +254,17 @@ public abstract class SInC {
                 if (null == dependencies) {
                     dependencies = new HashSet<>();
                 }
-                for (int pred_idx = Rule.FIRST_BODY_PRED_IDX; pred_idx < grounding.length; pred_idx++) {
-                    final Predicate body_pred = grounding[pred_idx];
-                    final BaseGraphNode<Predicate> body_node = predicate2NodeMap.computeIfAbsent(
-                            body_pred, kk -> new BaseGraphNode<>(body_pred)
-                    );
-                    dependencies.add(body_node);
+                if (1 >= grounding.length) {
+                    /* dependency为公理 */
+                    dependencies.add(AXIOM_NODE);
+                } else {
+                    for (int pred_idx = Rule.FIRST_BODY_PRED_IDX; pred_idx < grounding.length; pred_idx++) {
+                        final Predicate body_pred = grounding[pred_idx];
+                        final BaseGraphNode<Predicate> body_node = predicate2NodeMap.computeIfAbsent(
+                                body_pred, kk -> new BaseGraphNode<>(body_pred)
+                        );
+                        dependencies.add(body_node);
+                    }
                 }
                 return dependencies;
             });
@@ -362,5 +376,10 @@ public abstract class SInC {
         performanceMonitor.totalTime = time_dumped - time_start;
 
         performanceMonitor.show();
+
+        if (config.debug) {
+            /* Todo: 图结构上传Neo4j */
+            System.out.println("[DEBUG] Upload Graph to Neo4J...");
+        }
     }
 }

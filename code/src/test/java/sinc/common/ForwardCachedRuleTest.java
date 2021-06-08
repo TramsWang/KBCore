@@ -915,6 +915,85 @@ class ForwardCachedRuleTest {
     }
 
     @Test
+    void testFamilyRule9() {
+        final MemKB kb = kbFamily();
+
+        /* #1: father(?, ?):- */
+        final ForwardCachedRule rule1 = new ForwardCachedRule(kb, FUNCTOR_FATHER, new HashSet<>());
+        assertTrue(rule1.toString().contains("father(?,?):-"));
+        assertTrue(rule1.toCompleteRuleString().contains("father(X0,X1):-"));
+        assertEquals(
+                new Eval(null, 5, 16 * 16, 0),
+                rule1.getEval()
+        );
+        assertEquals(0, rule1.usedBoundedVars());
+        assertEquals(1, rule1.length());
+
+        /* #1: father(f2,?):- */
+        assertTrue(rule1.boundFreeVar2Constant(0, 0, "f2"));
+        assertTrue(rule1.toString().contains("father(f2,?):-"));
+        assertTrue(rule1.toCompleteRuleString().contains("father(f2,X0):-"));
+        assertEquals(
+                new Eval(null, 2, 16, 1),
+                rule1.getEval()
+        );
+        assertEquals(0, rule1.usedBoundedVars());
+        assertEquals(1, rule1.length());
+        rule1.updateInKb();
+
+        /* #1: father(?, ?):- */
+        final ForwardCachedRule rule2 = new ForwardCachedRule(kb, FUNCTOR_FATHER, new HashSet<>());
+        assertTrue(rule2.toString().contains("father(?,?):-"));
+        assertTrue(rule2.toCompleteRuleString().contains("father(X0,X1):-"));
+        assertEquals(
+                new Eval(null, 3, 16 * 16 - 2, 0),
+                rule2.getEval()
+        );
+        assertEquals(0, rule2.usedBoundedVars());
+        assertEquals(1, rule2.length());
+        ForwardCachedRule.UpdateResult update_result = rule2.updateInKb();
+        final Set<List<Predicate>> actual_grounding_set = new HashSet<>();
+        for (Predicate[] grounding: update_result.groundings) {
+            actual_grounding_set.add(new ArrayList<>(Arrays.asList(grounding)));
+        }
+        Predicate father1 = new Predicate(FUNCTOR_FATHER, ARITY_FATHER);
+        father1.args[0] = new Constant(CONST_ID, "f1");
+        father1.args[1] = new Constant(CONST_ID, "s1");
+        Predicate father2 = new Predicate(FUNCTOR_FATHER, ARITY_FATHER);
+        father2.args[0] = new Constant(CONST_ID, "f2");
+        father2.args[1] = new Constant(CONST_ID, "s2");
+        Predicate father3 = new Predicate(FUNCTOR_FATHER, ARITY_FATHER);
+        father3.args[0] = new Constant(CONST_ID, "f2");
+        father3.args[1] = new Constant(CONST_ID, "d2");
+        Predicate father4 = new Predicate(FUNCTOR_FATHER, ARITY_FATHER);
+        father4.args[0] = new Constant(CONST_ID, "f3");
+        father4.args[1] = new Constant(CONST_ID, "s3");
+        Predicate father5 = new Predicate(FUNCTOR_FATHER, ARITY_FATHER);
+        father5.args[0] = new Constant(CONST_ID, "f4");
+        father5.args[1] = new Constant(CONST_ID, "d4");
+        final Set<List<Predicate>> expected_groundings = new HashSet<>();
+        expected_groundings.add(new ArrayList<>(Collections.singleton(father1)));
+        expected_groundings.add(new ArrayList<>(Collections.singleton(father4)));
+        expected_groundings.add(new ArrayList<>(Collections.singleton(father5)));
+        assertEquals(expected_groundings, actual_grounding_set);
+        final Set<Predicate> expected_counter_examples = new HashSet<>();
+        for (String arg1: kb.allConstants()) {
+            for (String arg2: kb.allConstants()) {
+                final Predicate counter_example = new Predicate(FUNCTOR_FATHER, ARITY_FATHER);
+                counter_example.args[0] = new Constant(CONST_ID, arg1);
+                counter_example.args[1] = new Constant(CONST_ID, arg2);
+                expected_counter_examples.add(counter_example);
+            }
+        }
+        expected_counter_examples.remove(father1);
+        expected_counter_examples.remove(father2);
+        expected_counter_examples.remove(father3);
+        expected_counter_examples.remove(father4);
+        expected_counter_examples.remove(father5);
+        assertEquals(expected_counter_examples, update_result.counterExamples);
+    }
+
+    @Test
     void testFamilyWithCopy1() {
         final MemKB kb = kbFamily();
         final Set<RuleFingerPrint> cache = new HashSet<>();

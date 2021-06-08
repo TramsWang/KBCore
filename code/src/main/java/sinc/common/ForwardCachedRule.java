@@ -6,6 +6,7 @@ import sinc.util.MemKB;
 import java.util.*;
 
 public class ForwardCachedRule {
+    /* Todo: HC剪枝？ */
     public static final int HEAD_PRED_IDX = 0;
     public static final int FIRST_BODY_PRED_IDX = HEAD_PRED_IDX + 1;
     public static final int CONSTANT_ARG_ID = -1;
