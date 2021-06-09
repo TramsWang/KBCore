@@ -1,13 +1,10 @@
 package sinc.impl.cached;
 
 import sinc.common.*;
-import sinc.util.DisjointSet;
 
 import java.util.*;
 
 public class ForwardCachedRule extends Rule {
-    /* Todo: HC剪枝？ */
-
     /* 记录符合条件的grounding的中间结果 */
     private static class PredicateCache {
         public final Predicate predicate;
@@ -674,6 +671,12 @@ public class ForwardCachedRule extends Rule {
                     }
                 }
             }
+        }
+
+        /* 用HC剪枝 */
+        double head_coverage = ((double) newly_proved.size()) / kb.getAllFacts(head_pred.functor).size();
+        if (Rule.MIN_HEAD_COVERAGE >= head_coverage) {
+            return null;
         }
 
         /* 更新eval */

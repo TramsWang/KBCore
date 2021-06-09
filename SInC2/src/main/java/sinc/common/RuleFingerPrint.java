@@ -88,6 +88,18 @@ public class RuleFingerPrint {
         }
     }
 
+    public String getHeadFunctor() {
+        return headFunctor;
+    }
+
+    public MultiSet<ArgIndicator>[] getHeadEquivClasses() {
+        return headEquivClasses;
+    }
+
+    public MultiSet<MultiSet<ArgIndicator>> getOtherEquivClasses() {
+        return otherEquivClasses;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
