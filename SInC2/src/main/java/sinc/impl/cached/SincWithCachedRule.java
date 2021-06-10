@@ -37,7 +37,7 @@ public class SincWithCachedRule extends SInC {
     }
 
     @Override
-    protected int loadKb() {
+    protected KbStatistics loadKb() {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(kbPath));
             String line;
@@ -51,11 +51,11 @@ public class SincWithCachedRule extends SInC {
             }
             kb.calculatePromisingConstants(config.minConstantProportion);
 
-            return kb.totalFacts();
+            return new KbStatistics(kb.totalFacts(), kb.functor2ArityMap.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return -1;
+        return new KbStatistics(-1, -1);
     }
 
     @Override

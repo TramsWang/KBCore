@@ -369,7 +369,6 @@ public class SincBasicWithJPL extends SInC<Compound> {
                 bounded_vars_in_head_only.add(bv_head);
             }
         }
-        // TODO: 这里对bounded_vars_in_head_only相关的数量估计是错误的，它不一定能取所有的const
         final double all_entailments = (body_is_not_empty ? head_templates.size() : 1) * Math.pow(
                 constants.size(), free_var_cnt_in_head + bounded_vars_in_head_only.size()
         );
@@ -640,7 +639,7 @@ public class SincBasicWithJPL extends SInC<Compound> {
 
                 /* 构造head grounding*/
                 Compound head_grounding = SwiplUtil.substitute(head_compound, binding);
-                if (bounded_vars_in_head_only.isEmpty()) {
+                if (bounded_vars_in_head_only.isEmpty()) {  // Todo: Bug here
                     if (drawInGraph(cur_fact_set, global_facts, head_grounding, body_groundings)) {
                         removed_cnt++;
                     }
@@ -649,7 +648,7 @@ public class SincBasicWithJPL extends SInC<Compound> {
                     Query q_4_head_grounding = new Query(":", new Term[]{
                             new Atom(PrologModule.GLOBAL.getSessionName()), head_grounding
                     });
-                    for (Map<String, Term> head_binding: q_4_head_grounding) {
+                    for (Map<String, Term> head_binding: q_4_head_grounding) {  // Todo: Bug Here, 不能找到counter exmaple
                         if (drawInGraph(
                                 cur_fact_set, global_facts, SwiplUtil.substitute(
                                         head_grounding, head_binding
@@ -664,7 +663,7 @@ public class SincBasicWithJPL extends SInC<Compound> {
             q_4_body_grounding.close();
         } else {
             /* Body为True(i.e. AXIOM) */
-            if (0 >= free_var_cnt_in_head) {
+            if (0 >= free_var_cnt_in_head) {  // Todo: Bug here
                 if (drawInGraph(cur_fact_set, global_facts, head_compound, Collections.singletonList(AXIOM))) {
                     removed_cnt++;
                 }

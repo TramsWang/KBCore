@@ -43,10 +43,8 @@ public abstract class SInC {
      * [pred]\t[arg1]\t[arg2]\t...\t[argn]
      *
      * Assume no duplication.
-     *
-     * @return 原KB的fact数量，|B|
      */
-    abstract protected int loadKb();
+    abstract protected KbStatistics loadKb();
 
     abstract protected List<String> getTargetFunctors();
 
@@ -73,7 +71,6 @@ public abstract class SInC {
             );
             for (Rule r: beams) {
                 System.out.printf("Extend: %s\n", r);
-                candidates.add(r);
                 Rule r_max = r;
 
                 /* 遍历r的邻居 */
@@ -114,8 +111,16 @@ public abstract class SInC {
             }
 
             /* 如果有多个optimal，选择最优的返回 */
-            if (!optimals.isEmpty()) {
-                return optimals.peek();
+            final Rule loc_opt = optimals.peek();
+            if (null != loc_opt) {
+                final Rule peek_rule = candidates.peek();
+                if (
+                        null == peek_rule ||
+                        /* 如果local optimal在当前的candidates里面不是最优的，则排除 */
+                        loc_opt.getEval().value(eval_metric) > peek_rule.getEval().value(eval_metric)
+                ) {
+                    return loc_opt;
+                }
             }
 
             /* 找出下一轮的beams，同时检查optimal */
@@ -225,7 +230,7 @@ public abstract class SInC {
 
     protected List<Rule> findOrigin(Rule rule) {
         final List<Rule> origins = new ArrayList<>();
-        for (int pred_idx = 0; pred_idx < rule.length(); pred_idx++) {
+        for (int pred_idx = Rule.HEAD_PRED_IDX; pred_idx < rule.length(); pred_idx++) {
             /* 从Head开始删除可能会出现Head中没有Bounded Var但是Body不为空的情况，按照定义来说，这种规则是不在
                搜索空间中的，但是会被isInvalid方法检查出来 */
             final Predicate predicate = rule.getPredicate(pred_idx);
@@ -247,7 +252,7 @@ public abstract class SInC {
     protected void updateGraph(List<Predicate[]> groundings) {
         for (Predicate[] grounding: groundings) {
             final Predicate head_pred = grounding[Rule.HEAD_PRED_IDX];
-            BaseGraphNode<Predicate> head_node = predicate2NodeMap.computeIfAbsent(
+            final BaseGraphNode<Predicate> head_node = predicate2NodeMap.computeIfAbsent(
                     head_pred, k -> new BaseGraphNode<>(head_pred)
             );
             dependencyGraph.compute(head_node, (h, dependencies) -> {
@@ -276,8 +281,7 @@ public abstract class SInC {
         /* 找出所有不能被prove的点 */
         final GraphAnalyseResult result = new GraphAnalyseResult();
         for (Predicate fact : getOriginalKb()) {
-            final BaseGraphNode<Predicate> fact_node = new BaseGraphNode<>(fact);
-            if (!dependencyGraph.containsKey(fact_node)) {
+            if (!dependencyGraph.containsKey(new BaseGraphNode<>(fact))) {
                 startSet.add(fact);
             }
         }
@@ -315,24 +319,43 @@ public abstract class SInC {
 
     abstract protected Set<Predicate> getOriginalKb();
 
+    protected void showMonitor() {
+        performanceMonitor.show();
+    }
+
+    public List<Rule> getHypothesis() {
+        return hypothesis;
+    }
+
+    public Set<Predicate> getStartSet() {
+        return startSet;
+    }
+
+    public Set<Predicate> getCounterExamples() {
+        return counterExamples;
+    }
+
     public final void run() {
         /* 加载KB */
         final long time_start = System.currentTimeMillis();
-        performanceMonitor.kbSize = loadKb();
+        KbStatistics kb_stat = loadKb();
+        performanceMonitor.kbSize = kb_stat.facts;
+        performanceMonitor.kbFunctors = kb_stat.functors;
         final long time_kb_loaded = System.currentTimeMillis();
         performanceMonitor.kbLoadTime = time_kb_loaded - time_start;
 
         /* 逐个functor找rule */
-        long time_rule_finding_start = time_kb_loaded;
         final List<String> target_head_functors = getTargetFunctors();
         do {
-            int last_idx = target_head_functors.size() - 1;
-            String functor = target_head_functors.get(last_idx);
-            Rule rule = findRule(functor);
+            final long time_rule_finding_start = System.currentTimeMillis();
+            final int last_idx = target_head_functors.size() - 1;
+            final String functor = target_head_functors.get(last_idx);
+            final Rule rule = findRule(functor);
             final long time_rule_found = System.currentTimeMillis();
             performanceMonitor.hypothesisMiningTime += time_rule_found - time_rule_finding_start;
 
-            if (null != rule) {
+            if (null != rule && rule.getEval().useful(config.evalMetric)) {
+                System.out.printf("Found: %s\n", rule);
                 hypothesis.add(rule);
                 performanceMonitor.hypothesisSize += rule.size();
 
@@ -345,12 +368,12 @@ public abstract class SInC {
             } else {
                 target_head_functors.remove(last_idx);
             }
-            time_rule_finding_start = System.currentTimeMillis();
         } while (!target_head_functors.isEmpty());
         performanceMonitor.hypothesisRuleNumber = hypothesis.size();
         performanceMonitor.counterExampleSize = counterExamples.size();
 
         /* 解析Graph找start set */
+        final long time_graph_analyse_begin = System.currentTimeMillis();
         GraphAnalyseResult graph_analyse_result = findStartSet();
         performanceMonitor.startSetSize = graph_analyse_result.startSetSize;
         performanceMonitor.startSetSizeWithoutFvs = graph_analyse_result.startSetSizeWithoutFvs;
@@ -358,7 +381,7 @@ public abstract class SInC {
         performanceMonitor.sccVertices = graph_analyse_result.sccVertices;
         performanceMonitor.fvsVertices = graph_analyse_result.fvsVertices;
         final long time_start_set_found = System.currentTimeMillis();
-        performanceMonitor.otherMiningTime += time_start_set_found - time_rule_finding_start;
+        performanceMonitor.otherMiningTime += time_start_set_found - time_graph_analyse_begin;
 
         /* 检查结果 */
         if (config.validation) {
@@ -375,7 +398,13 @@ public abstract class SInC {
         performanceMonitor.dumpTime = time_dumped - time_validation_done;
         performanceMonitor.totalTime = time_dumped - time_start;
 
-        performanceMonitor.show();
+        /* 打印所有rules */
+        System.out.println("\n### Hypothesis Found ###");
+        for (Rule rule: hypothesis) {
+            System.out.println(rule);
+        }
+
+        showMonitor();
 
         if (config.debug) {
             /* Todo: 图结构上传Neo4j */

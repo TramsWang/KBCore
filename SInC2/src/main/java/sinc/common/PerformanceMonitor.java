@@ -26,6 +26,7 @@ public class PerformanceMonitor {
     public long totalTime = 0;
 
     /* Mining Statics Monitor */
+    public int kbFunctors = 0;
     public int kbSize = 0;
     public int hypothesisRuleNumber = 0;
     public int hypothesisSize = 0;
@@ -54,11 +55,12 @@ public class PerformanceMonitor {
 
         System.out.println("--- Statistics ---");
         System.out.printf(
-                "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
-                "|B|", "#H", "|H|", "|N|", "|A|", "|N/FVS|", "#SCC", "|SCC|", "|FVS|", "Comp(%)"
+                "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
+                "#F", "|B|", "#H", "|H|", "|N|", "|A|", "|N/FVS|", "#SCC", "|SCC|", "|FVS|", "Comp(%)"
         );
         System.out.printf(
-                "  %10d %10d %10d %10d %10d %10d %10d %10d %10d %10.2f\n\n",
+                "  %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10.2f\n\n",
+                kbFunctors,
                 kbSize,
                 hypothesisRuleNumber,
                 hypothesisSize,
@@ -73,7 +75,14 @@ public class PerformanceMonitor {
 
         System.out.println("--- Other Statistics ---");
         int executed_evaluations = 0;
-        for (BranchInfo branches: branchProgress) {
+        int[] rule_size_arr = new int[branchProgress.size()];
+        int[] ext_num_arr = new int[branchProgress.size()];
+        int[] org_num_arr = new int[branchProgress.size()];
+        for (int i = 0; i < branchProgress.size(); i++) {
+            BranchInfo branches = branchProgress.get(i);
+            rule_size_arr[i] = branches.ruleSize;
+            ext_num_arr[i] = branches.extNum;
+            org_num_arr[i] = branches.orgNum;
             executed_evaluations += branches.extNum + branches.orgNum;
         }
         System.out.printf(
@@ -83,6 +92,11 @@ public class PerformanceMonitor {
                 executed_evaluations + cacheHits
         );
         System.out.println("Branch Progress:");
-        System.out.println(Arrays.toString(branchProgress.toArray(new BranchInfo[0])));
+        System.out.print("- Rule Sizes: ");
+        System.out.println(Arrays.toString(rule_size_arr));
+        System.out.print("- Extensions: ");
+        System.out.println(Arrays.toString(ext_num_arr));
+        System.out.print("- Origins: ");
+        System.out.println(Arrays.toString(org_num_arr));
     }
 }

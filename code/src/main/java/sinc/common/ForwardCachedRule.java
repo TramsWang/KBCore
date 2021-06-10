@@ -962,15 +962,12 @@ public class ForwardCachedRule {
         final Set<Predicate> counter_example_set = new HashSet<>();
 
         /* 统计head中的变量信息 */
-        /* 如果是FV，则创建具体变量，方便替换 */
         final Map<Integer, List<Integer>> head_var_2_loc_map = new HashMap<>();
         int fv_id = boundedVars.size();
         final Predicate head_pred = new Predicate(getHead());
         for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
             final Argument argument = head_pred.args[arg_idx];
             if (null == argument) {
-//                final Variable fv = new Variable(fv_id);
-//                head_pred.args[arg_idx] = fv;
                 head_var_2_loc_map.put(fv_id, new ArrayList<>(Collections.singleton(arg_idx)));
                 fv_id++;
             } else {

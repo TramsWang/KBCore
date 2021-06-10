@@ -438,6 +438,10 @@ public abstract class Rule {
 
     protected abstract Eval calculateEval();
 
+    public RuleFingerPrint getFingerPrint() {
+        return fingerPrint;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("(");

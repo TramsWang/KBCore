@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Random;
 
 public class FamilyRelationGenerator {
+    public static final int ARITY = 2;
+
     public enum FamilyMember {
         GRAND_FATHER("gf"), GRAND_MOTHER("gm"),
         W_GRAND_FATHER("wgf"), W_GRAND_MOTHER("wgm"),

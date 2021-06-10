@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * To run with Jpl, the following ENVs should be set:
+ * (The following are config in my system, as an example)
+ *   SWI_HOME_DIR=/home/trams/lib/swipl;LD_LIBRARY_PATH=/home/trams/lib/swipl/lib/x86_64-linux;LD_PRELOAD=/home/trams/lib/swipl/lib/x86_64-linux/libswipl.so
+ */
 public class SincWithJpl extends SInC {
 
     private final PrologKb kb = new PrologKb();
@@ -37,7 +42,7 @@ public class SincWithJpl extends SInC {
     }
 
     @Override
-    protected int loadKb() {
+    protected KbStatistics loadKb() {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(kbPath));
             String line;
@@ -51,11 +56,11 @@ public class SincWithJpl extends SInC {
             }
             kb.calculatePromisingConstants(config.minConstantProportion);
 
-            return kb.totalFacts();
+            return new KbStatistics(kb.totalFacts(), kb.functor2ArityMap.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return -1;
+        return new KbStatistics(-1, -1);
     }
 
     @Override

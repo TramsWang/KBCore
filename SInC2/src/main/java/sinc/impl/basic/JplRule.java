@@ -4,6 +4,7 @@ import org.jpl7.*;
 import org.jpl7.Variable;
 import sinc.common.*;
 
+import java.lang.Integer;
 import java.util.*;
 
 public class JplRule extends Rule {
@@ -112,7 +113,7 @@ public class JplRule extends Rule {
                     }
                 }
                 final Compound body_compound = new Compound(body_pred.functor, args);
-                query_builder.append(body_compound.toString()).append(',');
+                query_builder.append(body_compound).append(',');
             }
             query_builder.deleteCharAt(query_builder.length() - 1);
         }
@@ -143,7 +144,6 @@ public class JplRule extends Rule {
                 bounded_vars_in_head_only.add(bv_head);
             }
         }
-        // TODO: 这里对bounded_vars_in_head_only相关的数量估计是错误的，它不一定能取所有的const
         final double all_entailments = (body_is_not_empty ? head_templates.size() : 1) * Math.pow(
                 kb.totalConstants(), free_var_cnt_in_head + bounded_vars_in_head_only.size()
         );
@@ -155,10 +155,10 @@ public class JplRule extends Rule {
                 head_compound.toString();
 
         final Query q = new Query(Term.textToTerm(query_str));
-        final Set<Compound> head_instances = new HashSet<>();
+        final Set<Predicate> head_instances = new HashSet<>();
         for (Map<String, Term> binding: q) {
             long substitute_begin = System.nanoTime();
-            head_instances.add(PrologKb.substitute(head_compound, binding));
+            head_instances.add(PrologKb.compound2Fact(PrologKb.substitute(head_compound, binding)));
             long substitute_done = System.nanoTime();
             substituteCostInNano += substitute_done - substitute_begin;
         }
@@ -166,7 +166,7 @@ public class JplRule extends Rule {
 
         int positive_entailments = 0;
         int already_entailed = 0;
-        for (Compound head_instance: head_instances) {
+        for (Predicate head_instance: head_instances) {
             if (cur_facts.contains(head_instance)) {
                 positive_entailments++;
             } else if (global_facts.contains(head_instance)) {
@@ -189,8 +189,11 @@ public class JplRule extends Rule {
     }
 
     public UpdateResult updateInKb() {
+        return new UpdateResult(findGroundings(), findCounterExmaples());
+    }
+
+    public List<Predicate[]> findGroundings() {
         final List<Predicate[]> groundings = new ArrayList<>();
-        final Set<Predicate> counter_examples = new HashSet<>();
 
         /* 统计Head的参数情况，并将其转成带Free Var的Jpl Compound */
         final Predicate head_pred = this.getHead();
@@ -236,7 +239,7 @@ public class JplRule extends Rule {
                 }
                 final Compound body_compound = new Compound(body_pred.functor, args);
                 body_compounds.add(body_compound);
-                query_builder.append(body_compound.toString()).append(',');
+                query_builder.append(body_compound).append(',');
             }
             query_builder.deleteCharAt(query_builder.length() - 1);
             final String query_str = query_builder.toString();
@@ -287,16 +290,16 @@ public class JplRule extends Rule {
 
                 /* 构造head grounding*/
                 final Compound head_grounding = PrologKb.substitute(head_compound, binding);
-                if (bounded_vars_in_head_only.isEmpty()) {
+                if (0 >= bounded_vars_in_head_only.size() + free_var_cnt_in_head) {
                     buildGrounding(
-                            cur_fact_set, global_facts, groundings, counter_examples, head_grounding, body_groundings
+                            cur_fact_set, global_facts, groundings, head_grounding, body_groundings
                     );
                 } else {
                     /* 如果head中带有free var需要遍历所有可能值 */
                     final Query q_4_head_grounding = new Query(head_grounding);
                     for (Map<String, Term> head_binding: q_4_head_grounding) {
                         buildGrounding(
-                                cur_fact_set, global_facts, groundings, counter_examples, PrologKb.substitute(
+                                cur_fact_set, global_facts, groundings, PrologKb.substitute(
                                         head_grounding, head_binding
                                 ), body_groundings
                         );
@@ -307,17 +310,16 @@ public class JplRule extends Rule {
             q_4_body_grounding.close();
         } else {
             /* Body为True(i.e. AXIOM) */
-            if (0 >= free_var_cnt_in_head) {
+            if (0 >= bounded_vars_in_head.size() + free_var_cnt_in_head) {
                 buildGrounding(
-                        cur_fact_set, global_facts, groundings, counter_examples, head_compound, new ArrayList<>()
+                        cur_fact_set, global_facts, groundings, head_compound, new ArrayList<>()
                 );
             } else {
-                // TODO: 这里有问题，如果规则是： head(X,X):- 则不能找到任何positive example
                 /* 如果head中带有free var需要遍历所有可能值 */
                 Query q_4_head_grounding = new Query(head_compound);
                 for (Map<String, Term> head_binding: q_4_head_grounding) {
                     buildGrounding(
-                            cur_fact_set, global_facts, groundings, counter_examples, PrologKb.substitute(
+                            cur_fact_set, global_facts, groundings, PrologKb.substitute(
                                     head_compound, head_binding
                             ), new ArrayList<>()
                     );
@@ -326,12 +328,137 @@ public class JplRule extends Rule {
             }
         }
 
-        return new UpdateResult(groundings, counter_examples);
+        return groundings;
+    }
+
+    private Set<Predicate> findCounterExmaples() {
+        final Set<Predicate> counter_examples = new HashSet<>();
+
+        /* 统计head中的变量信息 */
+        final Map<Integer, List<Integer>> head_var_2_loc_map = new HashMap<>();
+        int fv_id = boundedVars.size();
+        final Predicate head_pred = new Predicate(getHead());
+        for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
+            final Argument argument = head_pred.args[arg_idx];
+            if (null == argument) {
+                head_var_2_loc_map.put(fv_id, new ArrayList<>(Collections.singleton(arg_idx)));
+                fv_id++;
+            } else {
+                if (argument.isVar) {
+                    final int idx = arg_idx;
+                    head_var_2_loc_map.compute(argument.id, (id, locs) -> {
+                        if (null == locs) {
+                            locs = new ArrayList<>();
+                        }
+                        locs.add(idx);
+                        return locs;
+                    });
+                }
+            }
+        }
+
+        /* 用body构造查询 */
+        final StringBuilder query_builder = new StringBuilder();
+        for (int pred_idx = FIRST_BODY_PRED_IDX; pred_idx < structure.size(); pred_idx++) {
+            final Predicate body_pred = structure.get(pred_idx);
+            final Term[] args = new Term[body_pred.arity()];
+            for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
+                final Argument argument = body_pred.args[arg_idx];
+                if (null == argument) {
+                    args[arg_idx] = new Variable("_");
+                } else if (argument.isVar) {
+                    args[arg_idx] = new Variable(argument.name);
+                    head_var_2_loc_map.remove(argument.id);
+                } else {
+                    args[arg_idx] = new Atom(argument.name);
+                }
+            }
+            query_builder.append(new Compound(body_pred.functor, args)).append(',');
+        }
+
+        /* 找出所有仅在Head中出现的bounded var */
+        final Integer[][] head_only_var_locs = new Integer[head_var_2_loc_map.size()][];
+        {
+            int i = 0;
+            for (List<Integer> loc_list : head_var_2_loc_map.values()) {
+                head_only_var_locs[i] = loc_list.toArray(new Integer[0]);
+                i++;
+            }
+        }
+
+        /* 根据Rule结构找Counter Example */
+        boolean body_is_not_empty = (2 <= this.length());
+        if (body_is_not_empty) {
+            /* 找到所有head template */
+            query_builder.deleteCharAt(query_builder.length() - 1);
+            final String query_str = query_builder.toString();
+            final Query q_4_body_grounding = new Query(Term.textToTerm(query_str));
+            final Set<Predicate> head_templates = new HashSet<>();
+            for (Map<String, Term> binding : q_4_body_grounding) {
+                head_templates.add(PrologKb.substitute(head_pred, binding));
+            }
+
+            if (0 == head_only_var_locs.length) {
+                /* 不需要替换变量 */
+                for (Predicate head_template : head_templates) {
+                    if (!kb.containsFact(head_template)) {
+                        counter_examples.add(head_template);
+                    }
+                }
+            } else {
+                /* 需要替换head中的变量 */
+                for (Predicate head_template: head_templates) {
+                    iterate4CounterExamples(counter_examples, head_template, 0, head_only_var_locs);
+                }
+            }
+        } else {
+            /* 没有Body */
+            if (0 == head_only_var_locs.length) {
+                /* head中全是常量 */
+                if (!kb.containsFact(head_pred)) {
+                    counter_examples.add(head_pred);
+                }
+            } else {
+                /* head中有变量，而且全部当做自由变量处理 */
+                iterate4CounterExamples(counter_examples, head_pred, 0, head_only_var_locs);
+            }
+        }
+        return counter_examples;
+    }
+
+    private void iterate4CounterExamples(
+            final Set<Predicate> counterExamples, final Predicate template, final int idx,
+            final Integer[][] varLocs
+    ) {
+        final Integer[] locations = varLocs[idx];
+        if (idx < varLocs.length - 1) {
+            /* 递归 */
+            for (String constant_symbol: kb.allConstants()) {
+                final Constant constant = new Constant(CONSTANT_ARG_ID, constant_symbol);
+                for (int loc: locations) {
+                    template.args[loc] = constant;
+                }
+                iterate4CounterExamples(
+                        counterExamples, template, idx + 1, varLocs
+                );
+            }
+        } else {
+            /* 已经到了最后的位置，不递归，完成后检查是否是Counter Example */
+            for (String constant_symbol: kb.allConstants()) {
+                final Constant constant = new Constant(CONSTANT_ARG_ID, constant_symbol);
+                for (int loc: locations) {
+                    template.args[loc] = constant;
+                }
+                if (!kb.containsFact(template)) {
+                    counterExamples.add(new Predicate(template));
+                }
+            }
+        }
     }
 
     private void buildGrounding(
             Set<Predicate> curFactSet, Set<Predicate> globalFactSet, List<Predicate[]> groundings,
-            Set<Predicate> counterExampleSet, Compound head, List<Compound> bodies
+            Compound head, List<Compound> bodies
     ) {
         final Predicate head_pred = PrologKb.compound2Fact(head);
         if (curFactSet.remove(head_pred)) {
@@ -342,10 +469,7 @@ public class JplRule extends Rule {
                 grounding[i] = PrologKb.compound2Fact(bodies.get(i-1));
             }
             groundings.add(grounding);
-        } else if (!globalFactSet.contains(head_pred)) {
-            /* 加入反例集合 */
-            counterExampleSet.add(head_pred);
         }
-        /* 否则就是已经被prove过的，忽略即可 */
+        /* 否则就是返利或已经被prove过的，忽略即可 */
     }
 }
