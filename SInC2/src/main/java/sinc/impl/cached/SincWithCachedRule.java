@@ -22,7 +22,7 @@ public class SincWithCachedRule extends SInC {
                         config.validation,
                         config.debug,
                         config.beamWidth,
-                        false,
+                        false,  // Rule Cache 的优化方案不支持向前搜索
                         config.evalMetric,
                         config.minHeadCoverage,
                         config.minConstantProportion,

@@ -403,6 +403,7 @@ public abstract class SInC {
         for (Rule rule: hypothesis) {
             System.out.println(rule);
         }
+        System.out.println();
 
         showMonitor();
 

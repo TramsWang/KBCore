@@ -23,7 +23,7 @@ public class SincWithJpl extends SInC {
     public SincWithJpl(SincConfig config, String bkPath, String dumpPath) {
         super(
                 new SincConfig(
-                        config.threads,
+                        1,  // Jpl 目前暂不支持多线程
                         config.validation,
                         config.debug,
                         config.beamWidth,

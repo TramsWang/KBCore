@@ -192,11 +192,7 @@ public abstract class Rule {
         boundFreeVar2ExistingVarHandler(predIdx, argIdx, varId);
 
         /* 更新Eval */
-        Eval new_eval = calculateEval();
-        if (null == new_eval) {
-            return false;
-        }
-        this.eval = new_eval;
+        this.eval = calculateEval();
         return true;
     }
 
@@ -229,11 +225,7 @@ public abstract class Rule {
         boundFreeVar2ExistingVarHandler(target_predicate, argIdx, varId);
 
         /* 更新Eval */
-        Eval new_eval = calculateEval();
-        if (null == new_eval) {
-            return false;
-        }
-        this.eval = new_eval;
+        this.eval = calculateEval();
         return true;
     }
 
@@ -269,11 +261,7 @@ public abstract class Rule {
         boundFreeVars2NewVarHandler(predIdx1, argIdx1, predIdx2, argIdx2);
 
         /* 更新Eval */
-        Eval new_eval = calculateEval();
-        if (null == new_eval) {
-            return false;
-        }
-        this.eval = new_eval;
+        this.eval = calculateEval();
         return true;
     }
 
@@ -310,11 +298,7 @@ public abstract class Rule {
         boundFreeVars2NewVarHandler(target_predicate1, argIdx1, predIdx2, argIdx2);
 
         /* 更新Eval */
-        Eval new_eval = calculateEval();
-        if (null == new_eval) {
-            return false;
-        }
-        this.eval = new_eval;
+        this.eval = calculateEval();
         return true;
     }
 
@@ -343,11 +327,7 @@ public abstract class Rule {
         boundFreeVar2ConstantHandler(predIdx, argIdx, constantSymbol);
 
         /* 更新Eval */
-        Eval new_eval = calculateEval();
-        if (null == new_eval) {
-            return false;
-        }
-        this.eval = new_eval;
+        this.eval = calculateEval();
         return true;
     }
 
@@ -426,11 +406,7 @@ public abstract class Rule {
         removeBoundedArgHandler(predIdx, argIdx);
 
         /* 更新Eval */
-        Eval new_eval = calculateEval();
-        if (null == new_eval) {
-            return false;
-        }
-        this.eval = new_eval;
+        this.eval = calculateEval();
         return true;
     }
 

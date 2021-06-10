@@ -1,8 +1,5 @@
-package sinc.impl.basic;
+package sinc.impl.cached;
 
-import org.jpl7.Compound;
-import org.jpl7.Query;
-import org.jpl7.Term;
 import org.junit.jupiter.api.Test;
 import sinc.SincConfig;
 import sinc.common.*;
@@ -14,7 +11,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SincWithJplTest {
+class SincWithCachedRuleTest {
 
     static final int CONSTANT_ID = Rule.CONSTANT_ARG_ID;
 
@@ -44,7 +41,7 @@ class SincWithJplTest {
                     1,
                     false,
                     false,
-                    3,
+                    5,
                     true,
                     eval_type,
                     0.05,
@@ -55,8 +52,7 @@ class SincWithJplTest {
                     false
             );
 
-            retractAllKnowledge();
-            SincWithJpl sinc = new SincWithJpl(
+            SincWithCachedRule sinc = new SincWithCachedRule(
                     config,
                     tmp_bk_file_path,
                     null
@@ -143,7 +139,7 @@ class SincWithJplTest {
                     1,
                     false,
                     false,
-                    3,
+                    5,
                     true,
                     eval_type,
                     0.05,
@@ -154,8 +150,7 @@ class SincWithJplTest {
                     false
             );
 
-            retractAllKnowledge();
-            SincWithJpl sinc = new SincWithJpl(
+            SincWithCachedRule sinc = new SincWithCachedRule(
                     config,
                     tmp_bk_file_path,
                     null
@@ -270,29 +265,5 @@ class SincWithJplTest {
             }
         }
         return builder.toString();
-    }
-
-    void retractAllKnowledge() {
-        final List<String> functors = new ArrayList<>();
-        for (FamilyRelationGenerator.FamilyPredicate fp: FamilyRelationGenerator.FamilyPredicate.values()) {
-            functors.add(fp.getName());
-        }
-        for (FamilyRelationGenerator.OtherPredicate op: FamilyRelationGenerator.OtherPredicate.values()) {
-            functors.add(op.getName());
-        }
-
-        int cnt = 0;
-        for (String functor: functors) {
-            Query q = new Query(new Compound("retract", new Term[]{
-                    new Compound(functor, new Term[]{
-                            new org.jpl7.Variable("_"),
-                            new org.jpl7.Variable("-")
-                    })
-            }));
-            for (Map<String, Term> binding: q) {
-                cnt++;
-            }
-        }
-        System.out.printf("Retract %d functors, %d facts\n", functors.size(), cnt);
     }
 }

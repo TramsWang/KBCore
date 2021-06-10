@@ -181,7 +181,7 @@ public class JplRule extends Rule {
         /* 用HC剪枝 */
         double head_coverage = ((double) positive_entailments) / global_facts.size();
         if (Rule.MIN_HEAD_COVERAGE >= head_coverage) {
-            return null;
+            return Eval.MIN;
         }
         return new Eval(
                 eval, positive_entailments, all_entailments - already_entailed, this.size()

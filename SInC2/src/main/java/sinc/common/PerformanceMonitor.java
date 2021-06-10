@@ -98,5 +98,6 @@ public class PerformanceMonitor {
         System.out.println(Arrays.toString(ext_num_arr));
         System.out.print("- Origins: ");
         System.out.println(Arrays.toString(org_num_arr));
+        System.out.println();
     }
 }

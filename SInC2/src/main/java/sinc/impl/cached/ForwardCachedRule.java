@@ -676,7 +676,7 @@ public class ForwardCachedRule extends Rule {
         /* 用HC剪枝 */
         double head_coverage = ((double) newly_proved.size()) / kb.getAllFacts(head_pred.functor).size();
         if (Rule.MIN_HEAD_COVERAGE >= head_coverage) {
-            return null;
+            return Eval.MIN;
         }
 
         /* 更新eval */
