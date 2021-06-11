@@ -25,7 +25,7 @@ public class SincWithCachedRule extends SInC {
                         false,  // Rule Cache 的优化方案不支持向前搜索
                         config.evalMetric,
                         config.minHeadCoverage,
-                        config.minConstantProportion,
+                        config.minConstantCoverage,
                         true,
                         -1.0,
                         false,
@@ -49,13 +49,18 @@ public class SincWithCachedRule extends SInC {
                 }
                 kb.addFact(predicate);
             }
-            kb.calculatePromisingConstants(config.minConstantProportion);
+            kb.calculatePromisingConstants(config.minConstantCoverage);
 
-            return new KbStatistics(kb.totalFacts(), kb.functor2ArityMap.size());
+            return new KbStatistics(
+                    kb.totalFacts(),
+                    kb.functor2ArityMap.size(),
+                    kb.getActualConstantSubstitutions(),
+                    kb.getTotalConstantSubstitutions()
+            );
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new KbStatistics(-1, -1);
+        return new KbStatistics(-1, -1, -1, -1);
     }
 
     @Override

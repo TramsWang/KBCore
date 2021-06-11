@@ -2,7 +2,7 @@
 /*
 !/code
 !/SInC2
-!/experiments
+!/datasets
 !/doc
 !/README.md
 !/.gitignore
@@ -27,8 +27,7 @@
 /SInC2/*
 !/SInC2/src/
 !/SInC2/pom.xml
-
-### Experiments ###
+!/SInC2/TestBeam.sh
 
 ### Documents ###
 /doc/*

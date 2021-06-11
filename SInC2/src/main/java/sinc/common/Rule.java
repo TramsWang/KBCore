@@ -412,6 +412,9 @@ public abstract class Rule {
 
     public abstract void removeBoundedArgHandler(final int predIdx, final int argIdx);
 
+    /**
+     * @return 如果不符合Head Coverage，返回Eval.MIN
+     */
     protected abstract Eval calculateEval();
 
     public RuleFingerPrint getFingerPrint() {

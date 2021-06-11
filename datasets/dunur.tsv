@@ -1,0 +1,440 @@
+aunt	Angela	Alfonso
+aunt	Angela	Sophia
+aunt	Gina	Alfonso
+aunt	Gina	Sophia
+aunt	Jennifer	Charlotte
+aunt	Jennifer	Colin
+aunt	Margaret	Charlotte
+aunt	Margaret	Colin
+brother	Alfonso	Sophia
+brother	Arthur	Victoria
+brother	Colin	Charlotte
+brother	Emilio	Lucia
+brother	James	Jennifer
+brother	Marco	Angela
+daughter	Angela	Francesca
+daughter	Angela	Pierro
+daughter	Charlotte	James
+daughter	Charlotte	Victoria
+daughter	Jennifer	Andrew
+daughter	Jennifer	Christine
+daughter	Lucia	Maria
+daughter	Lucia	Roberto
+daughter	Sophia	Lucia
+daughter	Sophia	Marco
+daughter	Victoria	Christopher
+daughter	Victoria	Penelope
+dunur	Andrew	Christopher
+dunur	Andrew	Penelope
+dunur	Christine	Christopher
+dunur	Christine	Penelope
+dunur	Christopher	Andrew
+dunur	Christopher	Christine
+dunur	Francesca	Maria
+dunur	Francesca	Roberto
+dunur	Maria	Francesca
+dunur	Maria	Pierro
+dunur	Penelope	Andrew
+dunur	Penelope	Christine
+dunur	Pierro	Maria
+dunur	Pierro	Roberto
+dunur	Roberto	Francesca
+dunur	Roberto	Pierro
+father	Andrew	James
+father	Andrew	Jennifer
+father	Christopher	Arthur
+father	Christopher	Victoria
+father	James	Charlotte
+father	James	Colin
+father	Marco	Alfonso
+father	Marco	Sophia
+father	Pierro	Angela
+father	Pierro	Marco
+father	Roberto	Emilio
+father	Roberto	Lucia
+husband	Andrew	Christine
+husband	Arthur	Margaret
+husband	Charles	Jennifer
+husband	Christopher	Penelope
+husband	Emilio	Gina
+husband	James	Victoria
+husband	Marco	Lucia
+husband	Pierro	Francesca
+husband	Roberto	Maria
+husband	Tomaso	Angela
+husband2	Arthur	Margaret
+husband2	Charles	Jennifer
+husband2	Emilio	Gina
+husband2	James	Victoria
+husband2	Marco	Lucia
+husband2	Tomaso	Angela
+mother	Christine	James
+mother	Christine	Jennifer
+mother	Francesca	Angela
+mother	Francesca	Marco
+mother	Lucia	Alfonso
+mother	Lucia	Sophia
+mother	Maria	Emilio
+mother	Maria	Lucia
+mother	Penelope	Arthur
+mother	Penelope	Victoria
+mother	Victoria	Charlotte
+mother	Victoria	Colin
+nephew	Alfonso	Angela
+nephew	Alfonso	Emilio
+nephew	Alfonso	Gina
+nephew	Alfonso	Tomaso
+nephew	Colin	Arthur
+nephew	Colin	Charles
+nephew	Colin	Jennifer
+nephew	Colin	Margaret
+niece	Charlotte	Arthur
+niece	Charlotte	Charles
+niece	Charlotte	Jennifer
+niece	Charlotte	Margaret
+niece	Sophia	Angela
+niece	Sophia	Emilio
+niece	Sophia	Gina
+niece	Sophia	Tomaso
+person	Alfonso
+person	Andrew
+person	Angela
+person	Arthur
+person	Charles
+person	Charlotte
+person	Christine
+person	Christopher
+person	Colin
+person	Emilio
+person	Francesca
+person	Gina
+person	James
+person	Jennifer
+person	Lucia
+person	Marco
+person	Margaret
+person	Maria
+person	Penelope
+person	Pierro
+person	Roberto
+person	Sophia
+person	Tomaso
+person	Victoria
+sister	Angela	Marco
+sister	Charlotte	Colin
+sister	Jennifer	James
+sister	Lucia	Emilio
+sister	Sophia	Alfonso
+sister	Victoria	Arthur
+son	Alfonso	Lucia
+son	Alfonso	Marco
+son	Arthur	Christopher
+son	Arthur	Penelope
+son	Colin	James
+son	Colin	Victoria
+son	Emilio	Maria
+son	Emilio	Roberto
+son	James	Andrew
+son	James	Christine
+son	Marco	Francesca
+son	Marco	Pierro
+target	Alfonso	Andrew	0
+target	Alfonso	Angela	0
+target	Alfonso	Arthur	0
+target	Alfonso	Charles	0
+target	Alfonso	Charlotte	0
+target	Alfonso	Christine	0
+target	Alfonso	Christopher	0
+target	Alfonso	Colin	0
+target	Alfonso	Emilio	0
+target	Alfonso	Francesca	0
+target	Alfonso	Gina	0
+target	Alfonso	James	0
+target	Alfonso	Jennifer	0
+target	Alfonso	Lucia	0
+target	Alfonso	Marco	0
+target	Alfonso	Margaret	0
+target	Alfonso	Maria	0
+target	Alfonso	Penelope	0
+target	Alfonso	Pierro	0
+target	Alfonso	Roberto	0
+target	Alfonso	Sophia	0
+target	Alfonso	Tomaso	0
+target	Alfonso	Victoria	0
+target	Andrew	Angela	0
+target	Andrew	Arthur	0
+target	Andrew	Charles	0
+target	Andrew	Charlotte	0
+target	Andrew	Christine	0
+target	Andrew	Christopher	1
+target	Andrew	Colin	0
+target	Andrew	Emilio	0
+target	Andrew	Francesca	0
+target	Andrew	Gina	0
+target	Andrew	James	0
+target	Andrew	Jennifer	0
+target	Andrew	Lucia	0
+target	Andrew	Marco	0
+target	Andrew	Margaret	0
+target	Andrew	Maria	0
+target	Andrew	Penelope	1
+target	Andrew	Pierro	0
+target	Andrew	Roberto	0
+target	Andrew	Sophia	0
+target	Andrew	Tomaso	0
+target	Andrew	Victoria	0
+target	Angela	Arthur	0
+target	Angela	Charles	0
+target	Angela	Charlotte	0
+target	Angela	Christine	0
+target	Angela	Christopher	0
+target	Angela	Colin	0
+target	Angela	Emilio	0
+target	Angela	Francesca	0
+target	Angela	Gina	0
+target	Angela	James	0
+target	Angela	Jennifer	0
+target	Angela	Lucia	0
+target	Angela	Marco	0
+target	Angela	Margaret	0
+target	Angela	Maria	0
+target	Angela	Penelope	0
+target	Angela	Pierro	0
+target	Angela	Roberto	0
+target	Angela	Sophia	0
+target	Angela	Tomaso	0
+target	Angela	Victoria	0
+target	Arthur	Charles	0
+target	Arthur	Charlotte	0
+target	Arthur	Christine	0
+target	Arthur	Christopher	0
+target	Arthur	Colin	0
+target	Arthur	Emilio	0
+target	Arthur	Francesca	0
+target	Arthur	Gina	0
+target	Arthur	James	0
+target	Arthur	Jennifer	0
+target	Arthur	Lucia	0
+target	Arthur	Marco	0
+target	Arthur	Margaret	0
+target	Arthur	Maria	0
+target	Arthur	Penelope	0
+target	Arthur	Pierro	0
+target	Arthur	Roberto	0
+target	Arthur	Sophia	0
+target	Arthur	Tomaso	0
+target	Arthur	Victoria	0
+target	Charles	Charlotte	0
+target	Charles	Christine	0
+target	Charles	Christopher	0
+target	Charles	Colin	0
+target	Charles	Emilio	0
+target	Charles	Francesca	0
+target	Charles	Gina	0
+target	Charles	James	0
+target	Charles	Jennifer	0
+target	Charles	Lucia	0
+target	Charles	Marco	0
+target	Charles	Margaret	0
+target	Charles	Maria	0
+target	Charles	Penelope	0
+target	Charles	Pierro	0
+target	Charles	Roberto	0
+target	Charles	Sophia	0
+target	Charles	Tomaso	0
+target	Charles	Victoria	0
+target	Charlotte	Christine	0
+target	Charlotte	Christopher	0
+target	Charlotte	Colin	0
+target	Charlotte	Emilio	0
+target	Charlotte	Francesca	0
+target	Charlotte	Gina	0
+target	Charlotte	James	0
+target	Charlotte	Jennifer	0
+target	Charlotte	Lucia	0
+target	Charlotte	Marco	0
+target	Charlotte	Margaret	0
+target	Charlotte	Maria	0
+target	Charlotte	Penelope	0
+target	Charlotte	Pierro	0
+target	Charlotte	Roberto	0
+target	Charlotte	Sophia	0
+target	Charlotte	Tomaso	0
+target	Charlotte	Victoria	0
+target	Christine	Christopher	1
+target	Christine	Colin	0
+target	Christine	Emilio	0
+target	Christine	Francesca	0
+target	Christine	Gina	0
+target	Christine	James	0
+target	Christine	Jennifer	0
+target	Christine	Lucia	0
+target	Christine	Marco	0
+target	Christine	Margaret	0
+target	Christine	Maria	0
+target	Christine	Penelope	1
+target	Christine	Pierro	0
+target	Christine	Roberto	0
+target	Christine	Sophia	0
+target	Christine	Tomaso	0
+target	Christine	Victoria	0
+target	Christopher	Colin	0
+target	Christopher	Emilio	0
+target	Christopher	Francesca	0
+target	Christopher	Gina	0
+target	Christopher	James	0
+target	Christopher	Jennifer	0
+target	Christopher	Lucia	0
+target	Christopher	Marco	0
+target	Christopher	Margaret	0
+target	Christopher	Maria	0
+target	Christopher	Penelope	0
+target	Christopher	Pierro	0
+target	Christopher	Roberto	0
+target	Christopher	Sophia	0
+target	Christopher	Tomaso	0
+target	Christopher	Victoria	0
+target	Colin	Emilio	0
+target	Colin	Francesca	0
+target	Colin	Gina	0
+target	Colin	James	0
+target	Colin	Jennifer	0
+target	Colin	Lucia	0
+target	Colin	Marco	0
+target	Colin	Margaret	0
+target	Colin	Maria	0
+target	Colin	Penelope	0
+target	Colin	Pierro	0
+target	Colin	Roberto	0
+target	Colin	Sophia	0
+target	Colin	Tomaso	0
+target	Colin	Victoria	0
+target	Emilio	Francesca	0
+target	Emilio	Gina	0
+target	Emilio	James	0
+target	Emilio	Jennifer	0
+target	Emilio	Lucia	0
+target	Emilio	Marco	0
+target	Emilio	Margaret	0
+target	Emilio	Maria	0
+target	Emilio	Penelope	0
+target	Emilio	Pierro	0
+target	Emilio	Roberto	0
+target	Emilio	Sophia	0
+target	Emilio	Tomaso	0
+target	Emilio	Victoria	0
+target	Francesca	Gina	0
+target	Francesca	James	0
+target	Francesca	Jennifer	0
+target	Francesca	Lucia	0
+target	Francesca	Marco	0
+target	Francesca	Margaret	0
+target	Francesca	Maria	1
+target	Francesca	Penelope	0
+target	Francesca	Pierro	0
+target	Francesca	Roberto	1
+target	Francesca	Sophia	0
+target	Francesca	Tomaso	0
+target	Francesca	Victoria	0
+target	Gina	James	0
+target	Gina	Jennifer	0
+target	Gina	Lucia	0
+target	Gina	Marco	0
+target	Gina	Margaret	0
+target	Gina	Maria	0
+target	Gina	Penelope	0
+target	Gina	Pierro	0
+target	Gina	Roberto	0
+target	Gina	Sophia	0
+target	Gina	Tomaso	0
+target	Gina	Victoria	0
+target	James	Jennifer	0
+target	James	Lucia	0
+target	James	Marco	0
+target	James	Margaret	0
+target	James	Maria	0
+target	James	Penelope	0
+target	James	Pierro	0
+target	James	Roberto	0
+target	James	Sophia	0
+target	James	Tomaso	0
+target	James	Victoria	0
+target	Jennifer	Lucia	0
+target	Jennifer	Marco	0
+target	Jennifer	Margaret	0
+target	Jennifer	Maria	0
+target	Jennifer	Penelope	0
+target	Jennifer	Pierro	0
+target	Jennifer	Roberto	0
+target	Jennifer	Sophia	0
+target	Jennifer	Tomaso	0
+target	Jennifer	Victoria	0
+target	Lucia	Marco	0
+target	Lucia	Margaret	0
+target	Lucia	Maria	0
+target	Lucia	Penelope	0
+target	Lucia	Pierro	0
+target	Lucia	Roberto	0
+target	Lucia	Sophia	0
+target	Lucia	Tomaso	0
+target	Lucia	Victoria	0
+target	Marco	Margaret	0
+target	Marco	Maria	0
+target	Marco	Penelope	0
+target	Marco	Pierro	0
+target	Marco	Roberto	0
+target	Marco	Sophia	0
+target	Marco	Tomaso	0
+target	Marco	Victoria	0
+target	Margaret	Maria	0
+target	Margaret	Penelope	0
+target	Margaret	Pierro	0
+target	Margaret	Roberto	0
+target	Margaret	Sophia	0
+target	Margaret	Tomaso	0
+target	Margaret	Victoria	0
+target	Maria	Penelope	0
+target	Maria	Pierro	1
+target	Maria	Roberto	0
+target	Maria	Sophia	0
+target	Maria	Tomaso	0
+target	Maria	Victoria	0
+target	Penelope	Pierro	0
+target	Penelope	Roberto	0
+target	Penelope	Sophia	0
+target	Penelope	Tomaso	0
+target	Penelope	Victoria	0
+target	Pierro	Roberto	1
+target	Pierro	Sophia	0
+target	Pierro	Tomaso	0
+target	Pierro	Victoria	0
+target	Roberto	Sophia	0
+target	Roberto	Tomaso	0
+target	Roberto	Victoria	0
+target	Sophia	Tomaso	0
+target	Sophia	Victoria	0
+target	Tomaso	Victoria	0
+uncle	Arthur	Charlotte
+uncle	Arthur	Colin
+uncle	Charles	Charlotte
+uncle	Charles	Colin
+uncle	Emilio	Alfonso
+uncle	Emilio	Sophia
+uncle	Tomaso	Alfonso
+uncle	Tomaso	Sophia
+wife	Angela	Tomaso
+wife	Christine	Andrew
+wife	Francesca	Pierro
+wife	Gina	Emilio
+wife	Jennifer	Charles
+wife	Lucia	Marco
+wife	Margaret	Arthur
+wife	Maria	Roberto
+wife	Penelope	Christopher
+wife	Victoria	James
+wife2	Angela	Tomaso
+wife2	Gina	Emilio
+wife2	Jennifer	Charles
+wife2	Lucia	Marco
+wife2	Margaret	Arthur
+wife2	Victoria	James

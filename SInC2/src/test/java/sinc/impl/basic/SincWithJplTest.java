@@ -256,7 +256,7 @@ class SincWithJplTest {
 
     private void deleteFile(String filePath) {
         File file = new File(filePath);
-        file.deleteOnExit();
+        file.delete();
     }
 
     private String rule2String(List<Predicate> rule) {
@@ -286,7 +286,7 @@ class SincWithJplTest {
             Query q = new Query(new Compound("retract", new Term[]{
                     new Compound(functor, new Term[]{
                             new org.jpl7.Variable("_"),
-                            new org.jpl7.Variable("-")
+                            new org.jpl7.Variable("_")
                     })
             }));
             for (Map<String, Term> binding: q) {

@@ -1,10 +1,34 @@
 package sinc.common;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class Eval {
     public enum EvalMetric {
-        CompressionRate, CompressionCapacity, InfoGain
+        CompressionRate("τ"),
+        CompressionCapacity("δ"),
+        InfoGain("h");
+        private final String name;
+
+        private static final Map<String, EvalMetric> name2ValMap = new HashMap<>();
+        static {
+            for (EvalMetric metric: EvalMetric.values()) {
+                name2ValMap.put(metric.name, metric);
+            }
+        }
+
+        EvalMetric(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        static public EvalMetric getByName(String name) {
+            return name2ValMap.get(name);
+        }
     }
 
     private static class EvalMin extends Eval {
@@ -76,16 +100,7 @@ public class Eval {
     }
 
     public boolean useful(EvalMetric type) {
-        switch (type) {
-            case CompressionRate:
-                return compRatio > COMP_RATIO_USEFUL_THRESHOLD;
-            case CompressionCapacity:
-                return compCapacity > COMP_CAPACITY_USEFUL_THRESHOLD;
-            case InfoGain:
-                return infoGain > INFO_GAIN_USEFUL_THRESHOLD;
-            default:
-                return false;
-        }
+        return compCapacity > COMP_CAPACITY_USEFUL_THRESHOLD;
     }
 
     @Override

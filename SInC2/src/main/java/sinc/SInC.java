@@ -5,6 +5,8 @@ import sinc.util.graph.BaseGraphNode;
 import sinc.util.graph.FeedbackVertexSetSolver;
 import sinc.util.graph.Tarjan;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public abstract class SInC {
@@ -88,6 +90,10 @@ public abstract class SInC {
                             r_max = r_e;
                         }
                     }
+                    if (Eval.MIN == r_e.getEval()) {
+                        /* 说明是被HC干掉的 */
+                        performanceMonitor.hcFilteredRules++;
+                    }
                 }
                 if (config.searchOrigins) {
                     for (Rule r_o : origins) {
@@ -96,6 +102,10 @@ public abstract class SInC {
                             if (r_o.getEval().value(eval_metric) > r_max.getEval().value(eval_metric)) {
                                 r_max = r_o;
                             }
+                        }
+                        if (Eval.MIN == r_o.getEval()) {
+                            /* 说明是被HC干掉的 */
+                            performanceMonitor.hcFilteredRules++;
                         }
                     }
                 }
@@ -314,7 +324,47 @@ public abstract class SInC {
     }
 
     protected void dumpResult() {
-        /* Todo: Implement Here */
+        if (null == dumpPath) {
+            return;
+        }
+        try {
+            PrintWriter writer = new PrintWriter(dumpPath);
+            /* Dump Hypothesis */
+            writer.println("# Hypothesis");
+            for (Rule r: hypothesis) {
+                writer.println(r);
+            }
+            writer.println();
+
+            /* Dump Start Set */
+            writer.println("# Essential Knowledge");
+            for (Predicate p: startSet) {
+                writer.print(p.functor);
+                for (Argument arg: p.args) {
+                    writer.print('\t');
+                    writer.print(arg.name);
+                }
+                writer.print('\n');
+            }
+            writer.println();
+
+            /* Dump Counter Example Set */
+            writer.println("# Counter Examples");
+            for (Predicate p: counterExamples) {
+                writer.print(p.functor);
+                for (Argument arg: p.args) {
+                    writer.print('\t');
+                    writer.print(arg.name);
+                }
+                writer.print('\n');
+            }
+            writer.println();
+
+            writer.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("[ERROR] Dump Failed.");
+            e.printStackTrace();
+        }
     }
 
     abstract protected Set<Predicate> getOriginalKb();
@@ -341,6 +391,8 @@ public abstract class SInC {
         KbStatistics kb_stat = loadKb();
         performanceMonitor.kbSize = kb_stat.facts;
         performanceMonitor.kbFunctors = kb_stat.functors;
+        performanceMonitor.totalConstantSubstitutions = kb_stat.totalConstantSubstitutions;
+        performanceMonitor.actualConstantSubstitutions = kb_stat.actualConstantSubstitutions;
         final long time_kb_loaded = System.currentTimeMillis();
         performanceMonitor.kbLoadTime = time_kb_loaded - time_start;
 
@@ -371,6 +423,7 @@ public abstract class SInC {
         } while (!target_head_functors.isEmpty());
         performanceMonitor.hypothesisRuleNumber = hypothesis.size();
         performanceMonitor.counterExampleSize = counterExamples.size();
+        performanceMonitor.cacheHits = Rule.cacheHits;
 
         /* 解析Graph找start set */
         final long time_graph_analyse_begin = System.currentTimeMillis();

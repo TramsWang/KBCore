@@ -251,7 +251,7 @@ class SincWithCachedRuleTest {
 
     private void deleteFile(String filePath) {
         File file = new File(filePath);
-        file.deleteOnExit();
+        file.delete();
     }
 
     private String rule2String(List<Predicate> rule) {

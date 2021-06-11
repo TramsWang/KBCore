@@ -132,4 +132,24 @@ public class MemKB {
     public Map<String, Integer> getFunctor2ArityMap() {
         return functor2ArityMap;
     }
+
+    public int getTotalConstantSubstitutions() {
+        int cnt = 0;
+        for (MultiSet<String>[] constant_sets: functor2ArgSetsMap.values()) {
+            for (MultiSet<String> constant_set: constant_sets) {
+                cnt += constant_set.differentValues();
+            }
+        }
+        return cnt;
+    }
+
+    public int getActualConstantSubstitutions() {
+        int cnt = 0;
+        for (List<String>[] promising_constant_lists: functor2PromisingConstMap.values()) {
+            for (List<String> promising_constant_list: promising_constant_lists) {
+                cnt += promising_constant_list.size();
+            }
+        }
+        return cnt;
+    }
 }

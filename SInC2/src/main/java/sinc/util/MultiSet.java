@@ -110,6 +110,10 @@ public class MultiSet<T> {
         return result;
     }
 
+    public int differentValues() {
+        return cntMap.size();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

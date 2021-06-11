@@ -30,7 +30,7 @@ public class SincWithJpl extends SInC {
                         config.searchOrigins,
                         config.evalMetric,
                         config.minHeadCoverage,
-                        config.minConstantProportion,
+                        config.minConstantCoverage,
                         false,
                         -1.0,
                         false,
@@ -54,13 +54,18 @@ public class SincWithJpl extends SInC {
                 }
                 kb.addFact(predicate);
             }
-            kb.calculatePromisingConstants(config.minConstantProportion);
+            kb.calculatePromisingConstants(config.minConstantCoverage);
 
-            return new KbStatistics(kb.totalFacts(), kb.functor2ArityMap.size());
+            return new KbStatistics(
+                    kb.totalFacts(),
+                    kb.functor2ArityMap.size(),
+                    kb.getActualConstantSubstitutions(),
+                    kb.getTotalConstantSubstitutions()
+            );
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new KbStatistics(-1, -1);
+        return new KbStatistics(-1, -1, -1, -1);
     }
 
     @Override
@@ -92,5 +97,16 @@ public class SincWithJpl extends SInC {
     @Override
     protected Set<Predicate> getOriginalKb() {
         return kb.originalKb;
+    }
+
+    @Deprecated  // Jpl retract有问题，不好用
+    public void retractAllKnowledgeFromJpl() {
+        kb.retractAllKnowledgeFromJpl();
+    }
+
+    @Override
+    protected void showMonitor() {
+        super.showMonitor();
+        JplRule.jplQueryMonitor.show();
     }
 }

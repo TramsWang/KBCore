@@ -39,6 +39,9 @@ public class PerformanceMonitor {
 
     /* Other Statistics Monitor */
     public int cacheHits = 0;
+    public int hcFilteredRules = 0;
+    public int totalConstantSubstitutions = 0;
+    public int actualConstantSubstitutions = 0;
     public List<BranchInfo> branchProgress = new ArrayList<>();
 
     public void show() {
@@ -90,6 +93,18 @@ public class PerformanceMonitor {
                 cacheHits * 100.0 / (executed_evaluations + cacheHits),
                 cacheHits,
                 executed_evaluations + cacheHits
+        );
+        System.out.printf(
+                "Head Coverage Filtered Rules: %.2f%%(%d/%d)\n",
+                hcFilteredRules * 100.0 / executed_evaluations,
+                hcFilteredRules,
+                executed_evaluations
+        );
+        System.out.printf(
+                "Constant Coverage Filtered Substitutions: %.2f%%(%d/%d)\n",
+                (totalConstantSubstitutions - actualConstantSubstitutions) * 100.0 / totalConstantSubstitutions,
+                actualConstantSubstitutions,
+                totalConstantSubstitutions
         );
         System.out.println("Branch Progress:");
         System.out.print("- Rule Sizes: ");

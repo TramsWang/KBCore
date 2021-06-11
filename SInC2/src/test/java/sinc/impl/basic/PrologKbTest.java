@@ -376,4 +376,29 @@ class PrologKbTest {
         expected.args[2] = new Constant(Rule.CONSTANT_ARG_ID, "y");
         assertEquals(expected, PrologKb.compound2Fact(compound));
     }
+
+    @Test
+    void testRetractKnowledge() {
+        String[] functors = new String[]{
+                FUNCTOR_FATHER, FUNCTOR_PARENT, FUNCTOR_GRANDPARENT
+        };
+        for (int i = 0; i < 5; i++) {
+            /* Append */
+            for (String functor: functors) {
+                for (int j = 0; j < 300; j++) {
+                    PrologKb.appendKnowledge(new Compound(functor, new Term[]{
+                            new Atom("x" + j), new Atom("y" + j)
+                    }));
+                }
+            }
+
+            /* Retract */
+            int cnt = 0;
+            for (String functor: functors) {
+                cnt += PrologKb.retractAllKnowledgeFromJpl(functor);
+            }
+            System.out.printf("Retracted: %d\n", cnt);
+            assertEquals(900, cnt);
+        }
+    }
 }

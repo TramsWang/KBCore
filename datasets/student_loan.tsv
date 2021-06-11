@@ -1,0 +1,5286 @@
+disabled	student114
+disabled	student125
+disabled	student142
+disabled	student155
+disabled	student156
+disabled	student173
+disabled	student178
+disabled	student181
+disabled	student184
+disabled	student194
+disabled	student197
+disabled	student207
+disabled	student208
+disabled	student214
+disabled	student234
+disabled	student242
+disabled	student246
+disabled	student248
+disabled	student253
+disabled	student26
+disabled	student269
+disabled	student281
+disabled	student286
+disabled	student288
+disabled	student295
+disabled	student313
+disabled	student316
+disabled	student336
+disabled	student349
+disabled	student351
+disabled	student352
+disabled	student364
+disabled	student37
+disabled	student371
+disabled	student407
+disabled	student41
+disabled	student410
+disabled	student436
+disabled	student440
+disabled	student458
+disabled	student465
+disabled	student470
+disabled	student472
+disabled	student474
+disabled	student476
+disabled	student479
+disabled	student485
+disabled	student50
+disabled	student502
+disabled	student505
+disabled	student512
+disabled	student559
+disabled	student560
+disabled	student565
+disabled	student580
+disabled	student594
+disabled	student598
+disabled	student600
+disabled	student602
+disabled	student628
+disabled	student634
+disabled	student64
+disabled	student65
+disabled	student650
+disabled	student659
+disabled	student663
+disabled	student673
+disabled	student68
+disabled	student680
+disabled	student698
+disabled	student700
+disabled	student732
+disabled	student733
+disabled	student734
+disabled	student738
+disabled	student748
+disabled	student762
+disabled	student770
+disabled	student805
+disabled	student823
+disabled	student83
+disabled	student830
+disabled	student831
+disabled	student838
+disabled	student852
+disabled	student870
+disabled	student881
+disabled	student885
+disabled	student909
+disabled	student913
+disabled	student918
+disabled	student92
+disabled	student963
+disabled	student976
+disabled	student992
+enlist	student40	fire_department
+enlist	student51	fire_department
+enlist	student109	fire_department
+enlist	student139	fire_department
+enlist	student148	fire_department
+enlist	student167	fire_department
+enlist	student168	fire_department
+enlist	student183	fire_department
+enlist	student211	fire_department
+enlist	student224	fire_department
+enlist	student233	fire_department
+enlist	student241	fire_department
+enlist	student262	fire_department
+enlist	student267	fire_department
+enlist	student280	fire_department
+enlist	student286	fire_department
+enlist	student288	fire_department
+enlist	student304	fire_department
+enlist	student313	fire_department
+enlist	student328	fire_department
+enlist	student329	fire_department
+enlist	student340	fire_department
+enlist	student349	fire_department
+enlist	student372	fire_department
+enlist	student404	fire_department
+enlist	student423	fire_department
+enlist	student428	fire_department
+enlist	student458	fire_department
+enlist	student474	fire_department
+enlist	student500	fire_department
+enlist	student539	fire_department
+enlist	student560	fire_department
+enlist	student562	fire_department
+enlist	student568	fire_department
+enlist	student585	fire_department
+enlist	student613	fire_department
+enlist	student634	fire_department
+enlist	student647	fire_department
+enlist	student668	fire_department
+enlist	student674	fire_department
+enlist	student702	fire_department
+enlist	student714	fire_department
+enlist	student758	fire_department
+enlist	student764	fire_department
+enlist	student768	fire_department
+enlist	student807	fire_department
+enlist	student854	fire_department
+enlist	student888	fire_department
+enlist	student908	fire_department
+enlist	student985	fire_department
+enlist	student35	fire_department
+enlist	student53	fire_department
+enlist	student160	fire_department
+enlist	student161	fire_department
+enlist	student201	fire_department
+enlist	student252	fire_department
+enlist	student287	fire_department
+enlist	student298	fire_department
+enlist	student310	fire_department
+enlist	student321	fire_department
+enlist	student325	fire_department
+enlist	student375	fire_department
+enlist	student424	fire_department
+enlist	student455	fire_department
+enlist	student462	fire_department
+enlist	student514	fire_department
+enlist	student528	fire_department
+enlist	student540	fire_department
+enlist	student566	fire_department
+enlist	student683	fire_department
+enlist	student715	fire_department
+enlist	student771	fire_department
+enlist	student839	fire_department
+enlist	student865	fire_department
+enlist	student876	fire_department
+enlist	student880	fire_department
+enlist	student931	fire_department
+enlist	student939	fire_department
+enlist	student1000	air_force
+enlist	student999	fire_department
+enlist	student996	navy
+enlist	student993	fire_department
+enlist	student992	marines
+enlist	student985	navy
+enlist	student981	air_force
+enlist	student980	fire_department
+enlist	student977	foreign_legion
+enlist	student975	army
+enlist	student962	marines
+enlist	student959	air_force
+enlist	student956	army
+enlist	student955	marines
+enlist	student952	navy
+enlist	student948	air_force
+enlist	student946	navy
+enlist	student942	air_force
+enlist	student937	navy
+enlist	student925	fire_department
+enlist	student915	army
+enlist	student913	air_force
+enlist	student905	air_force
+enlist	student902	army
+enlist	student895	fire_department
+enlist	student894	marines
+enlist	student889	foreign_legion
+enlist	student876	foreign_legion
+enlist	student875	foreign_legion
+enlist	student866	foreign_legion
+enlist	student856	army
+enlist	student854	fire_department
+enlist	student844	fire_department
+enlist	student840	navy
+enlist	student839	foreign_legion
+enlist	student836	navy
+enlist	student835	navy
+enlist	student832	peace_corps
+enlist	student831	marines
+enlist	student817	marines
+enlist	student815	fire_department
+enlist	student808	air_force
+enlist	student804	navy
+enlist	student803	fire_department
+enlist	student795	navy
+enlist	student794	air_force
+enlist	student793	foreign_legion
+enlist	student790	fire_department
+enlist	student789	army
+enlist	student779	navy
+enlist	student770	peace_corps
+enlist	student765	marines
+enlist	student763	fire_department
+enlist	student751	navy
+enlist	student750	air_force
+enlist	student748	air_force
+enlist	student738	fire_department
+enlist	student735	air_force
+enlist	student733	navy
+enlist	student729	army
+enlist	student724	marines
+enlist	student722	foreign_legion
+enlist	student721	peace_corps
+enlist	student714	army
+enlist	student712	fire_department
+enlist	student708	foreign_legion
+enlist	student705	fire_department
+enlist	student701	peace_corps
+enlist	student699	air_force
+enlist	student697	marines
+enlist	student696	peace_corps
+enlist	student694	fire_department
+enlist	student684	foreign_legion
+enlist	student681	foreign_legion
+enlist	student680	navy
+enlist	student678	foreign_legion
+enlist	student676	peace_corps
+enlist	student670	air_force
+enlist	student664	army
+enlist	student663	peace_corps
+enlist	student662	marines
+enlist	student660	army
+enlist	student652	navy
+enlist	student646	marines
+enlist	student637	fire_department
+enlist	student634	army
+enlist	student633	foreign_legion
+enlist	student628	army
+enlist	student621	peace_corps
+enlist	student618	foreign_legion
+enlist	student617	foreign_legion
+enlist	student616	navy
+enlist	student611	army
+enlist	student609	peace_corps
+enlist	student605	air_force
+enlist	student604	foreign_legion
+enlist	student596	peace_corps
+enlist	student595	marines
+enlist	student593	army
+enlist	student589	peace_corps
+enlist	student587	marines
+enlist	student569	peace_corps
+enlist	student568	army
+enlist	student562	marines
+enlist	student550	fire_department
+enlist	student548	foreign_legion
+enlist	student546	air_force
+enlist	student544	peace_corps
+enlist	student543	foreign_legion
+enlist	student542	fire_department
+enlist	student539	army
+enlist	student536	marines
+enlist	student531	foreign_legion
+enlist	student527	peace_corps
+enlist	student511	navy
+enlist	student507	fire_department
+enlist	student504	air_force
+enlist	student496	navy
+enlist	student494	peace_corps
+enlist	student493	marines
+enlist	student480	peace_corps
+enlist	student467	navy
+enlist	student458	peace_corps
+enlist	student450	peace_corps
+enlist	student448	fire_department
+enlist	student443	navy
+enlist	student442	navy
+enlist	student441	peace_corps
+enlist	student437	fire_department
+enlist	student420	marines
+enlist	student415	foreign_legion
+enlist	student407	fire_department
+enlist	student391	air_force
+enlist	student386	foreign_legion
+enlist	student382	marines
+enlist	student380	navy
+enlist	student378	navy
+enlist	student377	peace_corps
+enlist	student369	navy
+enlist	student367	army
+enlist	student365	fire_department
+enlist	student361	army
+enlist	student353	fire_department
+enlist	student349	navy
+enlist	student348	fire_department
+enlist	student340	army
+enlist	student338	fire_department
+enlist	student337	peace_corps
+enlist	student334	marines
+enlist	student317	navy
+enlist	student316	peace_corps
+enlist	student315	foreign_legion
+enlist	student313	air_force
+enlist	student308	air_force
+enlist	student306	foreign_legion
+enlist	student304	army
+enlist	student303	fire_department
+enlist	student302	fire_department
+enlist	student297	navy
+enlist	student295	navy
+enlist	student293	navy
+enlist	student292	foreign_legion
+enlist	student291	army
+enlist	student285	marines
+enlist	student282	marines
+enlist	student281	navy
+enlist	student280	air_force
+enlist	student279	army
+enlist	student275	navy
+enlist	student272	navy
+enlist	student271	fire_department
+enlist	student264	foreign_legion
+enlist	student248	army
+enlist	student233	navy
+enlist	student224	peace_corps
+enlist	student220	peace_corps
+enlist	student218	fire_department
+enlist	student208	foreign_legion
+enlist	student204	marines
+enlist	student196	peace_corps
+enlist	student195	marines
+enlist	student192	foreign_legion
+enlist	student191	army
+enlist	student189	peace_corps
+enlist	student180	fire_department
+enlist	student172	peace_corps
+enlist	student169	navy
+enlist	student168	air_force
+enlist	student165	foreign_legion
+enlist	student161	foreign_legion
+enlist	student160	fire_department
+enlist	student153	peace_corps
+enlist	student152	army
+enlist	student151	army
+enlist	student140	air_force
+enlist	student139	fire_department
+enlist	student129	peace_corps
+enlist	student127	marines
+enlist	student121	army
+enlist	student120	army
+enlist	student117	fire_department
+enlist	student116	fire_department
+enlist	student106	army
+enlist	student105	army
+enlist	student104	marines
+enlist	student101	foreign_legion
+enlist	student99	air_force
+enlist	student97	navy
+enlist	student94	peace_corps
+enlist	student91	navy
+enlist	student90	fire_department
+enlist	student84	marines
+enlist	student80	air_force
+enlist	student79	army
+enlist	student73	air_force
+enlist	student62	army
+enlist	student57	marines
+enlist	student53	foreign_legion
+enlist	student51	marines
+enlist	student49	army
+enlist	student48	army
+enlist	student46	army
+enlist	student39	navy
+enlist	student21	marines
+enlist	student13	peace_corps
+enlist	student11	peace_corps
+enlist	student9	marines
+enlist	student4	marines
+enrolled	student10	smc	1
+enrolled	student101	ucb	1
+enrolled	student122	ucsd	1
+enrolled	student154	ucb	1
+enrolled	student161	ucsd	1
+enrolled	student17	ucsd	1
+enrolled	student245	ucla	1
+enrolled	student253	ucb	1
+enrolled	student255	ucsd	1
+enrolled	student258	ucsd	1
+enrolled	student269	smc	1
+enrolled	student27	smc	1
+enrolled	student287	ucsd	1
+enrolled	student289	ucb	1
+enrolled	student292	ucsd	1
+enrolled	student297	ucla	1
+enrolled	student3	occ	1
+enrolled	student317	smc	1
+enrolled	student319	occ	1
+enrolled	student332	ucla	1
+enrolled	student359	ucsd	1
+enrolled	student367	occ	1
+enrolled	student372	uci	1
+enrolled	student379	ucb	1
+enrolled	student382	ucb	1
+enrolled	student396	ucb	1
+enrolled	student399	ucsd	1
+enrolled	student412	uci	1
+enrolled	student415	ucsd	1
+enrolled	student44	uci	1
+enrolled	student44	ucsd	1
+enrolled	student441	ucsd	1
+enrolled	student450	ucsd	1
+enrolled	student460	smc	1
+enrolled	student463	occ	1
+enrolled	student469	ucla	1
+enrolled	student470	ucsd	1
+enrolled	student48	occ	1
+enrolled	student495	ucla	1
+enrolled	student499	uci	1
+enrolled	student507	ucla	1
+enrolled	student527	smc	1
+enrolled	student532	ucb	1
+enrolled	student546	ucla	1
+enrolled	student552	ucsd	1
+enrolled	student564	ucla	1
+enrolled	student564	ucsd	1
+enrolled	student565	occ	1
+enrolled	student576	ucsd	1
+enrolled	student583	ucsd	1
+enrolled	student586	smc	1
+enrolled	student593	uci	1
+enrolled	student605	occ	1
+enrolled	student611	uci	1
+enrolled	student612	ucsd	1
+enrolled	student628	ucb	1
+enrolled	student629	ucsd	1
+enrolled	student630	uci	1
+enrolled	student636	ucla	1
+enrolled	student659	occ	1
+enrolled	student678	ucsd	1
+enrolled	student68	ucb	1
+enrolled	student680	smc	1
+enrolled	student680	ucsd	1
+enrolled	student690	ucb	1
+enrolled	student697	uci	1
+enrolled	student715	smc	1
+enrolled	student723	ucb	1
+enrolled	student736	occ	1
+enrolled	student737	ucsd	1
+enrolled	student752	ucla	1
+enrolled	student76	smc	1
+enrolled	student767	ucla	1
+enrolled	student778	ucsd	1
+enrolled	student78	ucb	1
+enrolled	student780	ucla	1
+enrolled	student784	ucla	1
+enrolled	student786	smc	1
+enrolled	student791	ucsd	1
+enrolled	student805	occ	1
+enrolled	student810	occ	1
+enrolled	student816	ucb	1
+enrolled	student816	ucla	1
+enrolled	student818	smc	1
+enrolled	student823	smc	1
+enrolled	student829	ucsd	1
+enrolled	student845	ucsd	1
+enrolled	student858	uci	1
+enrolled	student860	ucb	1
+enrolled	student862	uci	1
+enrolled	student864	ucsd	1
+enrolled	student878	ucla	1
+enrolled	student895	ucsd	1
+enrolled	student924	ucsd	1
+enrolled	student925	ucb	1
+enrolled	student933	smc	1
+enrolled	student937	smc	1
+enrolled	student946	uci	1
+enrolled	student948	occ	1
+enrolled	student953	ucsd	1
+enrolled	student960	ucb	1
+enrolled	student969	ucb	1
+enrolled	student973	ucla	1
+enrolled	student978	ucb	1
+enrolled	student985	ucla	1
+enrolled	student992	ucsd	1
+enrolled	student998	smc	1
+enrolled	student998	ucb	1
+enrolled	student10	ucb	2
+enrolled	student104	ucb	2
+enrolled	student107	ucsd	2
+enrolled	student120	ucsd	2
+enrolled	student123	occ	2
+enrolled	student125	smc	2
+enrolled	student130	ucb	2
+enrolled	student131	ucsd	2
+enrolled	student14	occ	2
+enrolled	student147	ucsd	2
+enrolled	student16	occ	2
+enrolled	student161	smc	2
+enrolled	student162	smc	2
+enrolled	student169	ucsd	2
+enrolled	student186	uci	2
+enrolled	student191	ucla	2
+enrolled	student20	ucla	2
+enrolled	student201	occ	2
+enrolled	student233	ucsd	2
+enrolled	student240	ucb	2
+enrolled	student245	ucsd	2
+enrolled	student248	occ	2
+enrolled	student263	ucsd	2
+enrolled	student267	ucsd	2
+enrolled	student268	smc	2
+enrolled	student278	ucla	2
+enrolled	student301	uci	2
+enrolled	student327	occ	2
+enrolled	student335	occ	2
+enrolled	student341	ucla	2
+enrolled	student353	ucla	2
+enrolled	student363	ucb	2
+enrolled	student367	ucsd	2
+enrolled	student369	ucsd	2
+enrolled	student374	ucsd	2
+enrolled	student377	occ	2
+enrolled	student41	ucsd	2
+enrolled	student426	ucla	2
+enrolled	student437	smc	2
+enrolled	student47	ucsd	2
+enrolled	student472	smc	2
+enrolled	student481	ucla	2
+enrolled	student504	occ	2
+enrolled	student505	ucla	2
+enrolled	student513	occ	2
+enrolled	student514	ucsd	2
+enrolled	student521	smc	2
+enrolled	student523	ucla	2
+enrolled	student523	ucsd	2
+enrolled	student53	smc	2
+enrolled	student535	smc	2
+enrolled	student548	smc	2
+enrolled	student571	smc	2
+enrolled	student571	ucsd	2
+enrolled	student633	uci	2
+enrolled	student67	uci	2
+enrolled	student675	ucsd	2
+enrolled	student69	ucla	2
+enrolled	student693	occ	2
+enrolled	student695	uci	2
+enrolled	student699	uci	2
+enrolled	student714	smc	2
+enrolled	student720	smc	2
+enrolled	student722	ucsd	2
+enrolled	student726	ucsd	2
+enrolled	student731	ucla	2
+enrolled	student740	ucsd	2
+enrolled	student747	ucla	2
+enrolled	student756	ucb	2
+enrolled	student758	occ	2
+enrolled	student760	smc	2
+enrolled	student777	occ	2
+enrolled	student78	smc	2
+enrolled	student787	ucsd	2
+enrolled	student789	uci	2
+enrolled	student796	ucsd	2
+enrolled	student812	smc	2
+enrolled	student812	ucsd	2
+enrolled	student822	ucb	2
+enrolled	student835	smc	2
+enrolled	student836	uci	2
+enrolled	student838	smc	2
+enrolled	student838	ucsd	2
+enrolled	student854	uci	2
+enrolled	student857	occ	2
+enrolled	student858	ucb	2
+enrolled	student861	smc	2
+enrolled	student87	occ	2
+enrolled	student871	ucb	2
+enrolled	student875	uci	2
+enrolled	student876	ucsd	2
+enrolled	student9	occ	2
+enrolled	student900	ucsd	2
+enrolled	student915	occ	2
+enrolled	student916	ucb	2
+enrolled	student921	smc	2
+enrolled	student931	smc	2
+enrolled	student934	ucla	2
+enrolled	student938	ucsd	2
+enrolled	student944	ucla	2
+enrolled	student952	uci	2
+enrolled	student960	smc	2
+enrolled	student961	ucsd	2
+enrolled	student966	uci	2
+enrolled	student971	occ	2
+enrolled	student975	occ	2
+enrolled	student991	ucsd	2
+enrolled	student102	uci	3
+enrolled	student103	ucla	3
+enrolled	student110	ucla	3
+enrolled	student111	uci	3
+enrolled	student120	ucla	3
+enrolled	student150	ucsd	3
+enrolled	student153	ucla	3
+enrolled	student156	ucsd	3
+enrolled	student168	occ	3
+enrolled	student180	smc	3
+enrolled	student182	uci	3
+enrolled	student186	ucsd	3
+enrolled	student189	ucb	3
+enrolled	student189	uci	3
+enrolled	student190	ucla	3
+enrolled	student192	occ	3
+enrolled	student194	ucla	3
+enrolled	student20	ucsd	3
+enrolled	student204	occ	3
+enrolled	student21	ucsd	3
+enrolled	student215	smc	3
+enrolled	student218	ucla	3
+enrolled	student236	occ	3
+enrolled	student241	ucb	3
+enrolled	student242	ucsd	3
+enrolled	student253	occ	3
+enrolled	student262	uci	3
+enrolled	student275	occ	3
+enrolled	student28	ucb	3
+enrolled	student290	ucsd	3
+enrolled	student298	ucb	3
+enrolled	student299	ucsd	3
+enrolled	student300	uci	3
+enrolled	student309	ucsd	3
+enrolled	student310	occ	3
+enrolled	student325	occ	3
+enrolled	student329	uci	3
+enrolled	student339	ucb	3
+enrolled	student343	uci	3
+enrolled	student349	smc	3
+enrolled	student35	ucla	3
+enrolled	student350	occ	3
+enrolled	student356	smc	3
+enrolled	student364	smc	3
+enrolled	student379	ucla	3
+enrolled	student387	uci	3
+enrolled	student41	uci	3
+enrolled	student411	ucb	3
+enrolled	student413	uci	3
+enrolled	student421	ucb	3
+enrolled	student43	ucb	3
+enrolled	student452	occ	3
+enrolled	student454	ucla	3
+enrolled	student457	ucsd	3
+enrolled	student458	occ	3
+enrolled	student463	ucsd	3
+enrolled	student467	smc	3
+enrolled	student47	occ	3
+enrolled	student474	uci	3
+enrolled	student481	ucsd	3
+enrolled	student483	ucsd	3
+enrolled	student487	occ	3
+enrolled	student493	occ	3
+enrolled	student502	ucsd	3
+enrolled	student52	ucsd	3
+enrolled	student520	uci	3
+enrolled	student522	uci	3
+enrolled	student525	ucb	3
+enrolled	student528	ucsd	3
+enrolled	student54	uci	3
+enrolled	student557	ucla	3
+enrolled	student559	occ	3
+enrolled	student566	uci	3
+enrolled	student574	ucb	3
+enrolled	student584	ucla	3
+enrolled	student6	ucsd	3
+enrolled	student60	ucsd	3
+enrolled	student602	ucb	3
+enrolled	student609	ucsd	3
+enrolled	student615	smc	3
+enrolled	student615	ucsd	3
+enrolled	student62	ucla	3
+enrolled	student622	ucla	3
+enrolled	student623	smc	3
+enrolled	student623	ucsd	3
+enrolled	student624	ucb	3
+enrolled	student650	occ	3
+enrolled	student657	occ	3
+enrolled	student658	ucb	3
+enrolled	student662	smc	3
+enrolled	student670	ucsd	3
+enrolled	student675	occ	3
+enrolled	student676	uci	3
+enrolled	student69	ucsd	3
+enrolled	student694	ucla	3
+enrolled	student704	ucla	3
+enrolled	student722	uci	3
+enrolled	student726	ucla	3
+enrolled	student74	uci	3
+enrolled	student753	ucsd	3
+enrolled	student766	occ	3
+enrolled	student792	ucsd	3
+enrolled	student798	ucb	3
+enrolled	student807	uci	3
+enrolled	student811	occ	3
+enrolled	student825	ucsd	3
+enrolled	student829	uci	3
+enrolled	student832	ucsd	3
+enrolled	student834	ucla	3
+enrolled	student837	uci	3
+enrolled	student843	occ	3
+enrolled	student844	ucsd	3
+enrolled	student851	ucb	3
+enrolled	student87	ucsd	3
+enrolled	student879	ucb	3
+enrolled	student888	ucb	3
+enrolled	student900	uci	3
+enrolled	student919	ucb	3
+enrolled	student927	ucsd	3
+enrolled	student931	ucsd	3
+enrolled	student939	ucb	3
+enrolled	student942	ucb	3
+enrolled	student948	ucsd	3
+enrolled	student951	smc	3
+enrolled	student954	ucsd	3
+enrolled	student959	ucb	3
+enrolled	student965	ucla	3
+enrolled	student974	ucla	3
+enrolled	student984	ucsd	3
+enrolled	student986	ucla	3
+enrolled	student995	ucsd	3
+enrolled	student104	smc	4
+enrolled	student11	uci	4
+enrolled	student111	ucsd	4
+enrolled	student114	ucb	4
+enrolled	student142	ucsd	4
+enrolled	student147	smc	4
+enrolled	student159	ucb	4
+enrolled	student160	uci	4
+enrolled	student169	ucla	4
+enrolled	student177	smc	4
+enrolled	student18	ucsd	4
+enrolled	student187	ucb	4
+enrolled	student202	ucla	4
+enrolled	student206	ucsd	4
+enrolled	student212	ucb	4
+enrolled	student218	ucsd	4
+enrolled	student221	occ	4
+enrolled	student221	ucb	4
+enrolled	student225	ucsd	4
+enrolled	student247	ucla	4
+enrolled	student252	smc	4
+enrolled	student265	uci	4
+enrolled	student268	ucsd	4
+enrolled	student276	occ	4
+enrolled	student277	occ	4
+enrolled	student282	uci	4
+enrolled	student285	ucla	4
+enrolled	student29	occ	4
+enrolled	student301	ucsd	4
+enrolled	student302	uci	4
+enrolled	student31	ucsd	4
+enrolled	student311	uci	4
+enrolled	student318	uci	4
+enrolled	student320	uci	4
+enrolled	student324	ucla	4
+enrolled	student337	uci	4
+enrolled	student343	ucsd	4
+enrolled	student348	ucsd	4
+enrolled	student35	ucsd	4
+enrolled	student350	ucb	4
+enrolled	student358	smc	4
+enrolled	student362	ucla	4
+enrolled	student368	smc	4
+enrolled	student370	ucb	4
+enrolled	student382	uci	4
+enrolled	student390	occ	4
+enrolled	student391	ucsd	4
+enrolled	student394	smc	4
+enrolled	student406	ucla	4
+enrolled	student409	smc	4
+enrolled	student413	ucb	4
+enrolled	student433	occ	4
+enrolled	student455	uci	4
+enrolled	student456	smc	4
+enrolled	student462	uci	4
+enrolled	student486	ucsd	4
+enrolled	student487	ucsd	4
+enrolled	student494	uci	4
+enrolled	student497	ucsd	4
+enrolled	student498	ucsd	4
+enrolled	student500	ucb	4
+enrolled	student501	ucb	4
+enrolled	student506	ucla	4
+enrolled	student513	ucsd	4
+enrolled	student518	ucsd	4
+enrolled	student526	occ	4
+enrolled	student533	ucsd	4
+enrolled	student535	ucsd	4
+enrolled	student542	uci	4
+enrolled	student543	occ	4
+enrolled	student551	ucb	4
+enrolled	student555	ucb	4
+enrolled	student57	occ	4
+enrolled	student578	ucb	4
+enrolled	student58	ucla	4
+enrolled	student589	occ	4
+enrolled	student590	ucsd	4
+enrolled	student595	ucb	4
+enrolled	student601	uci	4
+enrolled	student602	ucla	4
+enrolled	student604	occ	4
+enrolled	student604	ucsd	4
+enrolled	student605	ucsd	4
+enrolled	student64	ucb	4
+enrolled	student64	ucla	4
+enrolled	student643	uci	4
+enrolled	student661	occ	4
+enrolled	student669	uci	4
+enrolled	student671	ucla	4
+enrolled	student702	ucb	4
+enrolled	student725	occ	4
+enrolled	student733	uci	4
+enrolled	student734	occ	4
+enrolled	student744	ucb	4
+enrolled	student75	ucsd	4
+enrolled	student772	smc	4
+enrolled	student777	ucb	4
+enrolled	student785	ucsd	4
+enrolled	student795	smc	4
+enrolled	student8	ucsd	4
+enrolled	student801	occ	4
+enrolled	student804	ucb	4
+enrolled	student810	ucsd	4
+enrolled	student817	smc	4
+enrolled	student822	uci	4
+enrolled	student869	smc	4
+enrolled	student876	uci	4
+enrolled	student899	uci	4
+enrolled	student902	smc	4
+enrolled	student91	ucsd	4
+enrolled	student912	ucb	4
+enrolled	student914	smc	4
+enrolled	student919	occ	4
+enrolled	student92	ucb	4
+enrolled	student922	uci	4
+enrolled	student923	ucsd	4
+enrolled	student929	ucsd	4
+enrolled	student932	ucla	4
+enrolled	student942	uci	4
+enrolled	student95	ucsd	4
+enrolled	student954	uci	4
+enrolled	student975	ucsd	4
+enrolled	student982	smc	4
+enrolled	student982	ucb	4
+enrolled	student991	occ	4
+enrolled	student999	smc	4
+enrolled	student1000	ucsd	5
+enrolled	student118	ucla	5
+enrolled	student13	smc	5
+enrolled	student131	uci	5
+enrolled	student137	ucla	5
+enrolled	student144	ucla	5
+enrolled	student145	occ	5
+enrolled	student162	ucb	5
+enrolled	student179	occ	5
+enrolled	student179	ucsd	5
+enrolled	student18	smc	5
+enrolled	student213	ucsd	5
+enrolled	student214	ucsd	5
+enrolled	student22	occ	5
+enrolled	student240	smc	5
+enrolled	student250	ucsd	5
+enrolled	student256	occ	5
+enrolled	student26	smc	5
+enrolled	student266	occ	5
+enrolled	student271	ucsd	5
+enrolled	student279	ucla	5
+enrolled	student281	ucla	5
+enrolled	student308	ucsd	5
+enrolled	student312	smc	5
+enrolled	student314	ucsd	5
+enrolled	student32	ucsd	5
+enrolled	student326	ucla	5
+enrolled	student345	uci	5
+enrolled	student348	uci	5
+enrolled	student361	smc	5
+enrolled	student365	ucla	5
+enrolled	student366	uci	5
+enrolled	student383	smc	5
+enrolled	student385	uci	5
+enrolled	student415	occ	5
+enrolled	student418	uci	5
+enrolled	student419	ucla	5
+enrolled	student427	ucla	5
+enrolled	student449	smc	5
+enrolled	student450	occ	5
+enrolled	student461	uci	5
+enrolled	student466	uci	5
+enrolled	student471	ucla	5
+enrolled	student477	ucsd	5
+enrolled	student478	smc	5
+enrolled	student485	occ	5
+enrolled	student5	smc	5
+enrolled	student505	ucsd	5
+enrolled	student51	smc	5
+enrolled	student512	uci	5
+enrolled	student561	ucla	5
+enrolled	student568	ucla	5
+enrolled	student598	ucb	5
+enrolled	student618	occ	5
+enrolled	student637	ucla	5
+enrolled	student644	occ	5
+enrolled	student645	smc	5
+enrolled	student648	ucla	5
+enrolled	student650	ucsd	5
+enrolled	student652	ucla	5
+enrolled	student660	ucla	5
+enrolled	student663	occ	5
+enrolled	student681	smc	5
+enrolled	student682	ucb	5
+enrolled	student710	ucb	5
+enrolled	student712	smc	5
+enrolled	student713	smc	5
+enrolled	student738	ucsd	5
+enrolled	student763	smc	5
+enrolled	student769	ucsd	5
+enrolled	student773	ucsd	5
+enrolled	student782	ucla	5
+enrolled	student826	ucla	5
+enrolled	student828	ucla	5
+enrolled	student83	ucla	5
+enrolled	student840	ucsd	5
+enrolled	student850	ucsd	5
+enrolled	student851	uci	5
+enrolled	student863	ucsd	5
+enrolled	student89	occ	5
+enrolled	student891	ucla	5
+enrolled	student90	ucb	5
+enrolled	student91	occ	5
+enrolled	student924	smc	5
+enrolled	student94	smc	5
+enrolled	student956	uci	5
+enrolled	student98	uci	5
+enrolled	student983	ucsd	5
+enrolled	student109	ucsd	6
+enrolled	student119	smc	6
+enrolled	student122	smc	6
+enrolled	student136	smc	6
+enrolled	student184	occ	6
+enrolled	student193	ucsd	6
+enrolled	student197	uci	6
+enrolled	student198	uci	6
+enrolled	student216	smc	6
+enrolled	student220	occ	6
+enrolled	student227	ucb	6
+enrolled	student232	ucb	6
+enrolled	student246	uci	6
+enrolled	student275	ucsd	6
+enrolled	student279	ucsd	6
+enrolled	student316	ucsd	6
+enrolled	student376	ucsd	6
+enrolled	student385	ucb	6
+enrolled	student389	uci	6
+enrolled	student39	uci	6
+enrolled	student391	smc	6
+enrolled	student4	uci	6
+enrolled	student403	ucsd	6
+enrolled	student408	occ	6
+enrolled	student420	smc	6
+enrolled	student421	occ	6
+enrolled	student428	uci	6
+enrolled	student435	occ	6
+enrolled	student440	ucsd	6
+enrolled	student445	uci	6
+enrolled	student470	uci	6
+enrolled	student472	ucsd	6
+enrolled	student480	ucla	6
+enrolled	student502	ucla	6
+enrolled	student509	ucla	6
+enrolled	student530	ucsd	6
+enrolled	student532	occ	6
+enrolled	student533	occ	6
+enrolled	student538	uci	6
+enrolled	student538	ucsd	6
+enrolled	student544	occ	6
+enrolled	student547	smc	6
+enrolled	student549	ucla	6
+enrolled	student551	ucla	6
+enrolled	student569	occ	6
+enrolled	student574	occ	6
+enrolled	student584	ucsd	6
+enrolled	student59	ucb	6
+enrolled	student606	smc	6
+enrolled	student606	ucsd	6
+enrolled	student609	occ	6
+enrolled	student619	ucb	6
+enrolled	student62	ucb	6
+enrolled	student624	uci	6
+enrolled	student649	ucla	6
+enrolled	student653	smc	6
+enrolled	student658	ucla	6
+enrolled	student678	uci	6
+enrolled	student698	ucsd	6
+enrolled	student708	ucla	6
+enrolled	student735	ucsd	6
+enrolled	student741	occ	6
+enrolled	student746	uci	6
+enrolled	student748	ucla	6
+enrolled	student749	uci	6
+enrolled	student770	ucla	6
+enrolled	student775	ucla	6
+enrolled	student790	smc	6
+enrolled	student833	ucla	6
+enrolled	student835	ucb	6
+enrolled	student836	ucsd	6
+enrolled	student84	uci	6
+enrolled	student842	ucb	6
+enrolled	student847	uci	6
+enrolled	student853	smc	6
+enrolled	student86	occ	6
+enrolled	student860	ucla	6
+enrolled	student865	smc	6
+enrolled	student866	ucla	6
+enrolled	student868	uci	6
+enrolled	student888	ucla	6
+enrolled	student890	ucb	6
+enrolled	student892	occ	6
+enrolled	student917	occ	6
+enrolled	student936	ucb	6
+enrolled	student946	ucsd	6
+enrolled	student958	smc	6
+enrolled	student97	ucla	6
+enrolled	student993	ucb	6
+enrolled	student101	ucla	7
+enrolled	student108	smc	7
+enrolled	student117	smc	7
+enrolled	student127	ucla	7
+enrolled	student15	uci	7
+enrolled	student154	ucla	7
+enrolled	student185	uci	7
+enrolled	student223	uci	7
+enrolled	student235	uci	7
+enrolled	student238	smc	7
+enrolled	student260	ucla	7
+enrolled	student272	uci	7
+enrolled	student289	occ	7
+enrolled	student295	occ	7
+enrolled	student30	occ	7
+enrolled	student304	smc	7
+enrolled	student334	occ	7
+enrolled	student338	uci	7
+enrolled	student363	smc	7
+enrolled	student374	ucla	7
+enrolled	student375	ucla	7
+enrolled	student396	smc	7
+enrolled	student400	occ	7
+enrolled	student403	smc	7
+enrolled	student424	uci	7
+enrolled	student436	occ	7
+enrolled	student442	ucla	7
+enrolled	student444	smc	7
+enrolled	student447	ucla	7
+enrolled	student453	uci	7
+enrolled	student482	occ	7
+enrolled	student501	ucla	7
+enrolled	student518	smc	7
+enrolled	student534	ucla	7
+enrolled	student537	uci	7
+enrolled	student545	uci	7
+enrolled	student578	smc	7
+enrolled	student612	ucla	7
+enrolled	student640	smc	7
+enrolled	student668	occ	7
+enrolled	student672	smc	7
+enrolled	student673	smc	7
+enrolled	student686	ucla	7
+enrolled	student71	uci	7
+enrolled	student724	occ	7
+enrolled	student744	uci	7
+enrolled	student750	occ	7
+enrolled	student755	uci	7
+enrolled	student779	occ	7
+enrolled	student781	occ	7
+enrolled	student797	uci	7
+enrolled	student8	smc	7
+enrolled	student802	smc	7
+enrolled	student813	ucla	7
+enrolled	student814	smc	7
+enrolled	student824	smc	7
+enrolled	student844	ucla	7
+enrolled	student845	uci	7
+enrolled	student85	uci	7
+enrolled	student874	uci	7
+enrolled	student885	occ	7
+enrolled	student898	smc	7
+enrolled	student907	occ	7
+enrolled	student935	ucla	7
+enrolled	student943	occ	7
+enrolled	student950	smc	7
+enrolled	student953	uci	7
+enrolled	student978	smc	7
+enrolled	student979	smc	7
+enrolled	student100	ucla	8
+enrolled	student107	uci	8
+enrolled	student115	smc	8
+enrolled	student134	smc	8
+enrolled	student141	smc	8
+enrolled	student142	uci	8
+enrolled	student146	ucla	8
+enrolled	student155	ucla	8
+enrolled	student157	occ	8
+enrolled	student219	uci	8
+enrolled	student224	occ	8
+enrolled	student225	occ	8
+enrolled	student233	uci	8
+enrolled	student234	uci	8
+enrolled	student237	uci	8
+enrolled	student239	ucla	8
+enrolled	student243	smc	8
+enrolled	student244	occ	8
+enrolled	student254	smc	8
+enrolled	student255	occ	8
+enrolled	student261	occ	8
+enrolled	student274	uci	8
+enrolled	student307	smc	8
+enrolled	student322	uci	8
+enrolled	student330	occ	8
+enrolled	student34	ucla	8
+enrolled	student370	occ	8
+enrolled	student388	ucla	8
+enrolled	student392	occ	8
+enrolled	student397	uci	8
+enrolled	student399	occ	8
+enrolled	student438	smc	8
+enrolled	student451	occ	8
+enrolled	student457	uci	8
+enrolled	student473	ucla	8
+enrolled	student500	smc	8
+enrolled	student503	occ	8
+enrolled	student529	uci	8
+enrolled	student540	smc	8
+enrolled	student552	ucla	8
+enrolled	student560	smc	8
+enrolled	student581	smc	8
+enrolled	student61	ucla	8
+enrolled	student613	smc	8
+enrolled	student621	occ	8
+enrolled	student63	smc	8
+enrolled	student631	uci	8
+enrolled	student639	occ	8
+enrolled	student666	occ	8
+enrolled	student679	smc	8
+enrolled	student688	ucla	8
+enrolled	student70	smc	8
+enrolled	student706	occ	8
+enrolled	student707	uci	8
+enrolled	student75	occ	8
+enrolled	student751	occ	8
+enrolled	student787	ucla	8
+enrolled	student863	occ	8
+enrolled	student879	smc	8
+enrolled	student887	uci	8
+enrolled	student906	occ	8
+enrolled	student909	ucla	8
+enrolled	student913	occ	8
+enrolled	student928	smc	8
+enrolled	student96	occ	8
+enrolled	student969	uci	8
+enrolled	student980	ucla	8
+enrolled	student984	smc	8
+enrolled	student1000	occ	9
+enrolled	student129	smc	9
+enrolled	student138	uci	9
+enrolled	student143	smc	9
+enrolled	student17	uci	9
+enrolled	student172	smc	9
+enrolled	student176	occ	9
+enrolled	student188	smc	9
+enrolled	student19	occ	9
+enrolled	student21	uci	9
+enrolled	student226	smc	9
+enrolled	student242	ucla	9
+enrolled	student263	ucla	9
+enrolled	student264	ucla	9
+enrolled	student267	occ	9
+enrolled	student286	uci	9
+enrolled	student290	ucla	9
+enrolled	student296	smc	9
+enrolled	student299	occ	9
+enrolled	student303	ucla	9
+enrolled	student308	ucla	9
+enrolled	student314	smc	9
+enrolled	student323	ucla	9
+enrolled	student328	occ	9
+enrolled	student351	ucla	9
+enrolled	student357	uci	9
+enrolled	student37	ucla	9
+enrolled	student373	uci	9
+enrolled	student386	occ	9
+enrolled	student393	ucla	9
+enrolled	student404	uci	9
+enrolled	student410	occ	9
+enrolled	student414	uci	9
+enrolled	student416	uci	9
+enrolled	student430	uci	9
+enrolled	student432	ucla	9
+enrolled	student440	ucla	9
+enrolled	student448	ucla	9
+enrolled	student475	ucla	9
+enrolled	student484	occ	9
+enrolled	student491	uci	9
+enrolled	student497	ucla	9
+enrolled	student515	occ	9
+enrolled	student516	uci	9
+enrolled	student528	smc	9
+enrolled	student530	occ	9
+enrolled	student580	uci	9
+enrolled	student590	smc	9
+enrolled	student594	ucla	9
+enrolled	student595	occ	9
+enrolled	student597	occ	9
+enrolled	student60	ucla	9
+enrolled	student607	ucla	9
+enrolled	student610	occ	9
+enrolled	student617	ucla	9
+enrolled	student627	smc	9
+enrolled	student641	uci	9
+enrolled	student642	uci	9
+enrolled	student656	ucla	9
+enrolled	student670	uci	9
+enrolled	student684	smc	9
+enrolled	student685	ucla	9
+enrolled	student691	smc	9
+enrolled	student692	ucla	9
+enrolled	student702	occ	9
+enrolled	student718	uci	9
+enrolled	student730	occ	9
+enrolled	student742	uci	9
+enrolled	student764	ucla	9
+enrolled	student77	uci	9
+enrolled	student773	smc	9
+enrolled	student776	uci	9
+enrolled	student783	occ	9
+enrolled	student785	uci	9
+enrolled	student79	smc	9
+enrolled	student796	smc	9
+enrolled	student82	smc	9
+enrolled	student825	uci	9
+enrolled	student841	uci	9
+enrolled	student848	uci	9
+enrolled	student855	ucla	9
+enrolled	student864	uci	9
+enrolled	student873	uci	9
+enrolled	student88	ucla	9
+enrolled	student882	smc	9
+enrolled	student884	occ	9
+enrolled	student893	smc	9
+enrolled	student926	uci	9
+enrolled	student936	uci	9
+enrolled	student947	smc	9
+enrolled	student961	uci	9
+enrolled	student99	occ	9
+enrolled	student994	uci	9
+enrolled	student995	uci	9
+enrolled	student112	ucla	10
+enrolled	student126	uci	10
+enrolled	student139	uci	10
+enrolled	student148	occ	10
+enrolled	student149	smc	10
+enrolled	student151	ucla	10
+enrolled	student158	smc	10
+enrolled	student165	uci	10
+enrolled	student167	occ	10
+enrolled	student170	uci	10
+enrolled	student183	occ	10
+enrolled	student196	ucla	10
+enrolled	student199	ucla	10
+enrolled	student200	smc	10
+enrolled	student217	uci	10
+enrolled	student232	ucla	10
+enrolled	student24	ucla	10
+enrolled	student249	smc	10
+enrolled	student25	occ	10
+enrolled	student250	occ	10
+enrolled	student270	occ	10
+enrolled	student273	uci	10
+enrolled	student283	uci	10
+enrolled	student284	occ	10
+enrolled	student294	uci	10
+enrolled	student298	uci	10
+enrolled	student305	occ	10
+enrolled	student306	occ	10
+enrolled	student316	smc	10
+enrolled	student339	occ	10
+enrolled	student344	uci	10
+enrolled	student352	uci	10
+enrolled	student371	ucla	10
+enrolled	student381	occ	10
+enrolled	student395	smc	10
+enrolled	student417	smc	10
+enrolled	student423	uci	10
+enrolled	student43	occ	10
+enrolled	student439	ucla	10
+enrolled	student446	smc	10
+enrolled	student45	ucla	10
+enrolled	student46	ucla	10
+enrolled	student476	ucla	10
+enrolled	student490	uci	10
+enrolled	student498	ucla	10
+enrolled	student510	ucla	10
+enrolled	student514	occ	10
+enrolled	student525	smc	10
+enrolled	student536	smc	10
+enrolled	student55	occ	10
+enrolled	student563	smc	10
+enrolled	student567	occ	10
+enrolled	student570	occ	10
+enrolled	student582	smc	10
+enrolled	student583	ucla	10
+enrolled	student588	uci	10
+enrolled	student592	occ	10
+enrolled	student596	ucla	10
+enrolled	student616	occ	10
+enrolled	student646	ucla	10
+enrolled	student66	occ	10
+enrolled	student667	smc	10
+enrolled	student674	smc	10
+enrolled	student677	smc	10
+enrolled	student68	ucla	10
+enrolled	student682	occ	10
+enrolled	student683	ucla	10
+enrolled	student703	smc	10
+enrolled	student710	occ	10
+enrolled	student716	occ	10
+enrolled	student719	ucla	10
+enrolled	student721	occ	10
+enrolled	student729	occ	10
+enrolled	student73	occ	10
+enrolled	student737	ucla	10
+enrolled	student739	ucla	10
+enrolled	student740	ucla	10
+enrolled	student745	ucla	10
+enrolled	student769	ucla	10
+enrolled	student794	ucla	10
+enrolled	student803	smc	10
+enrolled	student808	smc	10
+enrolled	student819	occ	10
+enrolled	student820	smc	10
+enrolled	student827	ucla	10
+enrolled	student839	smc	10
+enrolled	student846	occ	10
+enrolled	student852	occ	10
+enrolled	student859	occ	10
+enrolled	student877	smc	10
+enrolled	student881	ucla	10
+enrolled	student883	smc	10
+enrolled	student890	occ	10
+enrolled	student896	ucla	10
+enrolled	student901	ucla	10
+enrolled	student911	smc	10
+enrolled	student923	uci	10
+enrolled	student925	occ	10
+enrolled	student95	uci	10
+enrolled	student962	ucla	10
+enrolled	student970	ucla	10
+enrolled	student972	uci	10
+enrolled	student981	occ	10
+enrolled	student990	smc	10
+enrolled	student997	occ	10
+enrolled	student1	occ	11
+enrolled	student109	occ	11
+enrolled	student116	ucla	11
+enrolled	student130	ucla	11
+enrolled	student150	uci	11
+enrolled	student173	ucla	11
+enrolled	student181	uci	11
+enrolled	student195	ucla	11
+enrolled	student2	uci	11
+enrolled	student203	ucla	11
+enrolled	student207	occ	11
+enrolled	student230	ucla	11
+enrolled	student231	smc	11
+enrolled	student28	ucla	11
+enrolled	student280	ucla	11
+enrolled	student288	occ	11
+enrolled	student31	uci	11
+enrolled	student33	smc	11
+enrolled	student331	ucla	11
+enrolled	student36	ucla	11
+enrolled	student360	smc	11
+enrolled	student378	occ	11
+enrolled	student38	ucla	11
+enrolled	student380	uci	11
+enrolled	student398	uci	11
+enrolled	student40	uci	11
+enrolled	student402	ucla	11
+enrolled	student405	occ	11
+enrolled	student425	occ	11
+enrolled	student49	occ	11
+enrolled	student50	ucla	11
+enrolled	student508	ucla	11
+enrolled	student531	ucla	11
+enrolled	student541	smc	11
+enrolled	student556	ucla	11
+enrolled	student572	occ	11
+enrolled	student575	smc	11
+enrolled	student577	ucla	11
+enrolled	student587	occ	11
+enrolled	student591	uci	11
+enrolled	student598	ucla	11
+enrolled	student625	occ	11
+enrolled	student651	uci	11
+enrolled	student655	smc	11
+enrolled	student690	uci	11
+enrolled	student696	smc	11
+enrolled	student701	uci	11
+enrolled	student711	ucla	11
+enrolled	student732	occ	11
+enrolled	student735	ucla	11
+enrolled	student743	smc	11
+enrolled	student757	uci	11
+enrolled	student759	occ	11
+enrolled	student765	occ	11
+enrolled	student768	ucla	11
+enrolled	student774	smc	11
+enrolled	student788	uci	11
+enrolled	student791	occ	11
+enrolled	student798	occ	11
+enrolled	student80	occ	11
+enrolled	student809	occ	11
+enrolled	student81	ucla	11
+enrolled	student821	uci	11
+enrolled	student831	smc	11
+enrolled	student840	uci	11
+enrolled	student872	ucla	11
+enrolled	student880	ucla	11
+enrolled	student886	smc	11
+enrolled	student904	smc	11
+enrolled	student908	ucla	11
+enrolled	student918	occ	11
+enrolled	student93	occ	11
+enrolled	student930	occ	11
+enrolled	student938	occ	11
+enrolled	student963	uci	11
+enrolled	student964	smc	11
+enrolled	student976	occ	11
+enrolled	student977	uci	11
+enrolled	student992	smc	11
+enrolled	student996	smc	11
+enrolled	student106	smc	12
+enrolled	student12	ucla	12
+enrolled	student135	uci	12
+enrolled	student140	occ	12
+enrolled	student152	uci	12
+enrolled	student164	uci	12
+enrolled	student171	smc	12
+enrolled	student178	ucla	12
+enrolled	student193	smc	12
+enrolled	student209	uci	12
+enrolled	student213	ucla	12
+enrolled	student228	ucla	12
+enrolled	student23	smc	12
+enrolled	student241	smc	12
+enrolled	student257	occ	12
+enrolled	student271	smc	12
+enrolled	student293	occ	12
+enrolled	student309	ucla	12
+enrolled	student32	occ	12
+enrolled	student333	uci	12
+enrolled	student336	uci	12
+enrolled	student340	occ	12
+enrolled	student342	ucla	12
+enrolled	student346	occ	12
+enrolled	student347	smc	12
+enrolled	student359	smc	12
+enrolled	student369	uci	12
+enrolled	student384	smc	12
+enrolled	student407	uci	12
+enrolled	student411	occ	12
+enrolled	student422	smc	12
+enrolled	student429	ucla	12
+enrolled	student441	occ	12
+enrolled	student459	occ	12
+enrolled	student465	occ	12
+enrolled	student479	ucla	12
+enrolled	student492	occ	12
+enrolled	student511	smc	12
+enrolled	student517	smc	12
+enrolled	student52	occ	12
+enrolled	student539	smc	12
+enrolled	student550	occ	12
+enrolled	student554	occ	12
+enrolled	student555	uci	12
+enrolled	student573	occ	12
+enrolled	student576	uci	12
+enrolled	student579	occ	12
+enrolled	student6	smc	12
+enrolled	student600	ucla	12
+enrolled	student608	uci	12
+enrolled	student614	occ	12
+enrolled	student619	smc	12
+enrolled	student629	uci	12
+enrolled	student634	uci	12
+enrolled	student638	smc	12
+enrolled	student647	ucla	12
+enrolled	student665	occ	12
+enrolled	student705	uci	12
+enrolled	student709	ucla	12
+enrolled	student717	uci	12
+enrolled	student723	occ	12
+enrolled	student738	smc	12
+enrolled	student762	uci	12
+enrolled	student778	occ	12
+enrolled	student800	occ	12
+enrolled	student806	ucla	12
+enrolled	student830	ucla	12
+enrolled	student849	ucla	12
+enrolled	student850	occ	12
+enrolled	student856	smc	12
+enrolled	student867	occ	12
+enrolled	student871	smc	12
+enrolled	student895	ucla	12
+enrolled	student897	smc	12
+enrolled	student90	smc	12
+enrolled	student910	uci	12
+enrolled	student920	uci	12
+enrolled	student927	uci	12
+enrolled	student940	ucla	12
+enrolled	student945	uci	12
+enrolled	student949	ucla	12
+enrolled	student955	uci	12
+enrolled	student959	ucla	12
+enrolled	student967	uci	12
+enrolled	student968	smc	12
+enrolled	student987	occ	12
+enrolled	student989	ucla	12
+enrolled	student128	ucla	13
+enrolled	student133	smc	13
+enrolled	student174	occ	13
+enrolled	student354	occ	13
+enrolled	student488	occ	13
+enrolled	student519	uci	13
+enrolled	student620	occ	13
+enrolled	student632	occ	13
+enrolled	student761	uci	13
+enrolled	student870	uci	13
+enrolled	student905	occ	13
+enrolled	student983	ucla	13
+enrolled	student163	uci	14
+enrolled	student208	smc	14
+enrolled	student210	ucla	14
+enrolled	student227	occ	14
+enrolled	student315	uci	14
+enrolled	student468	smc	14
+enrolled	student486	smc	14
+enrolled	student553	uci	14
+enrolled	student585	occ	14
+enrolled	student626	occ	14
+enrolled	student689	ucla	14
+enrolled	student698	ucla	14
+enrolled	student72	occ	14
+enrolled	student832	smc	14
+enrolled	student175	uci	15
+enrolled	student211	uci	15
+enrolled	student214	smc	15
+enrolled	student222	smc	15
+enrolled	student229	occ	15
+enrolled	student401	uci	15
+enrolled	student42	smc	15
+enrolled	student59	uci	15
+enrolled	student599	occ	15
+enrolled	student635	smc	15
+enrolled	student700	uci	15
+enrolled	student727	smc	15
+enrolled	student753	occ	15
+enrolled	student792	ucla	15
+enrolled	student842	occ	15
+enrolled	student894	smc	15
+filed_for_bankrupcy	student122
+filed_for_bankrupcy	student126
+filed_for_bankrupcy	student136
+filed_for_bankrupcy	student145
+filed_for_bankrupcy	student148
+filed_for_bankrupcy	student159
+filed_for_bankrupcy	student162
+filed_for_bankrupcy	student170
+filed_for_bankrupcy	student179
+filed_for_bankrupcy	student2
+filed_for_bankrupcy	student211
+filed_for_bankrupcy	student219
+filed_for_bankrupcy	student227
+filed_for_bankrupcy	student238
+filed_for_bankrupcy	student241
+filed_for_bankrupcy	student242
+filed_for_bankrupcy	student244
+filed_for_bankrupcy	student247
+filed_for_bankrupcy	student248
+filed_for_bankrupcy	student253
+filed_for_bankrupcy	student262
+filed_for_bankrupcy	student270
+filed_for_bankrupcy	student280
+filed_for_bankrupcy	student300
+filed_for_bankrupcy	student302
+filed_for_bankrupcy	student323
+filed_for_bankrupcy	student33
+filed_for_bankrupcy	student347
+filed_for_bankrupcy	student350
+filed_for_bankrupcy	student376
+filed_for_bankrupcy	student377
+filed_for_bankrupcy	student385
+filed_for_bankrupcy	student396
+filed_for_bankrupcy	student406
+filed_for_bankrupcy	student409
+filed_for_bankrupcy	student416
+filed_for_bankrupcy	student433
+filed_for_bankrupcy	student436
+filed_for_bankrupcy	student438
+filed_for_bankrupcy	student448
+filed_for_bankrupcy	student467
+filed_for_bankrupcy	student477
+filed_for_bankrupcy	student490
+filed_for_bankrupcy	student495
+filed_for_bankrupcy	student502
+filed_for_bankrupcy	student505
+filed_for_bankrupcy	student511
+filed_for_bankrupcy	student512
+filed_for_bankrupcy	student522
+filed_for_bankrupcy	student526
+filed_for_bankrupcy	student553
+filed_for_bankrupcy	student570
+filed_for_bankrupcy	student585
+filed_for_bankrupcy	student588
+filed_for_bankrupcy	student59
+filed_for_bankrupcy	student591
+filed_for_bankrupcy	student592
+filed_for_bankrupcy	student606
+filed_for_bankrupcy	student641
+filed_for_bankrupcy	student651
+filed_for_bankrupcy	student66
+filed_for_bankrupcy	student661
+filed_for_bankrupcy	student663
+filed_for_bankrupcy	student686
+filed_for_bankrupcy	student7
+filed_for_bankrupcy	student742
+filed_for_bankrupcy	student747
+filed_for_bankrupcy	student749
+filed_for_bankrupcy	student760
+filed_for_bankrupcy	student764
+filed_for_bankrupcy	student780
+filed_for_bankrupcy	student787
+filed_for_bankrupcy	student792
+filed_for_bankrupcy	student803
+filed_for_bankrupcy	student807
+filed_for_bankrupcy	student814
+filed_for_bankrupcy	student817
+filed_for_bankrupcy	student835
+filed_for_bankrupcy	student84
+filed_for_bankrupcy	student847
+filed_for_bankrupcy	student849
+filed_for_bankrupcy	student854
+filed_for_bankrupcy	student874
+filed_for_bankrupcy	student890
+filed_for_bankrupcy	student891
+filed_for_bankrupcy	student915
+filed_for_bankrupcy	student924
+filed_for_bankrupcy	student928
+filed_for_bankrupcy	student932
+filed_for_bankrupcy	student95
+filed_for_bankrupcy	student953
+filed_for_bankrupcy	student956
+filed_for_bankrupcy	student958
+filed_for_bankrupcy	student97
+filed_for_bankrupcy	student998
+filed_for_bankrupcy	student999
+longest_absense_from_school	student10	0
+longest_absense_from_school	student102	0
+longest_absense_from_school	student110	0
+longest_absense_from_school	student111	0
+longest_absense_from_school	student114	0
+longest_absense_from_school	student118	0
+longest_absense_from_school	student119	0
+longest_absense_from_school	student124	0
+longest_absense_from_school	student137	0
+longest_absense_from_school	student139	0
+longest_absense_from_school	student154	0
+longest_absense_from_school	student169	0
+longest_absense_from_school	student170	0
+longest_absense_from_school	student202	0
+longest_absense_from_school	student205	0
+longest_absense_from_school	student206	0
+longest_absense_from_school	student209	0
+longest_absense_from_school	student21	0
+longest_absense_from_school	student214	0
+longest_absense_from_school	student226	0
+longest_absense_from_school	student227	0
+longest_absense_from_school	student248	0
+longest_absense_from_school	student256	0
+longest_absense_from_school	student277	0
+longest_absense_from_school	student280	0
+longest_absense_from_school	student300	0
+longest_absense_from_school	student310	0
+longest_absense_from_school	student32	0
+longest_absense_from_school	student321	0
+longest_absense_from_school	student331	0
+longest_absense_from_school	student333	0
+longest_absense_from_school	student349	0
+longest_absense_from_school	student365	0
+longest_absense_from_school	student367	0
+longest_absense_from_school	student386	0
+longest_absense_from_school	student395	0
+longest_absense_from_school	student399	0
+longest_absense_from_school	student405	0
+longest_absense_from_school	student406	0
+longest_absense_from_school	student430	0
+longest_absense_from_school	student437	0
+longest_absense_from_school	student439	0
+longest_absense_from_school	student463	0
+longest_absense_from_school	student465	0
+longest_absense_from_school	student467	0
+longest_absense_from_school	student471	0
+longest_absense_from_school	student476	0
+longest_absense_from_school	student477	0
+longest_absense_from_school	student479	0
+longest_absense_from_school	student485	0
+longest_absense_from_school	student486	0
+longest_absense_from_school	student498	0
+longest_absense_from_school	student50	0
+longest_absense_from_school	student500	0
+longest_absense_from_school	student524	0
+longest_absense_from_school	student527	0
+longest_absense_from_school	student533	0
+longest_absense_from_school	student54	0
+longest_absense_from_school	student541	0
+longest_absense_from_school	student567	0
+longest_absense_from_school	student59	0
+longest_absense_from_school	student602	0
+longest_absense_from_school	student609	0
+longest_absense_from_school	student614	0
+longest_absense_from_school	student622	0
+longest_absense_from_school	student633	0
+longest_absense_from_school	student65	0
+longest_absense_from_school	student667	0
+longest_absense_from_school	student678	0
+longest_absense_from_school	student68	0
+longest_absense_from_school	student689	0
+longest_absense_from_school	student705	0
+longest_absense_from_school	student714	0
+longest_absense_from_school	student73	0
+longest_absense_from_school	student734	0
+longest_absense_from_school	student739	0
+longest_absense_from_school	student743	0
+longest_absense_from_school	student754	0
+longest_absense_from_school	student783	0
+longest_absense_from_school	student792	0
+longest_absense_from_school	student799	0
+longest_absense_from_school	student8	0
+longest_absense_from_school	student806	0
+longest_absense_from_school	student832	0
+longest_absense_from_school	student840	0
+longest_absense_from_school	student842	0
+longest_absense_from_school	student863	0
+longest_absense_from_school	student869	0
+longest_absense_from_school	student870	0
+longest_absense_from_school	student875	0
+longest_absense_from_school	student878	0
+longest_absense_from_school	student879	0
+longest_absense_from_school	student899	0
+longest_absense_from_school	student903	0
+longest_absense_from_school	student913	0
+longest_absense_from_school	student924	0
+longest_absense_from_school	student936	0
+longest_absense_from_school	student96	0
+longest_absense_from_school	student969	0
+longest_absense_from_school	student970	0
+longest_absense_from_school	student1	1
+longest_absense_from_school	student100	1
+longest_absense_from_school	student106	1
+longest_absense_from_school	student109	1
+longest_absense_from_school	student117	1
+longest_absense_from_school	student121	1
+longest_absense_from_school	student134	1
+longest_absense_from_school	student148	1
+longest_absense_from_school	student165	1
+longest_absense_from_school	student166	1
+longest_absense_from_school	student167	1
+longest_absense_from_school	student173	1
+longest_absense_from_school	student192	1
+longest_absense_from_school	student201	1
+longest_absense_from_school	student207	1
+longest_absense_from_school	student224	1
+longest_absense_from_school	student229	1
+longest_absense_from_school	student235	1
+longest_absense_from_school	student247	1
+longest_absense_from_school	student251	1
+longest_absense_from_school	student257	1
+longest_absense_from_school	student261	1
+longest_absense_from_school	student294	1
+longest_absense_from_school	student312	1
+longest_absense_from_school	student337	1
+longest_absense_from_school	student389	1
+longest_absense_from_school	student391	1
+longest_absense_from_school	student394	1
+longest_absense_from_school	student40	1
+longest_absense_from_school	student414	1
+longest_absense_from_school	student418	1
+longest_absense_from_school	student425	1
+longest_absense_from_school	student46	1
+longest_absense_from_school	student462	1
+longest_absense_from_school	student511	1
+longest_absense_from_school	student531	1
+longest_absense_from_school	student554	1
+longest_absense_from_school	student558	1
+longest_absense_from_school	student560	1
+longest_absense_from_school	student564	1
+longest_absense_from_school	student594	1
+longest_absense_from_school	student601	1
+longest_absense_from_school	student604	1
+longest_absense_from_school	student606	1
+longest_absense_from_school	student642	1
+longest_absense_from_school	student652	1
+longest_absense_from_school	student661	1
+longest_absense_from_school	student662	1
+longest_absense_from_school	student666	1
+longest_absense_from_school	student682	1
+longest_absense_from_school	student684	1
+longest_absense_from_school	student686	1
+longest_absense_from_school	student693	1
+longest_absense_from_school	student695	1
+longest_absense_from_school	student710	1
+longest_absense_from_school	student721	1
+longest_absense_from_school	student729	1
+longest_absense_from_school	student732	1
+longest_absense_from_school	student740	1
+longest_absense_from_school	student75	1
+longest_absense_from_school	student753	1
+longest_absense_from_school	student769	1
+longest_absense_from_school	student77	1
+longest_absense_from_school	student784	1
+longest_absense_from_school	student787	1
+longest_absense_from_school	student790	1
+longest_absense_from_school	student794	1
+longest_absense_from_school	student801	1
+longest_absense_from_school	student804	1
+longest_absense_from_school	student809	1
+longest_absense_from_school	student836	1
+longest_absense_from_school	student850	1
+longest_absense_from_school	student854	1
+longest_absense_from_school	student855	1
+longest_absense_from_school	student862	1
+longest_absense_from_school	student876	1
+longest_absense_from_school	student881	1
+longest_absense_from_school	student889	1
+longest_absense_from_school	student894	1
+longest_absense_from_school	student901	1
+longest_absense_from_school	student906	1
+longest_absense_from_school	student923	1
+longest_absense_from_school	student940	1
+longest_absense_from_school	student946	1
+longest_absense_from_school	student950	1
+longest_absense_from_school	student953	1
+longest_absense_from_school	student956	1
+longest_absense_from_school	student959	1
+longest_absense_from_school	student962	1
+longest_absense_from_school	student972	1
+longest_absense_from_school	student976	1
+longest_absense_from_school	student994	1
+longest_absense_from_school	student998	1
+longest_absense_from_school	student120	2
+longest_absense_from_school	student133	2
+longest_absense_from_school	student138	2
+longest_absense_from_school	student140	2
+longest_absense_from_school	student157	2
+longest_absense_from_school	student183	2
+longest_absense_from_school	student199	2
+longest_absense_from_school	student203	2
+longest_absense_from_school	student216	2
+longest_absense_from_school	student222	2
+longest_absense_from_school	student237	2
+longest_absense_from_school	student241	2
+longest_absense_from_school	student250	2
+longest_absense_from_school	student255	2
+longest_absense_from_school	student258	2
+longest_absense_from_school	student265	2
+longest_absense_from_school	student270	2
+longest_absense_from_school	student281	2
+longest_absense_from_school	student282	2
+longest_absense_from_school	student29	2
+longest_absense_from_school	student295	2
+longest_absense_from_school	student296	2
+longest_absense_from_school	student30	2
+longest_absense_from_school	student306	2
+longest_absense_from_school	student308	2
+longest_absense_from_school	student309	2
+longest_absense_from_school	student329	2
+longest_absense_from_school	student332	2
+longest_absense_from_school	student347	2
+longest_absense_from_school	student361	2
+longest_absense_from_school	student362	2
+longest_absense_from_school	student372	2
+longest_absense_from_school	student378	2
+longest_absense_from_school	student383	2
+longest_absense_from_school	student397	2
+longest_absense_from_school	student403	2
+longest_absense_from_school	student410	2
+longest_absense_from_school	student412	2
+longest_absense_from_school	student428	2
+longest_absense_from_school	student436	2
+longest_absense_from_school	student440	2
+longest_absense_from_school	student447	2
+longest_absense_from_school	student459	2
+longest_absense_from_school	student466	2
+longest_absense_from_school	student470	2
+longest_absense_from_school	student49	2
+longest_absense_from_school	student496	2
+longest_absense_from_school	student5	2
+longest_absense_from_school	student502	2
+longest_absense_from_school	student521	2
+longest_absense_from_school	student53	2
+longest_absense_from_school	student550	2
+longest_absense_from_school	student573	2
+longest_absense_from_school	student578	2
+longest_absense_from_school	student583	2
+longest_absense_from_school	student584	2
+longest_absense_from_school	student598	2
+longest_absense_from_school	student600	2
+longest_absense_from_school	student613	2
+longest_absense_from_school	student618	2
+longest_absense_from_school	student627	2
+longest_absense_from_school	student63	2
+longest_absense_from_school	student636	2
+longest_absense_from_school	student655	2
+longest_absense_from_school	student66	2
+longest_absense_from_school	student677	2
+longest_absense_from_school	student687	2
+longest_absense_from_school	student688	2
+longest_absense_from_school	student696	2
+longest_absense_from_school	student697	2
+longest_absense_from_school	student715	2
+longest_absense_from_school	student725	2
+longest_absense_from_school	student727	2
+longest_absense_from_school	student741	2
+longest_absense_from_school	student745	2
+longest_absense_from_school	student751	2
+longest_absense_from_school	student756	2
+longest_absense_from_school	student764	2
+longest_absense_from_school	student774	2
+longest_absense_from_school	student777	2
+longest_absense_from_school	student780	2
+longest_absense_from_school	student789	2
+longest_absense_from_school	student795	2
+longest_absense_from_school	student798	2
+longest_absense_from_school	student807	2
+longest_absense_from_school	student816	2
+longest_absense_from_school	student823	2
+longest_absense_from_school	student896	2
+longest_absense_from_school	student897	2
+longest_absense_from_school	student90	2
+longest_absense_from_school	student922	2
+longest_absense_from_school	student928	2
+longest_absense_from_school	student93	2
+longest_absense_from_school	student941	2
+longest_absense_from_school	student957	2
+longest_absense_from_school	student983	2
+longest_absense_from_school	student108	3
+longest_absense_from_school	student12	3
+longest_absense_from_school	student122	3
+longest_absense_from_school	student125	3
+longest_absense_from_school	student130	3
+longest_absense_from_school	student135	3
+longest_absense_from_school	student187	3
+longest_absense_from_school	student195	3
+longest_absense_from_school	student210	3
+longest_absense_from_school	student221	3
+longest_absense_from_school	student245	3
+longest_absense_from_school	student252	3
+longest_absense_from_school	student26	3
+longest_absense_from_school	student266	3
+longest_absense_from_school	student267	3
+longest_absense_from_school	student274	3
+longest_absense_from_school	student276	3
+longest_absense_from_school	student283	3
+longest_absense_from_school	student302	3
+longest_absense_from_school	student304	3
+longest_absense_from_school	student31	3
+longest_absense_from_school	student330	3
+longest_absense_from_school	student339	3
+longest_absense_from_school	student346	3
+longest_absense_from_school	student35	3
+longest_absense_from_school	student350	3
+longest_absense_from_school	student354	3
+longest_absense_from_school	student359	3
+longest_absense_from_school	student373	3
+longest_absense_from_school	student387	3
+longest_absense_from_school	student404	3
+longest_absense_from_school	student413	3
+longest_absense_from_school	student417	3
+longest_absense_from_school	student423	3
+longest_absense_from_school	student43	3
+longest_absense_from_school	student431	3
+longest_absense_from_school	student444	3
+longest_absense_from_school	student446	3
+longest_absense_from_school	student456	3
+longest_absense_from_school	student460	3
+longest_absense_from_school	student472	3
+longest_absense_from_school	student475	3
+longest_absense_from_school	student478	3
+longest_absense_from_school	student48	3
+longest_absense_from_school	student490	3
+longest_absense_from_school	student492	3
+longest_absense_from_school	student495	3
+longest_absense_from_school	student503	3
+longest_absense_from_school	student513	3
+longest_absense_from_school	student526	3
+longest_absense_from_school	student529	3
+longest_absense_from_school	student534	3
+longest_absense_from_school	student56	3
+longest_absense_from_school	student572	3
+longest_absense_from_school	student581	3
+longest_absense_from_school	student586	3
+longest_absense_from_school	student588	3
+longest_absense_from_school	student607	3
+longest_absense_from_school	student608	3
+longest_absense_from_school	student610	3
+longest_absense_from_school	student617	3
+longest_absense_from_school	student62	3
+longest_absense_from_school	student620	3
+longest_absense_from_school	student621	3
+longest_absense_from_school	student635	3
+longest_absense_from_school	student641	3
+longest_absense_from_school	student648	3
+longest_absense_from_school	student658	3
+longest_absense_from_school	student665	3
+longest_absense_from_school	student670	3
+longest_absense_from_school	student700	3
+longest_absense_from_school	student704	3
+longest_absense_from_school	student720	3
+longest_absense_from_school	student724	3
+longest_absense_from_school	student728	3
+longest_absense_from_school	student735	3
+longest_absense_from_school	student742	3
+longest_absense_from_school	student758	3
+longest_absense_from_school	student767	3
+longest_absense_from_school	student773	3
+longest_absense_from_school	student775	3
+longest_absense_from_school	student776	3
+longest_absense_from_school	student793	3
+longest_absense_from_school	student800	3
+longest_absense_from_school	student803	3
+longest_absense_from_school	student81	3
+longest_absense_from_school	student812	3
+longest_absense_from_school	student817	3
+longest_absense_from_school	student820	3
+longest_absense_from_school	student821	3
+longest_absense_from_school	student831	3
+longest_absense_from_school	student837	3
+longest_absense_from_school	student856	3
+longest_absense_from_school	student857	3
+longest_absense_from_school	student868	3
+longest_absense_from_school	student891	3
+longest_absense_from_school	student893	3
+longest_absense_from_school	student91	3
+longest_absense_from_school	student92	3
+longest_absense_from_school	student926	3
+longest_absense_from_school	student931	3
+longest_absense_from_school	student958	3
+longest_absense_from_school	student960	3
+longest_absense_from_school	student984	3
+longest_absense_from_school	student112	4
+longest_absense_from_school	student123	4
+longest_absense_from_school	student13	4
+longest_absense_from_school	student132	4
+longest_absense_from_school	student142	4
+longest_absense_from_school	student143	4
+longest_absense_from_school	student151	4
+longest_absense_from_school	student153	4
+longest_absense_from_school	student155	4
+longest_absense_from_school	student16	4
+longest_absense_from_school	student160	4
+longest_absense_from_school	student17	4
+longest_absense_from_school	student175	4
+longest_absense_from_school	student178	4
+longest_absense_from_school	student189	4
+longest_absense_from_school	student19	4
+longest_absense_from_school	student204	4
+longest_absense_from_school	student213	4
+longest_absense_from_school	student217	4
+longest_absense_from_school	student218	4
+longest_absense_from_school	student225	4
+longest_absense_from_school	student23	4
+longest_absense_from_school	student232	4
+longest_absense_from_school	student233	4
+longest_absense_from_school	student260	4
+longest_absense_from_school	student262	4
+longest_absense_from_school	student278	4
+longest_absense_from_school	student28	4
+longest_absense_from_school	student3	4
+longest_absense_from_school	student313	4
+longest_absense_from_school	student316	4
+longest_absense_from_school	student317	4
+longest_absense_from_school	student322	4
+longest_absense_from_school	student323	4
+longest_absense_from_school	student334	4
+longest_absense_from_school	student335	4
+longest_absense_from_school	student336	4
+longest_absense_from_school	student355	4
+longest_absense_from_school	student358	4
+longest_absense_from_school	student364	4
+longest_absense_from_school	student368	4
+longest_absense_from_school	student388	4
+longest_absense_from_school	student396	4
+longest_absense_from_school	student407	4
+longest_absense_from_school	student429	4
+longest_absense_from_school	student432	4
+longest_absense_from_school	student45	4
+longest_absense_from_school	student450	4
+longest_absense_from_school	student474	4
+longest_absense_from_school	student480	4
+longest_absense_from_school	student506	4
+longest_absense_from_school	student508	4
+longest_absense_from_school	student515	4
+longest_absense_from_school	student538	4
+longest_absense_from_school	student553	4
+longest_absense_from_school	student556	4
+longest_absense_from_school	student568	4
+longest_absense_from_school	student589	4
+longest_absense_from_school	student590	4
+longest_absense_from_school	student592	4
+longest_absense_from_school	student599	4
+longest_absense_from_school	student611	4
+longest_absense_from_school	student612	4
+longest_absense_from_school	student619	4
+longest_absense_from_school	student623	4
+longest_absense_from_school	student624	4
+longest_absense_from_school	student625	4
+longest_absense_from_school	student626	4
+longest_absense_from_school	student631	4
+longest_absense_from_school	student632	4
+longest_absense_from_school	student637	4
+longest_absense_from_school	student64	4
+longest_absense_from_school	student657	4
+longest_absense_from_school	student663	4
+longest_absense_from_school	student671	4
+longest_absense_from_school	student673	4
+longest_absense_from_school	student675	4
+longest_absense_from_school	student694	4
+longest_absense_from_school	student712	4
+longest_absense_from_school	student733	4
+longest_absense_from_school	student749	4
+longest_absense_from_school	student750	4
+longest_absense_from_school	student763	4
+longest_absense_from_school	student766	4
+longest_absense_from_school	student770	4
+longest_absense_from_school	student771	4
+longest_absense_from_school	student785	4
+longest_absense_from_school	student788	4
+longest_absense_from_school	student797	4
+longest_absense_from_school	student80	4
+longest_absense_from_school	student808	4
+longest_absense_from_school	student810	4
+longest_absense_from_school	student815	4
+longest_absense_from_school	student82	4
+longest_absense_from_school	student825	4
+longest_absense_from_school	student828	4
+longest_absense_from_school	student838	4
+longest_absense_from_school	student846	4
+longest_absense_from_school	student852	4
+longest_absense_from_school	student859	4
+longest_absense_from_school	student864	4
+longest_absense_from_school	student871	4
+longest_absense_from_school	student887	4
+longest_absense_from_school	student904	4
+longest_absense_from_school	student910	4
+longest_absense_from_school	student918	4
+longest_absense_from_school	student919	4
+longest_absense_from_school	student935	4
+longest_absense_from_school	student937	4
+longest_absense_from_school	student942	4
+longest_absense_from_school	student945	4
+longest_absense_from_school	student947	4
+longest_absense_from_school	student951	4
+longest_absense_from_school	student954	4
+longest_absense_from_school	student967	4
+longest_absense_from_school	student977	4
+longest_absense_from_school	student986	4
+longest_absense_from_school	student990	4
+longest_absense_from_school	student993	4
+longest_absense_from_school	student999	4
+longest_absense_from_school	student105	5
+longest_absense_from_school	student113	5
+longest_absense_from_school	student145	5
+longest_absense_from_school	student15	5
+longest_absense_from_school	student150	5
+longest_absense_from_school	student171	5
+longest_absense_from_school	student180	5
+longest_absense_from_school	student196	5
+longest_absense_from_school	student198	5
+longest_absense_from_school	student20	5
+longest_absense_from_school	student211	5
+longest_absense_from_school	student212	5
+longest_absense_from_school	student22	5
+longest_absense_from_school	student220	5
+longest_absense_from_school	student231	5
+longest_absense_from_school	student24	5
+longest_absense_from_school	student246	5
+longest_absense_from_school	student263	5
+longest_absense_from_school	student273	5
+longest_absense_from_school	student284	5
+longest_absense_from_school	student285	5
+longest_absense_from_school	student286	5
+longest_absense_from_school	student305	5
+longest_absense_from_school	student314	5
+longest_absense_from_school	student315	5
+longest_absense_from_school	student324	5
+longest_absense_from_school	student327	5
+longest_absense_from_school	student338	5
+longest_absense_from_school	student353	5
+longest_absense_from_school	student356	5
+longest_absense_from_school	student370	5
+longest_absense_from_school	student382	5
+longest_absense_from_school	student390	5
+longest_absense_from_school	student4	5
+longest_absense_from_school	student400	5
+longest_absense_from_school	student421	5
+longest_absense_from_school	student427	5
+longest_absense_from_school	student438	5
+longest_absense_from_school	student448	5
+longest_absense_from_school	student455	5
+longest_absense_from_school	student461	5
+longest_absense_from_school	student464	5
+longest_absense_from_school	student47	5
+longest_absense_from_school	student473	5
+longest_absense_from_school	student481	5
+longest_absense_from_school	student489	5
+longest_absense_from_school	student491	5
+longest_absense_from_school	student493	5
+longest_absense_from_school	student497	5
+longest_absense_from_school	student505	5
+longest_absense_from_school	student535	5
+longest_absense_from_school	student547	5
+longest_absense_from_school	student557	5
+longest_absense_from_school	student562	5
+longest_absense_from_school	student57	5
+longest_absense_from_school	student575	5
+longest_absense_from_school	student576	5
+longest_absense_from_school	student595	5
+longest_absense_from_school	student596	5
+longest_absense_from_school	student6	5
+longest_absense_from_school	student615	5
+longest_absense_from_school	student629	5
+longest_absense_from_school	student630	5
+longest_absense_from_school	student634	5
+longest_absense_from_school	student638	5
+longest_absense_from_school	student644	5
+longest_absense_from_school	student646	5
+longest_absense_from_school	student647	5
+longest_absense_from_school	student649	5
+longest_absense_from_school	student650	5
+longest_absense_from_school	student656	5
+longest_absense_from_school	student659	5
+longest_absense_from_school	student668	5
+longest_absense_from_school	student67	5
+longest_absense_from_school	student672	5
+longest_absense_from_school	student674	5
+longest_absense_from_school	student69	5
+longest_absense_from_school	student7	5
+longest_absense_from_school	student70	5
+longest_absense_from_school	student702	5
+longest_absense_from_school	student719	5
+longest_absense_from_school	student726	5
+longest_absense_from_school	student744	5
+longest_absense_from_school	student746	5
+longest_absense_from_school	student748	5
+longest_absense_from_school	student757	5
+longest_absense_from_school	student761	5
+longest_absense_from_school	student768	5
+longest_absense_from_school	student814	5
+longest_absense_from_school	student827	5
+longest_absense_from_school	student835	5
+longest_absense_from_school	student841	5
+longest_absense_from_school	student849	5
+longest_absense_from_school	student866	5
+longest_absense_from_school	student87	5
+longest_absense_from_school	student874	5
+longest_absense_from_school	student877	5
+longest_absense_from_school	student89	5
+longest_absense_from_school	student908	5
+longest_absense_from_school	student909	5
+longest_absense_from_school	student921	5
+longest_absense_from_school	student94	5
+longest_absense_from_school	student943	5
+longest_absense_from_school	student948	5
+longest_absense_from_school	student949	5
+longest_absense_from_school	student963	5
+longest_absense_from_school	student981	5
+longest_absense_from_school	student982	5
+longest_absense_from_school	student987	5
+longest_absense_from_school	student991	5
+longest_absense_from_school	student103	6
+longest_absense_from_school	student104	6
+longest_absense_from_school	student107	6
+longest_absense_from_school	student14	6
+longest_absense_from_school	student146	6
+longest_absense_from_school	student158	6
+longest_absense_from_school	student161	6
+longest_absense_from_school	student162	6
+longest_absense_from_school	student164	6
+longest_absense_from_school	student168	6
+longest_absense_from_school	student172	6
+longest_absense_from_school	student174	6
+longest_absense_from_school	student184	6
+longest_absense_from_school	student194	6
+longest_absense_from_school	student2	6
+longest_absense_from_school	student208	6
+longest_absense_from_school	student219	6
+longest_absense_from_school	student223	6
+longest_absense_from_school	student228	6
+longest_absense_from_school	student236	6
+longest_absense_from_school	student243	6
+longest_absense_from_school	student272	6
+longest_absense_from_school	student288	6
+longest_absense_from_school	student293	6
+longest_absense_from_school	student298	6
+longest_absense_from_school	student299	6
+longest_absense_from_school	student311	6
+longest_absense_from_school	student328	6
+longest_absense_from_school	student340	6
+longest_absense_from_school	student342	6
+longest_absense_from_school	student343	6
+longest_absense_from_school	student366	6
+longest_absense_from_school	student380	6
+longest_absense_from_school	student384	6
+longest_absense_from_school	student419	6
+longest_absense_from_school	student422	6
+longest_absense_from_school	student424	6
+longest_absense_from_school	student426	6
+longest_absense_from_school	student433	6
+longest_absense_from_school	student441	6
+longest_absense_from_school	student453	6
+longest_absense_from_school	student469	6
+longest_absense_from_school	student483	6
+longest_absense_from_school	student501	6
+longest_absense_from_school	student51	6
+longest_absense_from_school	student510	6
+longest_absense_from_school	student525	6
+longest_absense_from_school	student530	6
+longest_absense_from_school	student546	6
+longest_absense_from_school	student548	6
+longest_absense_from_school	student555	6
+longest_absense_from_school	student563	6
+longest_absense_from_school	student574	6
+longest_absense_from_school	student58	6
+longest_absense_from_school	student580	6
+longest_absense_from_school	student585	6
+longest_absense_from_school	student591	6
+longest_absense_from_school	student593	6
+longest_absense_from_school	student60	6
+longest_absense_from_school	student603	6
+longest_absense_from_school	student639	6
+longest_absense_from_school	student669	6
+longest_absense_from_school	student683	6
+longest_absense_from_school	student690	6
+longest_absense_from_school	student692	6
+longest_absense_from_school	student706	6
+longest_absense_from_school	student707	6
+longest_absense_from_school	student711	6
+longest_absense_from_school	student717	6
+longest_absense_from_school	student722	6
+longest_absense_from_school	student736	6
+longest_absense_from_school	student738	6
+longest_absense_from_school	student755	6
+longest_absense_from_school	student759	6
+longest_absense_from_school	student796	6
+longest_absense_from_school	student802	6
+longest_absense_from_school	student83	6
+longest_absense_from_school	student839	6
+longest_absense_from_school	student844	6
+longest_absense_from_school	student848	6
+longest_absense_from_school	student851	6
+longest_absense_from_school	student86	6
+longest_absense_from_school	student867	6
+longest_absense_from_school	student882	6
+longest_absense_from_school	student883	6
+longest_absense_from_school	student885	6
+longest_absense_from_school	student895	6
+longest_absense_from_school	student900	6
+longest_absense_from_school	student902	6
+longest_absense_from_school	student920	6
+longest_absense_from_school	student944	6
+longest_absense_from_school	student961	6
+longest_absense_from_school	student978	6
+longest_absense_from_school	student98	6
+longest_absense_from_school	student980	6
+longest_absense_from_school	student1000	7
+longest_absense_from_school	student115	7
+longest_absense_from_school	student116	7
+longest_absense_from_school	student131	7
+longest_absense_from_school	student136	7
+longest_absense_from_school	student163	7
+longest_absense_from_school	student176	7
+longest_absense_from_school	student177	7
+longest_absense_from_school	student18	7
+longest_absense_from_school	student181	7
+longest_absense_from_school	student182	7
+longest_absense_from_school	student188	7
+longest_absense_from_school	student190	7
+longest_absense_from_school	student191	7
+longest_absense_from_school	student193	7
+longest_absense_from_school	student197	7
+longest_absense_from_school	student215	7
+longest_absense_from_school	student238	7
+longest_absense_from_school	student239	7
+longest_absense_from_school	student242	7
+longest_absense_from_school	student244	7
+longest_absense_from_school	student25	7
+longest_absense_from_school	student253	7
+longest_absense_from_school	student279	7
+longest_absense_from_school	student290	7
+longest_absense_from_school	student291	7
+longest_absense_from_school	student297	7
+longest_absense_from_school	student301	7
+longest_absense_from_school	student307	7
+longest_absense_from_school	student320	7
+longest_absense_from_school	student325	7
+longest_absense_from_school	student344	7
+longest_absense_from_school	student345	7
+longest_absense_from_school	student36	7
+longest_absense_from_school	student363	7
+longest_absense_from_school	student37	7
+longest_absense_from_school	student374	7
+longest_absense_from_school	student375	7
+longest_absense_from_school	student376	7
+longest_absense_from_school	student379	7
+longest_absense_from_school	student393	7
+longest_absense_from_school	student401	7
+longest_absense_from_school	student402	7
+longest_absense_from_school	student409	7
+longest_absense_from_school	student41	7
+longest_absense_from_school	student411	7
+longest_absense_from_school	student415	7
+longest_absense_from_school	student443	7
+longest_absense_from_school	student449	7
+longest_absense_from_school	student451	7
+longest_absense_from_school	student494	7
+longest_absense_from_school	student507	7
+longest_absense_from_school	student509	7
+longest_absense_from_school	student514	7
+longest_absense_from_school	student517	7
+longest_absense_from_school	student52	7
+longest_absense_from_school	student542	7
+longest_absense_from_school	student545	7
+longest_absense_from_school	student55	7
+longest_absense_from_school	student551	7
+longest_absense_from_school	student559	7
+longest_absense_from_school	student561	7
+longest_absense_from_school	student566	7
+longest_absense_from_school	student577	7
+longest_absense_from_school	student597	7
+longest_absense_from_school	student616	7
+longest_absense_from_school	student628	7
+longest_absense_from_school	student640	7
+longest_absense_from_school	student651	7
+longest_absense_from_school	student680	7
+longest_absense_from_school	student685	7
+longest_absense_from_school	student691	7
+longest_absense_from_school	student698	7
+longest_absense_from_school	student71	7
+longest_absense_from_school	student747	7
+longest_absense_from_school	student762	7
+longest_absense_from_school	student772	7
+longest_absense_from_school	student782	7
+longest_absense_from_school	student79	7
+longest_absense_from_school	student813	7
+longest_absense_from_school	student819	7
+longest_absense_from_school	student826	7
+longest_absense_from_school	student833	7
+longest_absense_from_school	student834	7
+longest_absense_from_school	student85	7
+longest_absense_from_school	student884	7
+longest_absense_from_school	student890	7
+longest_absense_from_school	student892	7
+longest_absense_from_school	student911	7
+longest_absense_from_school	student916	7
+longest_absense_from_school	student938	7
+longest_absense_from_school	student939	7
+longest_absense_from_school	student955	7
+longest_absense_from_school	student964	7
+longest_absense_from_school	student971	7
+longest_absense_from_school	student973	7
+longest_absense_from_school	student974	7
+longest_absense_from_school	student992	7
+longest_absense_from_school	student996	7
+longest_absense_from_school	student101	8
+longest_absense_from_school	student128	8
+longest_absense_from_school	student141	8
+longest_absense_from_school	student147	8
+longest_absense_from_school	student152	8
+longest_absense_from_school	student200	8
+longest_absense_from_school	student230	8
+longest_absense_from_school	student234	8
+longest_absense_from_school	student240	8
+longest_absense_from_school	student249	8
+longest_absense_from_school	student254	8
+longest_absense_from_school	student264	8
+longest_absense_from_school	student275	8
+longest_absense_from_school	student287	8
+longest_absense_from_school	student303	8
+longest_absense_from_school	student319	8
+longest_absense_from_school	student326	8
+longest_absense_from_school	student33	8
+longest_absense_from_school	student34	8
+longest_absense_from_school	student360	8
+longest_absense_from_school	student369	8
+longest_absense_from_school	student371	8
+longest_absense_from_school	student38	8
+longest_absense_from_school	student381	8
+longest_absense_from_school	student392	8
+longest_absense_from_school	student398	8
+longest_absense_from_school	student408	8
+longest_absense_from_school	student416	8
+longest_absense_from_school	student42	8
+longest_absense_from_school	student420	8
+longest_absense_from_school	student434	8
+longest_absense_from_school	student454	8
+longest_absense_from_school	student457	8
+longest_absense_from_school	student458	8
+longest_absense_from_school	student468	8
+longest_absense_from_school	student482	8
+longest_absense_from_school	student484	8
+longest_absense_from_school	student488	8
+longest_absense_from_school	student499	8
+longest_absense_from_school	student512	8
+longest_absense_from_school	student518	8
+longest_absense_from_school	student519	8
+longest_absense_from_school	student523	8
+longest_absense_from_school	student528	8
+longest_absense_from_school	student536	8
+longest_absense_from_school	student539	8
+longest_absense_from_school	student543	8
+longest_absense_from_school	student549	8
+longest_absense_from_school	student552	8
+longest_absense_from_school	student569	8
+longest_absense_from_school	student570	8
+longest_absense_from_school	student587	8
+longest_absense_from_school	student660	8
+longest_absense_from_school	student664	8
+longest_absense_from_school	student679	8
+longest_absense_from_school	student681	8
+longest_absense_from_school	student699	8
+longest_absense_from_school	student708	8
+longest_absense_from_school	student713	8
+longest_absense_from_school	student723	8
+longest_absense_from_school	student730	8
+longest_absense_from_school	student731	8
+longest_absense_from_school	student737	8
+longest_absense_from_school	student74	8
+longest_absense_from_school	student752	8
+longest_absense_from_school	student76	8
+longest_absense_from_school	student778	8
+longest_absense_from_school	student779	8
+longest_absense_from_school	student78	8
+longest_absense_from_school	student786	8
+longest_absense_from_school	student791	8
+longest_absense_from_school	student818	8
+longest_absense_from_school	student822	8
+longest_absense_from_school	student829	8
+longest_absense_from_school	student845	8
+longest_absense_from_school	student847	8
+longest_absense_from_school	student853	8
+longest_absense_from_school	student858	8
+longest_absense_from_school	student873	8
+longest_absense_from_school	student880	8
+longest_absense_from_school	student886	8
+longest_absense_from_school	student914	8
+longest_absense_from_school	student915	8
+longest_absense_from_school	student917	8
+longest_absense_from_school	student925	8
+longest_absense_from_school	student927	8
+longest_absense_from_school	student930	8
+longest_absense_from_school	student932	8
+longest_absense_from_school	student968	8
+longest_absense_from_school	student97	8
+longest_absense_from_school	student99	8
+longest_absense_from_school	student995	8
+longest_absense_from_school	student997	8
+longest_absense_from_school	student11	9
+longest_absense_from_school	student126	9
+longest_absense_from_school	student127	9
+longest_absense_from_school	student129	9
+longest_absense_from_school	student144	9
+longest_absense_from_school	student149	9
+longest_absense_from_school	student156	9
+longest_absense_from_school	student159	9
+longest_absense_from_school	student179	9
+longest_absense_from_school	student185	9
+longest_absense_from_school	student186	9
+longest_absense_from_school	student259	9
+longest_absense_from_school	student268	9
+longest_absense_from_school	student269	9
+longest_absense_from_school	student27	9
+longest_absense_from_school	student271	9
+longest_absense_from_school	student289	9
+longest_absense_from_school	student292	9
+longest_absense_from_school	student318	9
+longest_absense_from_school	student341	9
+longest_absense_from_school	student348	9
+longest_absense_from_school	student351	9
+longest_absense_from_school	student352	9
+longest_absense_from_school	student357	9
+longest_absense_from_school	student377	9
+longest_absense_from_school	student385	9
+longest_absense_from_school	student39	9
+longest_absense_from_school	student435	9
+longest_absense_from_school	student44	9
+longest_absense_from_school	student442	9
+longest_absense_from_school	student445	9
+longest_absense_from_school	student452	9
+longest_absense_from_school	student487	9
+longest_absense_from_school	student504	9
+longest_absense_from_school	student516	9
+longest_absense_from_school	student520	9
+longest_absense_from_school	student522	9
+longest_absense_from_school	student532	9
+longest_absense_from_school	student537	9
+longest_absense_from_school	student540	9
+longest_absense_from_school	student544	9
+longest_absense_from_school	student565	9
+longest_absense_from_school	student571	9
+longest_absense_from_school	student579	9
+longest_absense_from_school	student582	9
+longest_absense_from_school	student605	9
+longest_absense_from_school	student61	9
+longest_absense_from_school	student643	9
+longest_absense_from_school	student645	9
+longest_absense_from_school	student653	9
+longest_absense_from_school	student654	9
+longest_absense_from_school	student676	9
+longest_absense_from_school	student701	9
+longest_absense_from_school	student703	9
+longest_absense_from_school	student709	9
+longest_absense_from_school	student716	9
+longest_absense_from_school	student718	9
+longest_absense_from_school	student72	9
+longest_absense_from_school	student760	9
+longest_absense_from_school	student765	9
+longest_absense_from_school	student781	9
+longest_absense_from_school	student805	9
+longest_absense_from_school	student811	9
+longest_absense_from_school	student824	9
+longest_absense_from_school	student830	9
+longest_absense_from_school	student84	9
+longest_absense_from_school	student843	9
+longest_absense_from_school	student860	9
+longest_absense_from_school	student861	9
+longest_absense_from_school	student865	9
+longest_absense_from_school	student872	9
+longest_absense_from_school	student88	9
+longest_absense_from_school	student888	9
+longest_absense_from_school	student898	9
+longest_absense_from_school	student9	9
+longest_absense_from_school	student905	9
+longest_absense_from_school	student907	9
+longest_absense_from_school	student912	9
+longest_absense_from_school	student929	9
+longest_absense_from_school	student933	9
+longest_absense_from_school	student934	9
+longest_absense_from_school	student95	9
+longest_absense_from_school	student952	9
+longest_absense_from_school	student965	9
+longest_absense_from_school	student966	9
+longest_absense_from_school	student975	9
+longest_absense_from_school	student979	9
+longest_absense_from_school	student985	9
+longest_absense_from_school	student988	9
+longest_absense_from_school	student989	9
+male	student1
+male	student101
+male	student102
+male	student103
+male	student105
+male	student106
+male	student108
+male	student110
+male	student111
+male	student114
+male	student115
+male	student117
+male	student118
+male	student119
+male	student12
+male	student122
+male	student123
+male	student124
+male	student125
+male	student126
+male	student13
+male	student130
+male	student133
+male	student136
+male	student138
+male	student139
+male	student14
+male	student140
+male	student143
+male	student144
+male	student146
+male	student147
+male	student148
+male	student15
+male	student151
+male	student155
+male	student157
+male	student16
+male	student161
+male	student162
+male	student163
+male	student167
+male	student174
+male	student177
+male	student180
+male	student181
+male	student182
+male	student19
+male	student190
+male	student195
+male	student198
+male	student199
+male	student20
+male	student201
+male	student203
+male	student204
+male	student205
+male	student208
+male	student21
+male	student213
+male	student214
+male	student215
+male	student217
+male	student218
+male	student222
+male	student225
+male	student227
+male	student229
+male	student23
+male	student230
+male	student231
+male	student233
+male	student235
+male	student236
+male	student238
+male	student240
+male	student241
+male	student244
+male	student245
+male	student247
+male	student249
+male	student25
+male	student252
+male	student253
+male	student256
+male	student259
+male	student260
+male	student261
+male	student262
+male	student267
+male	student269
+male	student270
+male	student273
+male	student275
+male	student28
+male	student284
+male	student287
+male	student288
+male	student289
+male	student290
+male	student291
+male	student295
+male	student297
+male	student3
+male	student300
+male	student301
+male	student306
+male	student307
+male	student309
+male	student31
+male	student311
+male	student313
+male	student314
+male	student316
+male	student317
+male	student32
+male	student321
+male	student322
+male	student326
+male	student327
+male	student328
+male	student329
+male	student33
+male	student330
+male	student334
+male	student338
+male	student344
+male	student345
+male	student346
+male	student347
+male	student349
+male	student35
+male	student352
+male	student354
+male	student356
+male	student357
+male	student358
+male	student36
+male	student364
+male	student368
+male	student372
+male	student373
+male	student374
+male	student375
+male	student376
+male	student378
+male	student379
+male	student38
+male	student381
+male	student384
+male	student386
+male	student39
+male	student390
+male	student392
+male	student394
+male	student395
+male	student397
+male	student4
+male	student40
+male	student401
+male	student402
+male	student403
+male	student405
+male	student407
+male	student408
+male	student412
+male	student413
+male	student417
+male	student420
+male	student421
+male	student423
+male	student424
+male	student426
+male	student428
+male	student429
+male	student430
+male	student433
+male	student436
+male	student439
+male	student44
+male	student440
+male	student442
+male	student444
+male	student446
+male	student447
+male	student449
+male	student45
+male	student451
+male	student453
+male	student454
+male	student455
+male	student456
+male	student457
+male	student46
+male	student460
+male	student461
+male	student463
+male	student464
+male	student465
+male	student466
+male	student467
+male	student468
+male	student470
+male	student472
+male	student473
+male	student474
+male	student475
+male	student477
+male	student478
+male	student479
+male	student48
+male	student480
+male	student483
+male	student486
+male	student489
+male	student490
+male	student491
+male	student493
+male	student494
+male	student497
+male	student498
+male	student50
+male	student502
+male	student503
+male	student504
+male	student505
+male	student509
+male	student511
+male	student513
+male	student514
+male	student515
+male	student516
+male	student517
+male	student520
+male	student521
+male	student522
+male	student523
+male	student526
+male	student528
+male	student53
+male	student530
+male	student531
+male	student534
+male	student535
+male	student536
+male	student537
+male	student538
+male	student539
+male	student540
+male	student542
+male	student546
+male	student548
+male	student549
+male	student550
+male	student553
+male	student554
+male	student559
+male	student56
+male	student560
+male	student561
+male	student564
+male	student571
+male	student574
+male	student578
+male	student58
+male	student582
+male	student587
+male	student588
+male	student589
+male	student590
+male	student592
+male	student595
+male	student596
+male	student6
+male	student601
+male	student602
+male	student603
+male	student605
+male	student607
+male	student61
+male	student611
+male	student615
+male	student618
+male	student619
+male	student62
+male	student620
+male	student621
+male	student623
+male	student624
+male	student627
+male	student628
+male	student631
+male	student632
+male	student633
+male	student634
+male	student635
+male	student636
+male	student638
+male	student639
+male	student642
+male	student643
+male	student645
+male	student646
+male	student650
+male	student653
+male	student654
+male	student656
+male	student658
+male	student660
+male	student662
+male	student663
+male	student665
+male	student666
+male	student667
+male	student669
+male	student673
+male	student675
+male	student676
+male	student678
+male	student679
+male	student68
+male	student680
+male	student681
+male	student682
+male	student683
+male	student684
+male	student685
+male	student686
+male	student69
+male	student695
+male	student697
+male	student699
+male	student7
+male	student704
+male	student705
+male	student708
+male	student710
+male	student713
+male	student714
+male	student715
+male	student716
+male	student717
+male	student72
+male	student720
+male	student721
+male	student723
+male	student724
+male	student725
+male	student726
+male	student727
+male	student729
+male	student73
+male	student733
+male	student737
+male	student738
+male	student74
+male	student742
+male	student745
+male	student749
+male	student75
+male	student751
+male	student752
+male	student753
+male	student754
+male	student755
+male	student756
+male	student759
+male	student76
+male	student760
+male	student761
+male	student762
+male	student765
+male	student767
+male	student768
+male	student77
+male	student770
+male	student771
+male	student772
+male	student778
+male	student779
+male	student781
+male	student782
+male	student783
+male	student784
+male	student786
+male	student787
+male	student788
+male	student795
+male	student796
+male	student797
+male	student798
+male	student799
+male	student8
+male	student804
+male	student806
+male	student81
+male	student810
+male	student811
+male	student812
+male	student813
+male	student816
+male	student817
+male	student82
+male	student821
+male	student823
+male	student825
+male	student827
+male	student828
+male	student831
+male	student833
+male	student834
+male	student835
+male	student838
+male	student841
+male	student844
+male	student846
+male	student847
+male	student85
+male	student851
+male	student855
+male	student857
+male	student859
+male	student860
+male	student861
+male	student864
+male	student867
+male	student868
+male	student869
+male	student87
+male	student872
+male	student873
+male	student875
+male	student879
+male	student880
+male	student881
+male	student882
+male	student884
+male	student887
+male	student888
+male	student89
+male	student890
+male	student893
+male	student894
+male	student895
+male	student898
+male	student900
+male	student901
+male	student902
+male	student903
+male	student904
+male	student907
+male	student908
+male	student91
+male	student911
+male	student916
+male	student917
+male	student918
+male	student921
+male	student923
+male	student924
+male	student926
+male	student929
+male	student930
+male	student933
+male	student934
+male	student935
+male	student936
+male	student939
+male	student941
+male	student943
+male	student944
+male	student947
+male	student948
+male	student95
+male	student950
+male	student952
+male	student953
+male	student958
+male	student96
+male	student960
+male	student962
+male	student966
+male	student971
+male	student972
+male	student973
+male	student975
+male	student976
+male	student977
+male	student98
+male	student981
+male	student983
+male	student984
+male	student986
+male	student987
+male	student992
+male	student994
+male	student997
+no_payment_due	student10	neg
+no_payment_due	student101	neg
+no_payment_due	student103	neg
+no_payment_due	student107	neg
+no_payment_due	student110	neg
+no_payment_due	student111	neg
+no_payment_due	student113	neg
+no_payment_due	student115	neg
+no_payment_due	student116	neg
+no_payment_due	student123	neg
+no_payment_due	student124	neg
+no_payment_due	student131	neg
+no_payment_due	student132	neg
+no_payment_due	student137	neg
+no_payment_due	student14	neg
+no_payment_due	student141	neg
+no_payment_due	student144	neg
+no_payment_due	student146	neg
+no_payment_due	student149	neg
+no_payment_due	student16	neg
+no_payment_due	student160	neg
+no_payment_due	student161	neg
+no_payment_due	student166	neg
+no_payment_due	student176	neg
+no_payment_due	student177	neg
+no_payment_due	student18	neg
+no_payment_due	student180	neg
+no_payment_due	student182	neg
+no_payment_due	student185	neg
+no_payment_due	student186	neg
+no_payment_due	student187	neg
+no_payment_due	student188	neg
+no_payment_due	student190	neg
+no_payment_due	student192	neg
+no_payment_due	student20	neg
+no_payment_due	student200	neg
+no_payment_due	student201	neg
+no_payment_due	student202	neg
+no_payment_due	student205	neg
+no_payment_due	student206	neg
+no_payment_due	student212	neg
+no_payment_due	student215	neg
+no_payment_due	student218	neg
+no_payment_due	student221	neg
+no_payment_due	student223	neg
+no_payment_due	student230	neg
+no_payment_due	student236	neg
+no_payment_due	student239	neg
+no_payment_due	student240	neg
+no_payment_due	student243	neg
+no_payment_due	student245	neg
+no_payment_due	student249	neg
+no_payment_due	student25	neg
+no_payment_due	student251	neg
+no_payment_due	student252	neg
+no_payment_due	student254	neg
+no_payment_due	student256	neg
+no_payment_due	student258	neg
+no_payment_due	student259	neg
+no_payment_due	student264	neg
+no_payment_due	student265	neg
+no_payment_due	student266	neg
+no_payment_due	student268	neg
+no_payment_due	student27	neg
+no_payment_due	student276	neg
+no_payment_due	student277	neg
+no_payment_due	student278	neg
+no_payment_due	student287	neg
+no_payment_due	student289	neg
+no_payment_due	student29	neg
+no_payment_due	student290	neg
+no_payment_due	student292	neg
+no_payment_due	student298	neg
+no_payment_due	student299	neg
+no_payment_due	student3	neg
+no_payment_due	student303	neg
+no_payment_due	student307	neg
+no_payment_due	student310	neg
+no_payment_due	student311	neg
+no_payment_due	student312	neg
+no_payment_due	student319	neg
+no_payment_due	student320	neg
+no_payment_due	student321	neg
+no_payment_due	student325	neg
+no_payment_due	student326	neg
+no_payment_due	student327	neg
+no_payment_due	student332	neg
+no_payment_due	student335	neg
+no_payment_due	student34	neg
+no_payment_due	student341	neg
+no_payment_due	student343	neg
+no_payment_due	student344	neg
+no_payment_due	student345	neg
+no_payment_due	student348	neg
+no_payment_due	student35	neg
+no_payment_due	student353	neg
+no_payment_due	student355	neg
+no_payment_due	student356	neg
+no_payment_due	student357	neg
+no_payment_due	student358	neg
+no_payment_due	student36	neg
+no_payment_due	student360	neg
+no_payment_due	student362	neg
+no_payment_due	student363	neg
+no_payment_due	student365	neg
+no_payment_due	student366	neg
+no_payment_due	student374	neg
+no_payment_due	student375	neg
+no_payment_due	student379	neg
+no_payment_due	student38	neg
+no_payment_due	student381	neg
+no_payment_due	student383	neg
+no_payment_due	student387	neg
+no_payment_due	student390	neg
+no_payment_due	student392	neg
+no_payment_due	student393	neg
+no_payment_due	student394	neg
+no_payment_due	student398	neg
+no_payment_due	student402	neg
+no_payment_due	student408	neg
+no_payment_due	student413	neg
+no_payment_due	student418	neg
+no_payment_due	student419	neg
+no_payment_due	student424	neg
+no_payment_due	student426	neg
+no_payment_due	student427	neg
+no_payment_due	student434	neg
+no_payment_due	student435	neg
+no_payment_due	student437	neg
+no_payment_due	student44	neg
+no_payment_due	student445	neg
+no_payment_due	student449	neg
+no_payment_due	student451	neg
+no_payment_due	student453	neg
+no_payment_due	student454	neg
+no_payment_due	student455	neg
+no_payment_due	student456	neg
+no_payment_due	student457	neg
+no_payment_due	student460	neg
+no_payment_due	student461	neg
+no_payment_due	student462	neg
+no_payment_due	student463	neg
+no_payment_due	student464	neg
+no_payment_due	student466	neg
+no_payment_due	student469	neg
+no_payment_due	student47	neg
+no_payment_due	student471	neg
+no_payment_due	student478	neg
+no_payment_due	student482	neg
+no_payment_due	student483	neg
+no_payment_due	student484	neg
+no_payment_due	student487	neg
+no_payment_due	student489	neg
+no_payment_due	student499	neg
+no_payment_due	student5	neg
+no_payment_due	student501	neg
+no_payment_due	student506	neg
+no_payment_due	student507	neg
+no_payment_due	student509	neg
+no_payment_due	student510	neg
+no_payment_due	student513	neg
+no_payment_due	student514	neg
+no_payment_due	student516	neg
+no_payment_due	student518	neg
+no_payment_due	student520	neg
+no_payment_due	student521	neg
+no_payment_due	student524	neg
+no_payment_due	student525	neg
+no_payment_due	student528	neg
+no_payment_due	student53	neg
+no_payment_due	student532	neg
+no_payment_due	student535	neg
+no_payment_due	student537	neg
+no_payment_due	student54	neg
+no_payment_due	student540	neg
+no_payment_due	student542	neg
+no_payment_due	student543	neg
+no_payment_due	student545	neg
+no_payment_due	student548	neg
+no_payment_due	student549	neg
+no_payment_due	student55	neg
+no_payment_due	student551	neg
+no_payment_due	student552	neg
+no_payment_due	student557	neg
+no_payment_due	student558	neg
+no_payment_due	student56	neg
+no_payment_due	student561	neg
+no_payment_due	student563	neg
+no_payment_due	student564	neg
+no_payment_due	student566	neg
+no_payment_due	student571	neg
+no_payment_due	student574	neg
+no_payment_due	student577	neg
+no_payment_due	student58	neg
+no_payment_due	student582	neg
+no_payment_due	student586	neg
+no_payment_due	student597	neg
+no_payment_due	student60	neg
+no_payment_due	student604	neg
+no_payment_due	student61	neg
+no_payment_due	student618	neg
+no_payment_due	student622	neg
+no_payment_due	student623	neg
+no_payment_due	student630	neg
+no_payment_due	student633	neg
+no_payment_due	student636	neg
+no_payment_due	student637	neg
+no_payment_due	student639	neg
+no_payment_due	student640	neg
+no_payment_due	student643	neg
+no_payment_due	student644	neg
+no_payment_due	student648	neg
+no_payment_due	student653	neg
+no_payment_due	student654	neg
+no_payment_due	student657	neg
+no_payment_due	student669	neg
+no_payment_due	student67	neg
+no_payment_due	student671	neg
+no_payment_due	student675	neg
+no_payment_due	student681	neg
+no_payment_due	student683	neg
+no_payment_due	student685	neg
+no_payment_due	student687	neg
+no_payment_due	student691	neg
+no_payment_due	student692	neg
+no_payment_due	student693	neg
+no_payment_due	student694	neg
+no_payment_due	student695	neg
+no_payment_due	student703	neg
+no_payment_due	student704	neg
+no_payment_due	student706	neg
+no_payment_due	student707	neg
+no_payment_due	student708	neg
+no_payment_due	student71	neg
+no_payment_due	student711	neg
+no_payment_due	student713	neg
+no_payment_due	student715	neg
+no_payment_due	student716	neg
+no_payment_due	student718	neg
+no_payment_due	student720	neg
+no_payment_due	student722	neg
+no_payment_due	student725	neg
+no_payment_due	student726	neg
+no_payment_due	student728	neg
+no_payment_due	student730	neg
+no_payment_due	student731	neg
+no_payment_due	student736	neg
+no_payment_due	student737	neg
+no_payment_due	student74	neg
+no_payment_due	student752	neg
+no_payment_due	student755	neg
+no_payment_due	student756	neg
+no_payment_due	student759	neg
+no_payment_due	student76	neg
+no_payment_due	student763	neg
+no_payment_due	student766	neg
+no_payment_due	student767	neg
+no_payment_due	student771	neg
+no_payment_due	student772	neg
+no_payment_due	student777	neg
+no_payment_due	student78	neg
+no_payment_due	student782	neg
+no_payment_due	student784	neg
+no_payment_due	student786	neg
+no_payment_due	student791	neg
+no_payment_due	student793	neg
+no_payment_due	student796	neg
+no_payment_due	student799	neg
+no_payment_due	student801	neg
+no_payment_due	student802	neg
+no_payment_due	student810	neg
+no_payment_due	student811	neg
+no_payment_due	student813	neg
+no_payment_due	student815	neg
+no_payment_due	student816	neg
+no_payment_due	student818	neg
+no_payment_due	student819	neg
+no_payment_due	student822	neg
+no_payment_due	student824	neg
+no_payment_due	student826	neg
+no_payment_due	student829	neg
+no_payment_due	student833	neg
+no_payment_due	student834	neg
+no_payment_due	student837	neg
+no_payment_due	student839	neg
+no_payment_due	student843	neg
+no_payment_due	student844	neg
+no_payment_due	student845	neg
+no_payment_due	student848	neg
+no_payment_due	student85	neg
+no_payment_due	student851	neg
+no_payment_due	student853	neg
+no_payment_due	student857	neg
+no_payment_due	student86	neg
+no_payment_due	student860	neg
+no_payment_due	student861	neg
+no_payment_due	student862	neg
+no_payment_due	student865	neg
+no_payment_due	student869	neg
+no_payment_due	student87	neg
+no_payment_due	student872	neg
+no_payment_due	student873	neg
+no_payment_due	student875	neg
+no_payment_due	student876	neg
+no_payment_due	student878	neg
+no_payment_due	student88	neg
+no_payment_due	student880	neg
+no_payment_due	student882	neg
+no_payment_due	student883	neg
+no_payment_due	student884	neg
+no_payment_due	student886	neg
+no_payment_due	student889	neg
+no_payment_due	student89	neg
+no_payment_due	student892	neg
+no_payment_due	student898	neg
+no_payment_due	student899	neg
+no_payment_due	student900	neg
+no_payment_due	student903	neg
+no_payment_due	student907	neg
+no_payment_due	student911	neg
+no_payment_due	student912	neg
+no_payment_due	student914	neg
+no_payment_due	student917	neg
+no_payment_due	student919	neg
+no_payment_due	student921	neg
+no_payment_due	student922	neg
+no_payment_due	student925	neg
+no_payment_due	student929	neg
+no_payment_due	student930	neg
+no_payment_due	student931	neg
+no_payment_due	student933	neg
+no_payment_due	student934	neg
+no_payment_due	student938	neg
+no_payment_due	student939	neg
+no_payment_due	student941	neg
+no_payment_due	student944	neg
+no_payment_due	student951	neg
+no_payment_due	student954	neg
+no_payment_due	student957	neg
+no_payment_due	student960	neg
+no_payment_due	student961	neg
+no_payment_due	student964	neg
+no_payment_due	student965	neg
+no_payment_due	student966	neg
+no_payment_due	student971	neg
+no_payment_due	student973	neg
+no_payment_due	student974	neg
+no_payment_due	student978	neg
+no_payment_due	student979	neg
+no_payment_due	student98	neg
+no_payment_due	student980	neg
+no_payment_due	student982	neg
+no_payment_due	student986	neg
+no_payment_due	student988	neg
+no_payment_due	student991	neg
+no_payment_due	student995	neg
+no_payment_due	student997	neg
+no_payment_due	student1	pos
+no_payment_due	student100	pos
+no_payment_due	student1000	pos
+no_payment_due	student102	pos
+no_payment_due	student104	pos
+no_payment_due	student105	pos
+no_payment_due	student106	pos
+no_payment_due	student108	pos
+no_payment_due	student109	pos
+no_payment_due	student11	pos
+no_payment_due	student112	pos
+no_payment_due	student114	pos
+no_payment_due	student117	pos
+no_payment_due	student118	pos
+no_payment_due	student119	pos
+no_payment_due	student12	pos
+no_payment_due	student120	pos
+no_payment_due	student121	pos
+no_payment_due	student122	pos
+no_payment_due	student125	pos
+no_payment_due	student126	pos
+no_payment_due	student127	pos
+no_payment_due	student128	pos
+no_payment_due	student129	pos
+no_payment_due	student13	pos
+no_payment_due	student130	pos
+no_payment_due	student133	pos
+no_payment_due	student134	pos
+no_payment_due	student135	pos
+no_payment_due	student136	pos
+no_payment_due	student138	pos
+no_payment_due	student139	pos
+no_payment_due	student140	pos
+no_payment_due	student142	pos
+no_payment_due	student143	pos
+no_payment_due	student145	pos
+no_payment_due	student147	pos
+no_payment_due	student148	pos
+no_payment_due	student15	pos
+no_payment_due	student150	pos
+no_payment_due	student151	pos
+no_payment_due	student152	pos
+no_payment_due	student153	pos
+no_payment_due	student154	pos
+no_payment_due	student155	pos
+no_payment_due	student156	pos
+no_payment_due	student157	pos
+no_payment_due	student158	pos
+no_payment_due	student159	pos
+no_payment_due	student162	pos
+no_payment_due	student163	pos
+no_payment_due	student164	pos
+no_payment_due	student165	pos
+no_payment_due	student167	pos
+no_payment_due	student168	pos
+no_payment_due	student169	pos
+no_payment_due	student17	pos
+no_payment_due	student170	pos
+no_payment_due	student171	pos
+no_payment_due	student172	pos
+no_payment_due	student173	pos
+no_payment_due	student174	pos
+no_payment_due	student175	pos
+no_payment_due	student178	pos
+no_payment_due	student179	pos
+no_payment_due	student181	pos
+no_payment_due	student183	pos
+no_payment_due	student184	pos
+no_payment_due	student189	pos
+no_payment_due	student19	pos
+no_payment_due	student191	pos
+no_payment_due	student193	pos
+no_payment_due	student194	pos
+no_payment_due	student195	pos
+no_payment_due	student196	pos
+no_payment_due	student197	pos
+no_payment_due	student198	pos
+no_payment_due	student199	pos
+no_payment_due	student2	pos
+no_payment_due	student203	pos
+no_payment_due	student204	pos
+no_payment_due	student207	pos
+no_payment_due	student208	pos
+no_payment_due	student209	pos
+no_payment_due	student21	pos
+no_payment_due	student210	pos
+no_payment_due	student211	pos
+no_payment_due	student213	pos
+no_payment_due	student214	pos
+no_payment_due	student216	pos
+no_payment_due	student217	pos
+no_payment_due	student219	pos
+no_payment_due	student22	pos
+no_payment_due	student220	pos
+no_payment_due	student222	pos
+no_payment_due	student224	pos
+no_payment_due	student225	pos
+no_payment_due	student226	pos
+no_payment_due	student227	pos
+no_payment_due	student228	pos
+no_payment_due	student229	pos
+no_payment_due	student23	pos
+no_payment_due	student231	pos
+no_payment_due	student232	pos
+no_payment_due	student233	pos
+no_payment_due	student234	pos
+no_payment_due	student235	pos
+no_payment_due	student237	pos
+no_payment_due	student238	pos
+no_payment_due	student24	pos
+no_payment_due	student241	pos
+no_payment_due	student242	pos
+no_payment_due	student244	pos
+no_payment_due	student246	pos
+no_payment_due	student247	pos
+no_payment_due	student248	pos
+no_payment_due	student250	pos
+no_payment_due	student253	pos
+no_payment_due	student255	pos
+no_payment_due	student257	pos
+no_payment_due	student26	pos
+no_payment_due	student260	pos
+no_payment_due	student261	pos
+no_payment_due	student262	pos
+no_payment_due	student263	pos
+no_payment_due	student267	pos
+no_payment_due	student269	pos
+no_payment_due	student270	pos
+no_payment_due	student271	pos
+no_payment_due	student272	pos
+no_payment_due	student273	pos
+no_payment_due	student274	pos
+no_payment_due	student275	pos
+no_payment_due	student279	pos
+no_payment_due	student28	pos
+no_payment_due	student280	pos
+no_payment_due	student281	pos
+no_payment_due	student282	pos
+no_payment_due	student283	pos
+no_payment_due	student284	pos
+no_payment_due	student285	pos
+no_payment_due	student286	pos
+no_payment_due	student288	pos
+no_payment_due	student291	pos
+no_payment_due	student293	pos
+no_payment_due	student294	pos
+no_payment_due	student295	pos
+no_payment_due	student296	pos
+no_payment_due	student297	pos
+no_payment_due	student30	pos
+no_payment_due	student300	pos
+no_payment_due	student301	pos
+no_payment_due	student302	pos
+no_payment_due	student304	pos
+no_payment_due	student305	pos
+no_payment_due	student306	pos
+no_payment_due	student308	pos
+no_payment_due	student309	pos
+no_payment_due	student31	pos
+no_payment_due	student313	pos
+no_payment_due	student314	pos
+no_payment_due	student315	pos
+no_payment_due	student316	pos
+no_payment_due	student317	pos
+no_payment_due	student318	pos
+no_payment_due	student32	pos
+no_payment_due	student322	pos
+no_payment_due	student323	pos
+no_payment_due	student324	pos
+no_payment_due	student328	pos
+no_payment_due	student329	pos
+no_payment_due	student33	pos
+no_payment_due	student330	pos
+no_payment_due	student331	pos
+no_payment_due	student333	pos
+no_payment_due	student334	pos
+no_payment_due	student336	pos
+no_payment_due	student337	pos
+no_payment_due	student338	pos
+no_payment_due	student339	pos
+no_payment_due	student340	pos
+no_payment_due	student342	pos
+no_payment_due	student346	pos
+no_payment_due	student347	pos
+no_payment_due	student349	pos
+no_payment_due	student350	pos
+no_payment_due	student351	pos
+no_payment_due	student352	pos
+no_payment_due	student354	pos
+no_payment_due	student359	pos
+no_payment_due	student361	pos
+no_payment_due	student364	pos
+no_payment_due	student367	pos
+no_payment_due	student368	pos
+no_payment_due	student369	pos
+no_payment_due	student37	pos
+no_payment_due	student370	pos
+no_payment_due	student371	pos
+no_payment_due	student372	pos
+no_payment_due	student373	pos
+no_payment_due	student376	pos
+no_payment_due	student377	pos
+no_payment_due	student378	pos
+no_payment_due	student380	pos
+no_payment_due	student382	pos
+no_payment_due	student384	pos
+no_payment_due	student385	pos
+no_payment_due	student386	pos
+no_payment_due	student388	pos
+no_payment_due	student389	pos
+no_payment_due	student39	pos
+no_payment_due	student391	pos
+no_payment_due	student395	pos
+no_payment_due	student396	pos
+no_payment_due	student397	pos
+no_payment_due	student399	pos
+no_payment_due	student4	pos
+no_payment_due	student40	pos
+no_payment_due	student400	pos
+no_payment_due	student401	pos
+no_payment_due	student403	pos
+no_payment_due	student404	pos
+no_payment_due	student405	pos
+no_payment_due	student406	pos
+no_payment_due	student407	pos
+no_payment_due	student409	pos
+no_payment_due	student41	pos
+no_payment_due	student410	pos
+no_payment_due	student411	pos
+no_payment_due	student412	pos
+no_payment_due	student414	pos
+no_payment_due	student415	pos
+no_payment_due	student416	pos
+no_payment_due	student417	pos
+no_payment_due	student42	pos
+no_payment_due	student420	pos
+no_payment_due	student421	pos
+no_payment_due	student422	pos
+no_payment_due	student423	pos
+no_payment_due	student425	pos
+no_payment_due	student428	pos
+no_payment_due	student429	pos
+no_payment_due	student43	pos
+no_payment_due	student430	pos
+no_payment_due	student431	pos
+no_payment_due	student432	pos
+no_payment_due	student433	pos
+no_payment_due	student436	pos
+no_payment_due	student438	pos
+no_payment_due	student439	pos
+no_payment_due	student440	pos
+no_payment_due	student441	pos
+no_payment_due	student442	pos
+no_payment_due	student443	pos
+no_payment_due	student444	pos
+no_payment_due	student446	pos
+no_payment_due	student447	pos
+no_payment_due	student448	pos
+no_payment_due	student45	pos
+no_payment_due	student450	pos
+no_payment_due	student452	pos
+no_payment_due	student458	pos
+no_payment_due	student459	pos
+no_payment_due	student46	pos
+no_payment_due	student465	pos
+no_payment_due	student467	pos
+no_payment_due	student468	pos
+no_payment_due	student470	pos
+no_payment_due	student472	pos
+no_payment_due	student473	pos
+no_payment_due	student474	pos
+no_payment_due	student475	pos
+no_payment_due	student476	pos
+no_payment_due	student477	pos
+no_payment_due	student479	pos
+no_payment_due	student48	pos
+no_payment_due	student480	pos
+no_payment_due	student481	pos
+no_payment_due	student485	pos
+no_payment_due	student486	pos
+no_payment_due	student488	pos
+no_payment_due	student49	pos
+no_payment_due	student490	pos
+no_payment_due	student491	pos
+no_payment_due	student492	pos
+no_payment_due	student493	pos
+no_payment_due	student494	pos
+no_payment_due	student495	pos
+no_payment_due	student496	pos
+no_payment_due	student497	pos
+no_payment_due	student498	pos
+no_payment_due	student50	pos
+no_payment_due	student500	pos
+no_payment_due	student502	pos
+no_payment_due	student503	pos
+no_payment_due	student504	pos
+no_payment_due	student505	pos
+no_payment_due	student508	pos
+no_payment_due	student51	pos
+no_payment_due	student511	pos
+no_payment_due	student512	pos
+no_payment_due	student515	pos
+no_payment_due	student517	pos
+no_payment_due	student519	pos
+no_payment_due	student52	pos
+no_payment_due	student522	pos
+no_payment_due	student523	pos
+no_payment_due	student526	pos
+no_payment_due	student527	pos
+no_payment_due	student529	pos
+no_payment_due	student530	pos
+no_payment_due	student531	pos
+no_payment_due	student533	pos
+no_payment_due	student534	pos
+no_payment_due	student536	pos
+no_payment_due	student538	pos
+no_payment_due	student539	pos
+no_payment_due	student541	pos
+no_payment_due	student544	pos
+no_payment_due	student546	pos
+no_payment_due	student547	pos
+no_payment_due	student550	pos
+no_payment_due	student553	pos
+no_payment_due	student554	pos
+no_payment_due	student555	pos
+no_payment_due	student556	pos
+no_payment_due	student559	pos
+no_payment_due	student560	pos
+no_payment_due	student562	pos
+no_payment_due	student565	pos
+no_payment_due	student567	pos
+no_payment_due	student568	pos
+no_payment_due	student569	pos
+no_payment_due	student57	pos
+no_payment_due	student570	pos
+no_payment_due	student572	pos
+no_payment_due	student573	pos
+no_payment_due	student575	pos
+no_payment_due	student576	pos
+no_payment_due	student578	pos
+no_payment_due	student579	pos
+no_payment_due	student580	pos
+no_payment_due	student581	pos
+no_payment_due	student583	pos
+no_payment_due	student584	pos
+no_payment_due	student585	pos
+no_payment_due	student587	pos
+no_payment_due	student588	pos
+no_payment_due	student589	pos
+no_payment_due	student59	pos
+no_payment_due	student590	pos
+no_payment_due	student591	pos
+no_payment_due	student592	pos
+no_payment_due	student593	pos
+no_payment_due	student594	pos
+no_payment_due	student595	pos
+no_payment_due	student596	pos
+no_payment_due	student598	pos
+no_payment_due	student599	pos
+no_payment_due	student6	pos
+no_payment_due	student600	pos
+no_payment_due	student601	pos
+no_payment_due	student602	pos
+no_payment_due	student603	pos
+no_payment_due	student605	pos
+no_payment_due	student606	pos
+no_payment_due	student607	pos
+no_payment_due	student608	pos
+no_payment_due	student609	pos
+no_payment_due	student610	pos
+no_payment_due	student611	pos
+no_payment_due	student612	pos
+no_payment_due	student613	pos
+no_payment_due	student614	pos
+no_payment_due	student615	pos
+no_payment_due	student616	pos
+no_payment_due	student617	pos
+no_payment_due	student619	pos
+no_payment_due	student62	pos
+no_payment_due	student620	pos
+no_payment_due	student621	pos
+no_payment_due	student624	pos
+no_payment_due	student625	pos
+no_payment_due	student626	pos
+no_payment_due	student627	pos
+no_payment_due	student628	pos
+no_payment_due	student629	pos
+no_payment_due	student63	pos
+no_payment_due	student631	pos
+no_payment_due	student632	pos
+no_payment_due	student634	pos
+no_payment_due	student635	pos
+no_payment_due	student638	pos
+no_payment_due	student64	pos
+no_payment_due	student641	pos
+no_payment_due	student642	pos
+no_payment_due	student645	pos
+no_payment_due	student646	pos
+no_payment_due	student647	pos
+no_payment_due	student649	pos
+no_payment_due	student65	pos
+no_payment_due	student650	pos
+no_payment_due	student651	pos
+no_payment_due	student652	pos
+no_payment_due	student655	pos
+no_payment_due	student656	pos
+no_payment_due	student658	pos
+no_payment_due	student659	pos
+no_payment_due	student66	pos
+no_payment_due	student660	pos
+no_payment_due	student661	pos
+no_payment_due	student662	pos
+no_payment_due	student663	pos
+no_payment_due	student664	pos
+no_payment_due	student665	pos
+no_payment_due	student666	pos
+no_payment_due	student667	pos
+no_payment_due	student668	pos
+no_payment_due	student670	pos
+no_payment_due	student672	pos
+no_payment_due	student673	pos
+no_payment_due	student674	pos
+no_payment_due	student676	pos
+no_payment_due	student677	pos
+no_payment_due	student678	pos
+no_payment_due	student679	pos
+no_payment_due	student68	pos
+no_payment_due	student680	pos
+no_payment_due	student682	pos
+no_payment_due	student684	pos
+no_payment_due	student686	pos
+no_payment_due	student688	pos
+no_payment_due	student689	pos
+no_payment_due	student69	pos
+no_payment_due	student690	pos
+no_payment_due	student696	pos
+no_payment_due	student697	pos
+no_payment_due	student698	pos
+no_payment_due	student699	pos
+no_payment_due	student7	pos
+no_payment_due	student70	pos
+no_payment_due	student700	pos
+no_payment_due	student701	pos
+no_payment_due	student702	pos
+no_payment_due	student705	pos
+no_payment_due	student709	pos
+no_payment_due	student710	pos
+no_payment_due	student712	pos
+no_payment_due	student714	pos
+no_payment_due	student717	pos
+no_payment_due	student719	pos
+no_payment_due	student72	pos
+no_payment_due	student721	pos
+no_payment_due	student723	pos
+no_payment_due	student724	pos
+no_payment_due	student727	pos
+no_payment_due	student729	pos
+no_payment_due	student73	pos
+no_payment_due	student732	pos
+no_payment_due	student733	pos
+no_payment_due	student734	pos
+no_payment_due	student735	pos
+no_payment_due	student738	pos
+no_payment_due	student739	pos
+no_payment_due	student740	pos
+no_payment_due	student741	pos
+no_payment_due	student742	pos
+no_payment_due	student743	pos
+no_payment_due	student744	pos
+no_payment_due	student745	pos
+no_payment_due	student746	pos
+no_payment_due	student747	pos
+no_payment_due	student748	pos
+no_payment_due	student749	pos
+no_payment_due	student75	pos
+no_payment_due	student750	pos
+no_payment_due	student751	pos
+no_payment_due	student753	pos
+no_payment_due	student754	pos
+no_payment_due	student757	pos
+no_payment_due	student758	pos
+no_payment_due	student760	pos
+no_payment_due	student761	pos
+no_payment_due	student762	pos
+no_payment_due	student764	pos
+no_payment_due	student765	pos
+no_payment_due	student768	pos
+no_payment_due	student769	pos
+no_payment_due	student77	pos
+no_payment_due	student770	pos
+no_payment_due	student773	pos
+no_payment_due	student774	pos
+no_payment_due	student775	pos
+no_payment_due	student776	pos
+no_payment_due	student778	pos
+no_payment_due	student779	pos
+no_payment_due	student780	pos
+no_payment_due	student781	pos
+no_payment_due	student783	pos
+no_payment_due	student785	pos
+no_payment_due	student787	pos
+no_payment_due	student788	pos
+no_payment_due	student789	pos
+no_payment_due	student79	pos
+no_payment_due	student790	pos
+no_payment_due	student792	pos
+no_payment_due	student794	pos
+no_payment_due	student795	pos
+no_payment_due	student797	pos
+no_payment_due	student798	pos
+no_payment_due	student8	pos
+no_payment_due	student80	pos
+no_payment_due	student800	pos
+no_payment_due	student803	pos
+no_payment_due	student804	pos
+no_payment_due	student805	pos
+no_payment_due	student806	pos
+no_payment_due	student807	pos
+no_payment_due	student808	pos
+no_payment_due	student809	pos
+no_payment_due	student81	pos
+no_payment_due	student812	pos
+no_payment_due	student814	pos
+no_payment_due	student817	pos
+no_payment_due	student82	pos
+no_payment_due	student820	pos
+no_payment_due	student821	pos
+no_payment_due	student823	pos
+no_payment_due	student825	pos
+no_payment_due	student827	pos
+no_payment_due	student828	pos
+no_payment_due	student83	pos
+no_payment_due	student830	pos
+no_payment_due	student831	pos
+no_payment_due	student832	pos
+no_payment_due	student835	pos
+no_payment_due	student836	pos
+no_payment_due	student838	pos
+no_payment_due	student84	pos
+no_payment_due	student840	pos
+no_payment_due	student841	pos
+no_payment_due	student842	pos
+no_payment_due	student846	pos
+no_payment_due	student847	pos
+no_payment_due	student849	pos
+no_payment_due	student850	pos
+no_payment_due	student852	pos
+no_payment_due	student854	pos
+no_payment_due	student855	pos
+no_payment_due	student856	pos
+no_payment_due	student858	pos
+no_payment_due	student859	pos
+no_payment_due	student863	pos
+no_payment_due	student864	pos
+no_payment_due	student866	pos
+no_payment_due	student867	pos
+no_payment_due	student868	pos
+no_payment_due	student870	pos
+no_payment_due	student871	pos
+no_payment_due	student874	pos
+no_payment_due	student877	pos
+no_payment_due	student879	pos
+no_payment_due	student881	pos
+no_payment_due	student885	pos
+no_payment_due	student887	pos
+no_payment_due	student888	pos
+no_payment_due	student890	pos
+no_payment_due	student891	pos
+no_payment_due	student893	pos
+no_payment_due	student894	pos
+no_payment_due	student895	pos
+no_payment_due	student896	pos
+no_payment_due	student897	pos
+no_payment_due	student9	pos
+no_payment_due	student90	pos
+no_payment_due	student901	pos
+no_payment_due	student902	pos
+no_payment_due	student904	pos
+no_payment_due	student905	pos
+no_payment_due	student906	pos
+no_payment_due	student908	pos
+no_payment_due	student909	pos
+no_payment_due	student91	pos
+no_payment_due	student910	pos
+no_payment_due	student913	pos
+no_payment_due	student915	pos
+no_payment_due	student916	pos
+no_payment_due	student918	pos
+no_payment_due	student92	pos
+no_payment_due	student920	pos
+no_payment_due	student923	pos
+no_payment_due	student924	pos
+no_payment_due	student926	pos
+no_payment_due	student927	pos
+no_payment_due	student928	pos
+no_payment_due	student93	pos
+no_payment_due	student932	pos
+no_payment_due	student935	pos
+no_payment_due	student936	pos
+no_payment_due	student937	pos
+no_payment_due	student94	pos
+no_payment_due	student940	pos
+no_payment_due	student942	pos
+no_payment_due	student943	pos
+no_payment_due	student945	pos
+no_payment_due	student946	pos
+no_payment_due	student947	pos
+no_payment_due	student948	pos
+no_payment_due	student949	pos
+no_payment_due	student95	pos
+no_payment_due	student950	pos
+no_payment_due	student952	pos
+no_payment_due	student953	pos
+no_payment_due	student955	pos
+no_payment_due	student956	pos
+no_payment_due	student958	pos
+no_payment_due	student959	pos
+no_payment_due	student96	pos
+no_payment_due	student962	pos
+no_payment_due	student963	pos
+no_payment_due	student967	pos
+no_payment_due	student968	pos
+no_payment_due	student969	pos
+no_payment_due	student97	pos
+no_payment_due	student970	pos
+no_payment_due	student972	pos
+no_payment_due	student975	pos
+no_payment_due	student976	pos
+no_payment_due	student977	pos
+no_payment_due	student981	pos
+no_payment_due	student983	pos
+no_payment_due	student984	pos
+no_payment_due	student985	pos
+no_payment_due	student987	pos
+no_payment_due	student989	pos
+no_payment_due	student99	pos
+no_payment_due	student990	pos
+no_payment_due	student992	pos
+no_payment_due	student993	pos
+no_payment_due	student994	pos
+no_payment_due	student996	pos
+no_payment_due	student998	pos
+no_payment_due	student999	pos
+person	student1
+person	student10
+person	student100
+person	student1000
+person	student101
+person	student102
+person	student103
+person	student104
+person	student105
+person	student106
+person	student107
+person	student108
+person	student109
+person	student11
+person	student110
+person	student111
+person	student112
+person	student113
+person	student114
+person	student115
+person	student116
+person	student117
+person	student118
+person	student119
+person	student12
+person	student120
+person	student121
+person	student122
+person	student123
+person	student124
+person	student125
+person	student126
+person	student127
+person	student128
+person	student129
+person	student13
+person	student130
+person	student131
+person	student132
+person	student133
+person	student134
+person	student135
+person	student136
+person	student137
+person	student138
+person	student139
+person	student14
+person	student140
+person	student141
+person	student142
+person	student143
+person	student144
+person	student145
+person	student146
+person	student147
+person	student148
+person	student149
+person	student15
+person	student150
+person	student151
+person	student152
+person	student153
+person	student154
+person	student155
+person	student156
+person	student157
+person	student158
+person	student159
+person	student16
+person	student160
+person	student161
+person	student162
+person	student163
+person	student164
+person	student165
+person	student166
+person	student167
+person	student168
+person	student169
+person	student17
+person	student170
+person	student171
+person	student172
+person	student173
+person	student174
+person	student175
+person	student176
+person	student177
+person	student178
+person	student179
+person	student18
+person	student180
+person	student181
+person	student182
+person	student183
+person	student184
+person	student185
+person	student186
+person	student187
+person	student188
+person	student189
+person	student19
+person	student190
+person	student191
+person	student192
+person	student193
+person	student194
+person	student195
+person	student196
+person	student197
+person	student198
+person	student199
+person	student2
+person	student20
+person	student200
+person	student201
+person	student202
+person	student203
+person	student204
+person	student205
+person	student206
+person	student207
+person	student208
+person	student209
+person	student21
+person	student210
+person	student211
+person	student212
+person	student213
+person	student214
+person	student215
+person	student216
+person	student217
+person	student218
+person	student219
+person	student22
+person	student220
+person	student221
+person	student222
+person	student223
+person	student224
+person	student225
+person	student226
+person	student227
+person	student228
+person	student229
+person	student23
+person	student230
+person	student231
+person	student232
+person	student233
+person	student234
+person	student235
+person	student236
+person	student237
+person	student238
+person	student239
+person	student24
+person	student240
+person	student241
+person	student242
+person	student243
+person	student244
+person	student245
+person	student246
+person	student247
+person	student248
+person	student249
+person	student25
+person	student250
+person	student251
+person	student252
+person	student253
+person	student254
+person	student255
+person	student256
+person	student257
+person	student258
+person	student259
+person	student26
+person	student260
+person	student261
+person	student262
+person	student263
+person	student264
+person	student265
+person	student266
+person	student267
+person	student268
+person	student269
+person	student27
+person	student270
+person	student271
+person	student272
+person	student273
+person	student274
+person	student275
+person	student276
+person	student277
+person	student278
+person	student279
+person	student28
+person	student280
+person	student281
+person	student282
+person	student283
+person	student284
+person	student285
+person	student286
+person	student287
+person	student288
+person	student289
+person	student29
+person	student290
+person	student291
+person	student292
+person	student293
+person	student294
+person	student295
+person	student296
+person	student297
+person	student298
+person	student299
+person	student3
+person	student30
+person	student300
+person	student301
+person	student302
+person	student303
+person	student304
+person	student305
+person	student306
+person	student307
+person	student308
+person	student309
+person	student31
+person	student310
+person	student311
+person	student312
+person	student313
+person	student314
+person	student315
+person	student316
+person	student317
+person	student318
+person	student319
+person	student32
+person	student320
+person	student321
+person	student322
+person	student323
+person	student324
+person	student325
+person	student326
+person	student327
+person	student328
+person	student329
+person	student33
+person	student330
+person	student331
+person	student332
+person	student333
+person	student334
+person	student335
+person	student336
+person	student337
+person	student338
+person	student339
+person	student34
+person	student340
+person	student341
+person	student342
+person	student343
+person	student344
+person	student345
+person	student346
+person	student347
+person	student348
+person	student349
+person	student35
+person	student350
+person	student351
+person	student352
+person	student353
+person	student354
+person	student355
+person	student356
+person	student357
+person	student358
+person	student359
+person	student36
+person	student360
+person	student361
+person	student362
+person	student363
+person	student364
+person	student365
+person	student366
+person	student367
+person	student368
+person	student369
+person	student37
+person	student370
+person	student371
+person	student372
+person	student373
+person	student374
+person	student375
+person	student376
+person	student377
+person	student378
+person	student379
+person	student38
+person	student380
+person	student381
+person	student382
+person	student383
+person	student384
+person	student385
+person	student386
+person	student387
+person	student388
+person	student389
+person	student39
+person	student390
+person	student391
+person	student392
+person	student393
+person	student394
+person	student395
+person	student396
+person	student397
+person	student398
+person	student399
+person	student4
+person	student40
+person	student400
+person	student401
+person	student402
+person	student403
+person	student404
+person	student405
+person	student406
+person	student407
+person	student408
+person	student409
+person	student41
+person	student410
+person	student411
+person	student412
+person	student413
+person	student414
+person	student415
+person	student416
+person	student417
+person	student418
+person	student419
+person	student42
+person	student420
+person	student421
+person	student422
+person	student423
+person	student424
+person	student425
+person	student426
+person	student427
+person	student428
+person	student429
+person	student43
+person	student430
+person	student431
+person	student432
+person	student433
+person	student434
+person	student435
+person	student436
+person	student437
+person	student438
+person	student439
+person	student44
+person	student440
+person	student441
+person	student442
+person	student443
+person	student444
+person	student445
+person	student446
+person	student447
+person	student448
+person	student449
+person	student45
+person	student450
+person	student451
+person	student452
+person	student453
+person	student454
+person	student455
+person	student456
+person	student457
+person	student458
+person	student459
+person	student46
+person	student460
+person	student461
+person	student462
+person	student463
+person	student464
+person	student465
+person	student466
+person	student467
+person	student468
+person	student469
+person	student47
+person	student470
+person	student471
+person	student472
+person	student473
+person	student474
+person	student475
+person	student476
+person	student477
+person	student478
+person	student479
+person	student48
+person	student480
+person	student481
+person	student482
+person	student483
+person	student484
+person	student485
+person	student486
+person	student487
+person	student488
+person	student489
+person	student49
+person	student490
+person	student491
+person	student492
+person	student493
+person	student494
+person	student495
+person	student496
+person	student497
+person	student498
+person	student499
+person	student5
+person	student50
+person	student500
+person	student501
+person	student502
+person	student503
+person	student504
+person	student505
+person	student506
+person	student507
+person	student508
+person	student509
+person	student51
+person	student510
+person	student511
+person	student512
+person	student513
+person	student514
+person	student515
+person	student516
+person	student517
+person	student518
+person	student519
+person	student52
+person	student520
+person	student521
+person	student522
+person	student523
+person	student524
+person	student525
+person	student526
+person	student527
+person	student528
+person	student529
+person	student53
+person	student530
+person	student531
+person	student532
+person	student533
+person	student534
+person	student535
+person	student536
+person	student537
+person	student538
+person	student539
+person	student54
+person	student540
+person	student541
+person	student542
+person	student543
+person	student544
+person	student545
+person	student546
+person	student547
+person	student548
+person	student549
+person	student55
+person	student550
+person	student551
+person	student552
+person	student553
+person	student554
+person	student555
+person	student556
+person	student557
+person	student558
+person	student559
+person	student56
+person	student560
+person	student561
+person	student562
+person	student563
+person	student564
+person	student565
+person	student566
+person	student567
+person	student568
+person	student569
+person	student57
+person	student570
+person	student571
+person	student572
+person	student573
+person	student574
+person	student575
+person	student576
+person	student577
+person	student578
+person	student579
+person	student58
+person	student580
+person	student581
+person	student582
+person	student583
+person	student584
+person	student585
+person	student586
+person	student587
+person	student588
+person	student589
+person	student59
+person	student590
+person	student591
+person	student592
+person	student593
+person	student594
+person	student595
+person	student596
+person	student597
+person	student598
+person	student599
+person	student6
+person	student60
+person	student600
+person	student601
+person	student602
+person	student603
+person	student604
+person	student605
+person	student606
+person	student607
+person	student608
+person	student609
+person	student61
+person	student610
+person	student611
+person	student612
+person	student613
+person	student614
+person	student615
+person	student616
+person	student617
+person	student618
+person	student619
+person	student62
+person	student620
+person	student621
+person	student622
+person	student623
+person	student624
+person	student625
+person	student626
+person	student627
+person	student628
+person	student629
+person	student63
+person	student630
+person	student631
+person	student632
+person	student633
+person	student634
+person	student635
+person	student636
+person	student637
+person	student638
+person	student639
+person	student64
+person	student640
+person	student641
+person	student642
+person	student643
+person	student644
+person	student645
+person	student646
+person	student647
+person	student648
+person	student649
+person	student65
+person	student650
+person	student651
+person	student652
+person	student653
+person	student654
+person	student655
+person	student656
+person	student657
+person	student658
+person	student659
+person	student66
+person	student660
+person	student661
+person	student662
+person	student663
+person	student664
+person	student665
+person	student666
+person	student667
+person	student668
+person	student669
+person	student67
+person	student670
+person	student671
+person	student672
+person	student673
+person	student674
+person	student675
+person	student676
+person	student677
+person	student678
+person	student679
+person	student68
+person	student680
+person	student681
+person	student682
+person	student683
+person	student684
+person	student685
+person	student686
+person	student687
+person	student688
+person	student689
+person	student69
+person	student690
+person	student691
+person	student692
+person	student693
+person	student694
+person	student695
+person	student696
+person	student697
+person	student698
+person	student699
+person	student7
+person	student70
+person	student700
+person	student701
+person	student702
+person	student703
+person	student704
+person	student705
+person	student706
+person	student707
+person	student708
+person	student709
+person	student71
+person	student710
+person	student711
+person	student712
+person	student713
+person	student714
+person	student715
+person	student716
+person	student717
+person	student718
+person	student719
+person	student72
+person	student720
+person	student721
+person	student722
+person	student723
+person	student724
+person	student725
+person	student726
+person	student727
+person	student728
+person	student729
+person	student73
+person	student730
+person	student731
+person	student732
+person	student733
+person	student734
+person	student735
+person	student736
+person	student737
+person	student738
+person	student739
+person	student74
+person	student740
+person	student741
+person	student742
+person	student743
+person	student744
+person	student745
+person	student746
+person	student747
+person	student748
+person	student749
+person	student75
+person	student750
+person	student751
+person	student752
+person	student753
+person	student754
+person	student755
+person	student756
+person	student757
+person	student758
+person	student759
+person	student76
+person	student760
+person	student761
+person	student762
+person	student763
+person	student764
+person	student765
+person	student766
+person	student767
+person	student768
+person	student769
+person	student77
+person	student770
+person	student771
+person	student772
+person	student773
+person	student774
+person	student775
+person	student776
+person	student777
+person	student778
+person	student779
+person	student78
+person	student780
+person	student781
+person	student782
+person	student783
+person	student784
+person	student785
+person	student786
+person	student787
+person	student788
+person	student789
+person	student79
+person	student790
+person	student791
+person	student792
+person	student793
+person	student794
+person	student795
+person	student796
+person	student797
+person	student798
+person	student799
+person	student8
+person	student80
+person	student800
+person	student801
+person	student802
+person	student803
+person	student804
+person	student805
+person	student806
+person	student807
+person	student808
+person	student809
+person	student81
+person	student810
+person	student811
+person	student812
+person	student813
+person	student814
+person	student815
+person	student816
+person	student817
+person	student818
+person	student819
+person	student82
+person	student820
+person	student821
+person	student822
+person	student823
+person	student824
+person	student825
+person	student826
+person	student827
+person	student828
+person	student829
+person	student83
+person	student830
+person	student831
+person	student832
+person	student833
+person	student834
+person	student835
+person	student836
+person	student837
+person	student838
+person	student839
+person	student84
+person	student840
+person	student841
+person	student842
+person	student843
+person	student844
+person	student845
+person	student846
+person	student847
+person	student848
+person	student849
+person	student85
+person	student850
+person	student851
+person	student852
+person	student853
+person	student854
+person	student855
+person	student856
+person	student857
+person	student858
+person	student859
+person	student86
+person	student860
+person	student861
+person	student862
+person	student863
+person	student864
+person	student865
+person	student866
+person	student867
+person	student868
+person	student869
+person	student87
+person	student870
+person	student871
+person	student872
+person	student873
+person	student874
+person	student875
+person	student876
+person	student877
+person	student878
+person	student879
+person	student88
+person	student880
+person	student881
+person	student882
+person	student883
+person	student884
+person	student885
+person	student886
+person	student887
+person	student888
+person	student889
+person	student89
+person	student890
+person	student891
+person	student892
+person	student893
+person	student894
+person	student895
+person	student896
+person	student897
+person	student898
+person	student899
+person	student9
+person	student90
+person	student900
+person	student901
+person	student902
+person	student903
+person	student904
+person	student905
+person	student906
+person	student907
+person	student908
+person	student909
+person	student91
+person	student910
+person	student911
+person	student912
+person	student913
+person	student914
+person	student915
+person	student916
+person	student917
+person	student918
+person	student919
+person	student92
+person	student920
+person	student921
+person	student922
+person	student923
+person	student924
+person	student925
+person	student926
+person	student927
+person	student928
+person	student929
+person	student93
+person	student930
+person	student931
+person	student932
+person	student933
+person	student934
+person	student935
+person	student936
+person	student937
+person	student938
+person	student939
+person	student94
+person	student940
+person	student941
+person	student942
+person	student943
+person	student944
+person	student945
+person	student946
+person	student947
+person	student948
+person	student949
+person	student95
+person	student950
+person	student951
+person	student952
+person	student953
+person	student954
+person	student955
+person	student956
+person	student957
+person	student958
+person	student959
+person	student96
+person	student960
+person	student961
+person	student962
+person	student963
+person	student964
+person	student965
+person	student966
+person	student967
+person	student968
+person	student969
+person	student97
+person	student970
+person	student971
+person	student972
+person	student973
+person	student974
+person	student975
+person	student976
+person	student977
+person	student978
+person	student979
+person	student98
+person	student980
+person	student981
+person	student982
+person	student983
+person	student984
+person	student985
+person	student986
+person	student987
+person	student988
+person	student989
+person	student99
+person	student990
+person	student991
+person	student992
+person	student993
+person	student994
+person	student995
+person	student996
+person	student997
+person	student998
+person	student999
+unemployed	student1000
+unemployed	student102
+unemployed	student106
+unemployed	student109
+unemployed	student118
+unemployed	student119
+unemployed	student129
+unemployed	student140
+unemployed	student142
+unemployed	student147
+unemployed	student153
+unemployed	student158
+unemployed	student163
+unemployed	student194
+unemployed	student214
+unemployed	student22
+unemployed	student273
+unemployed	student28
+unemployed	student288
+unemployed	student301
+unemployed	student313
+unemployed	student318
+unemployed	student324
+unemployed	student328
+unemployed	student329
+unemployed	student33
+unemployed	student347
+unemployed	student349
+unemployed	student351
+unemployed	student352
+unemployed	student368
+unemployed	student372
+unemployed	student384
+unemployed	student407
+unemployed	student412
+unemployed	student415
+unemployed	student420
+unemployed	student428
+unemployed	student431
+unemployed	student442
+unemployed	student443
+unemployed	student452
+unemployed	student458
+unemployed	student467
+unemployed	student477
+unemployed	student481
+unemployed	student485
+unemployed	student492
+unemployed	student505
+unemployed	student51
+unemployed	student512
+unemployed	student523
+unemployed	student530
+unemployed	student538
+unemployed	student579
+unemployed	student584
+unemployed	student589
+unemployed	student59
+unemployed	student601
+unemployed	student603
+unemployed	student609
+unemployed	student615
+unemployed	student621
+unemployed	student642
+unemployed	student645
+unemployed	student664
+unemployed	student670
+unemployed	student676
+unemployed	student679
+unemployed	student688
+unemployed	student69
+unemployed	student690
+unemployed	student702
+unemployed	student705
+unemployed	student712
+unemployed	student751
+unemployed	student754
+unemployed	student758
+unemployed	student769
+unemployed	student780
+unemployed	student781
+unemployed	student809
+unemployed	student812
+unemployed	student817
+unemployed	student828
+unemployed	student836
+unemployed	student856
+unemployed	student858
+unemployed	student859
+unemployed	student888
+unemployed	student9
+unemployed	student916
+unemployed	student94
+unemployed	student940
+unemployed	student946
+unemployed	student948
+unemployed	student993
+unemployed	student996

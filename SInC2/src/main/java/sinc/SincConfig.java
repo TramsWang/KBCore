@@ -13,7 +13,7 @@ public class SincConfig {
     public final boolean searchOrigins;
     public final Eval.EvalMetric evalMetric;
     public final double minHeadCoverage;
-    public final double minConstantProportion;
+    public final double minConstantCoverage;
 
     /* Optimization Config */
     public final boolean ruleCache;  // 如果开启ruleCache，那么searchOrigins被强制设置为false
@@ -23,7 +23,7 @@ public class SincConfig {
 
     public SincConfig(
             int threads, boolean validation, boolean debug, int beamWidth, boolean searchOrigins,
-            Eval.EvalMetric evalMetric, double minHeadCoverage, double minConstantProportion,
+            Eval.EvalMetric evalMetric, double minHeadCoverage, double minConstantCoverage,
             boolean ruleCache, double sampling, boolean estimation, boolean kbBlocking
     ) {
         this.threads = threads;
@@ -33,7 +33,7 @@ public class SincConfig {
         this.searchOrigins = searchOrigins;
         this.evalMetric = evalMetric;
         this.minHeadCoverage = minHeadCoverage;
-        this.minConstantProportion = minConstantProportion;
+        this.minConstantCoverage = minConstantCoverage;
         this.ruleCache = ruleCache;
         this.sampling = sampling;
         this.estimation = estimation;

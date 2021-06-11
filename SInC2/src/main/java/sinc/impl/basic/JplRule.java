@@ -12,12 +12,7 @@ public class JplRule extends Rule {
     private final PrologKb kb;
 
     /* 性能检测数据 */
-    long preComputingCostInNano = 0;
-    long allEntailQueryCostInNano = 0;
-    long posEntailQueryCostInNano = 0;
-    long headTemplateBuildCostInNano = 0;
-    long allEntailJplQueryCostInNano = 0;
-    long substituteCostInNano = 0;
+    static protected final JplQueryMonitor jplQueryMonitor = new JplQueryMonitor();
 
     public JplRule(String headFunctor, Set<RuleFingerPrint> cache, PrologKb kb) {
         super(headFunctor, kb.getArity(headFunctor), cache);
@@ -28,12 +23,6 @@ public class JplRule extends Rule {
     public JplRule(JplRule another) {
         super(another);
         this.kb = another.kb;
-        this.preComputingCostInNano = another.preComputingCostInNano;
-        this.allEntailQueryCostInNano = another.allEntailQueryCostInNano;
-        this.posEntailQueryCostInNano = another.posEntailQueryCostInNano;
-        this.headTemplateBuildCostInNano = another.headTemplateBuildCostInNano;
-        this.allEntailJplQueryCostInNano = another.allEntailJplQueryCostInNano;
-        this.substituteCostInNano = another.substituteCostInNano;
     }
 
     @Override
@@ -131,11 +120,13 @@ public class JplRule extends Rule {
                 }
                 head_templates.add(new Compound("h", template_args));
                 long build_head_template_done = System.nanoTime();
-                headTemplateBuildCostInNano += build_head_template_done - build_head_template_begin;
+                final long period = build_head_template_done - build_head_template_begin;
+                jplQueryMonitor.headTemplateBuildCostInNano += period;
+                jplQueryMonitor.jplQueryCostInNano -= period;
             }
             q.close();
             long query_done = System.nanoTime();
-            allEntailJplQueryCostInNano += query_done - query_begin;
+            jplQueryMonitor.jplQueryCostInNano += query_done - query_begin;
         }
         final Set<String> bounded_vars_in_head_only = new HashSet<>();
         for (String bv_head : bounded_vars_in_head) {
@@ -149,20 +140,23 @@ public class JplRule extends Rule {
         );
 
         /* 计算positive entailments */
-        final long positive_entailments_query_begin = System.nanoTime();
         final Compound head_compound = new Compound(head_pred.functor, head_args);
         query_str = body_is_not_empty ? head_compound.toString() + ',' + query_str :
                 head_compound.toString();
 
+        final long positive_entailments_query_begin = System.nanoTime();
         final Query q = new Query(Term.textToTerm(query_str));
         final Set<Predicate> head_instances = new HashSet<>();
         for (Map<String, Term> binding: q) {
             long substitute_begin = System.nanoTime();
             head_instances.add(PrologKb.compound2Fact(PrologKb.substitute(head_compound, binding)));
             long substitute_done = System.nanoTime();
-            substituteCostInNano += substitute_done - substitute_begin;
+            final long period = substitute_done - substitute_begin;
+            jplQueryMonitor.substituteCostInNano += period;
+            jplQueryMonitor.jplQueryCostInNano -= period;
         }
         q.close();
+        final long positive_entailments_query_done = System.nanoTime();
 
         int positive_entailments = 0;
         int already_entailed = 0;
@@ -173,10 +167,11 @@ public class JplRule extends Rule {
                 already_entailed++;
             }
         }
-        final long positive_entailments_query_done = System.nanoTime();
-        preComputingCostInNano += all_entailments_query_begin - pre_computing_start;
-        allEntailQueryCostInNano += positive_entailments_query_begin - all_entailments_query_begin;
-        posEntailQueryCostInNano += positive_entailments_query_done - positive_entailments_query_begin;
+        final long check_done = System.nanoTime();
+        jplQueryMonitor.jplQueryCostInNano += positive_entailments_query_done - positive_entailments_query_begin;
+        jplQueryMonitor.preComputingCostInNano += all_entailments_query_begin - pre_computing_start;
+        jplQueryMonitor.allEntailQueryCostInNano += positive_entailments_query_begin - all_entailments_query_begin;
+        jplQueryMonitor.posEntailQueryCostInNano += check_done - positive_entailments_query_begin;
 
         /* 用HC剪枝 */
         double head_coverage = ((double) positive_entailments) / global_facts.size();

@@ -79,7 +79,7 @@ public class PrologKb {
         return functor2PromisingConstMap;
     }
 
-    private static void appendKnowledge(Compound compound) {
+    protected static void appendKnowledge(Compound compound) {
         Query q = new Query(
                 new Compound("assertz", new Term[]{compound})
         );
@@ -150,5 +150,51 @@ public class PrologKb {
 
     public boolean containsFact(Predicate predicate) {
         return originalKb.contains(predicate);
+    }
+
+    @Deprecated  // Jpl retract有问题，不好用
+    public void retractAllKnowledgeFromJpl() {
+        int cnt = 0;
+        for (String functor: functor2ArityMap.keySet()) {
+            cnt += retractAllKnowledgeFromJpl(functor);
+        }
+        System.out.printf("Retract %d functors, %d facts\n", functor2ArityMap.keySet().size(), cnt);
+    }
+
+    @Deprecated  // Jpl retract有问题，不好用
+    protected static int retractAllKnowledgeFromJpl(String functor) {
+        int cnt = 0;
+        Query q = new Query(new Compound("retract", new Term[]{
+                new Compound(functor, new Term[]{
+                        new org.jpl7.Variable("X"),
+                        new org.jpl7.Variable("Y")
+                })
+        }));
+        for (Map<String, Term> binding: q) {
+//            System.out.printf("%s(%s,%s)\n", functor, binding.get("X"), binding.get("Y"));
+            cnt++;
+        }
+        q.close();
+        return cnt;
+    }
+
+    public int getTotalConstantSubstitutions() {
+        int cnt = 0;
+        for (MultiSet<String>[] constant_sets: functor2ArgSetsMap.values()) {
+            for (MultiSet<String> constant_set: constant_sets) {
+                cnt += constant_set.differentValues();
+            }
+        }
+        return cnt;
+    }
+
+    public int getActualConstantSubstitutions() {
+        int cnt = 0;
+        for (List<String>[] promising_constant_lists: functor2PromisingConstMap.values()) {
+            for (List<String> promising_constant_list: promising_constant_lists) {
+                cnt += promising_constant_list.size();
+            }
+        }
+        return cnt;
     }
 }
