@@ -386,83 +386,98 @@ public abstract class SInC {
     }
 
     public final void run() {
-        /* 加载KB */
-        final long time_start = System.currentTimeMillis();
-        KbStatistics kb_stat = loadKb();
-        performanceMonitor.kbSize = kb_stat.facts;
-        performanceMonitor.kbFunctors = kb_stat.functors;
-        performanceMonitor.totalConstantSubstitutions = kb_stat.totalConstantSubstitutions;
-        performanceMonitor.actualConstantSubstitutions = kb_stat.actualConstantSubstitutions;
-        final long time_kb_loaded = System.currentTimeMillis();
-        performanceMonitor.kbLoadTime = time_kb_loaded - time_start;
+        try {
+            /* 加载KB */
+            final long time_start = System.currentTimeMillis();
+            KbStatistics kb_stat = loadKb();
+            performanceMonitor.kbSize = kb_stat.facts;
+            performanceMonitor.kbFunctors = kb_stat.functors;
+            performanceMonitor.totalConstantSubstitutions = kb_stat.totalConstantSubstitutions;
+            performanceMonitor.actualConstantSubstitutions = kb_stat.actualConstantSubstitutions;
+            final long time_kb_loaded = System.currentTimeMillis();
+            performanceMonitor.kbLoadTime = time_kb_loaded - time_start;
 
-        /* 逐个functor找rule */
-        final List<String> target_head_functors = getTargetFunctors();
-        do {
-            final long time_rule_finding_start = System.currentTimeMillis();
-            final int last_idx = target_head_functors.size() - 1;
-            final String functor = target_head_functors.get(last_idx);
-            final Rule rule = findRule(functor);
-            final long time_rule_found = System.currentTimeMillis();
-            performanceMonitor.hypothesisMiningTime += time_rule_found - time_rule_finding_start;
+            /* 逐个functor找rule */
+            final List<String> target_head_functors = getTargetFunctors();
+            do {
+                final long time_rule_finding_start = System.currentTimeMillis();
+                final int last_idx = target_head_functors.size() - 1;
+                final String functor = target_head_functors.get(last_idx);
+                final Rule rule = findRule(functor);
+                final long time_rule_found = System.currentTimeMillis();
+                performanceMonitor.hypothesisMiningTime += time_rule_found - time_rule_finding_start;
+                performanceMonitor.cacheHits = Rule.cacheHits;
 
-            if (null != rule && rule.getEval().useful(config.evalMetric)) {
-                System.out.printf("Found: %s\n", rule);
-                hypothesis.add(rule);
-                performanceMonitor.hypothesisSize += rule.size();
+                if (null != rule && rule.getEval().useful(config.evalMetric)) {
+                    System.out.printf("Found: %s\n", rule);
+                    hypothesis.add(rule);
+                    performanceMonitor.hypothesisSize += rule.size();
 
-                /* 更新grpah和counter example */
-                UpdateResult update_result = updateKb(rule);
-                counterExamples.addAll(update_result.counterExamples);
-                updateGraph(update_result.groundings);
-                final long time_kb_updated = System.currentTimeMillis();
-                performanceMonitor.otherMiningTime += time_kb_updated - time_rule_found;
-            } else {
-                target_head_functors.remove(last_idx);
+                    /* 更新grpah和counter example */
+                    UpdateResult update_result = updateKb(rule);
+                    counterExamples.addAll(update_result.counterExamples);
+                    updateGraph(update_result.groundings);
+                    final long time_kb_updated = System.currentTimeMillis();
+                    performanceMonitor.otherMiningTime += time_kb_updated - time_rule_found;
+                } else {
+                    target_head_functors.remove(last_idx);
+                }
+            } while (!target_head_functors.isEmpty());
+            performanceMonitor.hypothesisRuleNumber = hypothesis.size();
+            performanceMonitor.counterExampleSize = counterExamples.size();
+            performanceMonitor.cacheHits = Rule.cacheHits;
+
+            /* 解析Graph找start set */
+            final long time_graph_analyse_begin = System.currentTimeMillis();
+            GraphAnalyseResult graph_analyse_result = findStartSet();
+            performanceMonitor.startSetSize = graph_analyse_result.startSetSize;
+            performanceMonitor.startSetSizeWithoutFvs = graph_analyse_result.startSetSizeWithoutFvs;
+            performanceMonitor.sccNumber = graph_analyse_result.sccNumber;
+            performanceMonitor.sccVertices = graph_analyse_result.sccVertices;
+            performanceMonitor.fvsVertices = graph_analyse_result.fvsVertices;
+            final long time_start_set_found = System.currentTimeMillis();
+            performanceMonitor.otherMiningTime += time_start_set_found - time_graph_analyse_begin;
+
+            /* 检查结果 */
+            if (config.validation) {
+                if (!validate()) {
+                    System.err.println("[ERROR] Validation Failed");
+                }
             }
-        } while (!target_head_functors.isEmpty());
-        performanceMonitor.hypothesisRuleNumber = hypothesis.size();
-        performanceMonitor.counterExampleSize = counterExamples.size();
-        performanceMonitor.cacheHits = Rule.cacheHits;
+            final long time_validation_done = System.currentTimeMillis();
+            performanceMonitor.validationTime = time_validation_done - time_start_set_found;
 
-        /* 解析Graph找start set */
-        final long time_graph_analyse_begin = System.currentTimeMillis();
-        GraphAnalyseResult graph_analyse_result = findStartSet();
-        performanceMonitor.startSetSize = graph_analyse_result.startSetSize;
-        performanceMonitor.startSetSizeWithoutFvs = graph_analyse_result.startSetSizeWithoutFvs;
-        performanceMonitor.sccNumber = graph_analyse_result.sccNumber;
-        performanceMonitor.sccVertices = graph_analyse_result.sccVertices;
-        performanceMonitor.fvsVertices = graph_analyse_result.fvsVertices;
-        final long time_start_set_found = System.currentTimeMillis();
-        performanceMonitor.otherMiningTime += time_start_set_found - time_graph_analyse_begin;
+            /* 记录结果 */
+            dumpResult();
+            final long time_dumped = System.currentTimeMillis();
+            performanceMonitor.dumpTime = time_dumped - time_validation_done;
+            performanceMonitor.totalTime = time_dumped - time_start;
 
-        /* 检查结果 */
-        if (config.validation) {
-            if (!validate()) {
-                System.err.println("[ERROR] Validation Failed");
+            /* 打印所有rules */
+            System.out.println("\n### Hypothesis Found ###");
+            for (Rule rule : hypothesis) {
+                System.out.println(rule);
             }
-        }
-        final long time_validation_done = System.currentTimeMillis();
-        performanceMonitor.validationTime = time_validation_done - time_start_set_found;
+            System.out.println();
 
-        /* 记录结果 */
-        dumpResult();
-        final long time_dumped = System.currentTimeMillis();
-        performanceMonitor.dumpTime = time_dumped - time_validation_done;
-        performanceMonitor.totalTime = time_dumped - time_start;
+            showMonitor();
 
-        /* 打印所有rules */
-        System.out.println("\n### Hypothesis Found ###");
-        for (Rule rule: hypothesis) {
-            System.out.println(rule);
-        }
-        System.out.println();
+            if (config.debug) {
+                /* Todo: 图结构上传Neo4j */
+                System.out.println("[DEBUG] Upload Graph to Neo4J...");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.flush();
 
-        showMonitor();
+            /* 打印当前已经得到的rules */
+            System.out.println("\n### Hypothesis Found (Current) ###");
+            for (Rule rule : hypothesis) {
+                System.out.println(rule);
+            }
+            System.out.println();
 
-        if (config.debug) {
-            /* Todo: 图结构上传Neo4j */
-            System.out.println("[DEBUG] Upload Graph to Neo4J...");
+            showMonitor();
         }
     }
 }

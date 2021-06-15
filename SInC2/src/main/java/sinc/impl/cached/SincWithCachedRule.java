@@ -93,4 +93,10 @@ public class SincWithCachedRule extends SInC {
     protected Set<Predicate> getOriginalKb() {
         return kb.getOriginalKB();
     }
+
+    @Override
+    protected void showMonitor() {
+        super.showMonitor();
+        ForwardCachedRule.monitor.show();
+    }
 }

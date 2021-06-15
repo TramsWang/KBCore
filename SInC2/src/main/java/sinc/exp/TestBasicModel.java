@@ -9,11 +9,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 
-public class RunBasic {
+public class TestBasicModel {
     static void testBeam(int beam_width, Eval.EvalMetric eval_metric, Dataset dataset) {
-        File dir = new File(String.format("%s/%s", "Beam", dataset.getName()));
+        final String PURPOSE = "ORIGIN";
+        final String MODEL = "cached";
+        
+        File dir = new File(String.format("%s/%s", PURPOSE, dataset.getName()));
         if (!dir.exists() && !dir.mkdirs()) {
-            System.err.printf("Dir Make Failed: %s/%s\n", "Beam", dataset.getName());
+            System.err.printf("Dir Make Failed: %s/%s\n", PURPOSE, dataset.getName());
             return;
         }
         final SincConfig config = new SincConfig(
@@ -32,15 +35,15 @@ public class RunBasic {
         );
         final String stdout_path = String.format(
                 "%s/%s/%s_%s_%d.stdout",
-                "Beam", dataset.getName(), "basic", eval_metric.getName(), beam_width
+                PURPOSE, dataset.getName(), MODEL, eval_metric.getName(), beam_width
         );
         final String stderr_path = String.format(
                 "%s/%s/%s_%s_%d.stderr",
-                "Beam", dataset.getName(), "basic", eval_metric.getName(), beam_width
+                PURPOSE, dataset.getName(), MODEL, eval_metric.getName(), beam_width
         );
         final String dump_path = String.format(
                 "%s/%s/%s_%s_%d.result",
-                "Beam", dataset.getName(), "basic", eval_metric.getName(), beam_width
+                PURPOSE, dataset.getName(), MODEL, eval_metric.getName(), beam_width
         );
 
         try {

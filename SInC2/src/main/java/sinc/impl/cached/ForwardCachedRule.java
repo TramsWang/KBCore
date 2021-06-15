@@ -25,6 +25,8 @@ public class ForwardCachedRule extends Rule {
     private final List<List<PredicateCache>> groundings = new LinkedList<>();
     private final List<List<PredicateCache>> groundingsBody = new LinkedList<>();
 
+    protected static final CachedQueryMonitor monitor = new CachedQueryMonitor();
+
     public ForwardCachedRule(String headFunctor, Set<RuleFingerPrint> cache, MemKB kb) {
         super(headFunctor, kb.getArity(headFunctor), cache);
         this.kb = kb;
@@ -56,13 +58,21 @@ public class ForwardCachedRule extends Rule {
 
     @Override
     public Rule clone() {
-        return new ForwardCachedRule(this);
+        final long time_start = System.nanoTime();
+        Rule r =  new ForwardCachedRule(this);
+        final long time_done = System.nanoTime();
+        monitor.cloneCostInNano += time_done - time_start;
+        monitor.totalClones++;
+        return r;
     }
 
     @Override
     public void boundFreeVar2ExistingVarHandler(int predIdx, int argIdx, int varId) {
+        final long time_start = System.nanoTime();
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, false);
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, true);
+        final long time_done = System.nanoTime();
+        monitor.boundExistVarCostInNano += time_start - time_done;
     }
 
     /**
@@ -168,8 +178,11 @@ public class ForwardCachedRule extends Rule {
 
     @Override
     public void boundFreeVar2ExistingVarHandler(Predicate newPredicate, int argIdx, int varId) {
+        final long time_start = System.nanoTime();
         boundFreeVar2ExistingVarUpdateCache(newPredicate, argIdx, varId, false);
         boundFreeVar2ExistingVarUpdateCache(newPredicate, argIdx, varId, true);
+        final long time_done = System.nanoTime();
+        monitor.boundExistVarInNewPredCostInNano += time_start - time_done;
     }
 
     /**
@@ -250,8 +263,11 @@ public class ForwardCachedRule extends Rule {
 
     @Override
     public void boundFreeVars2NewVarHandler(int predIdx1, int argIdx1, int predIdx2, int argIdx2) {
+        final long time_start = System.nanoTime();
         boundFreeVars2NewVarUpdateCache(predIdx1, argIdx1, predIdx2, argIdx2, false);
         boundFreeVars2NewVarUpdateCache(predIdx1, argIdx1, predIdx2, argIdx2, true);
+        final long time_done = System.nanoTime();
+        monitor.boundNewVarCostInNano += time_start - time_done;
     }
 
     /**
@@ -430,8 +446,11 @@ public class ForwardCachedRule extends Rule {
 
     @Override
     public void boundFreeVars2NewVarHandler(Predicate newPredicate, int argIdx1, int predIdx2, int argIdx2) {
+        final long time_start = System.nanoTime();
         boundFreeVars2NewVarUpdateCache(newPredicate, argIdx1, predIdx2, argIdx2, false);
         boundFreeVars2NewVarUpdateCache(newPredicate, argIdx1, predIdx2, argIdx2, true);
+        final long time_done = System.nanoTime();
+        monitor.boundNewVarInNewPredCostInNano += time_start - time_done;
     }
 
     /**
@@ -541,8 +560,11 @@ public class ForwardCachedRule extends Rule {
 
     @Override
     public void boundFreeVar2ConstantHandler(int predIdx, int argIdx, String constantSymbol) {
+        final long time_start = System.nanoTime();
         boundFreeVar2ConstantUpdateCache(predIdx, argIdx, constantSymbol, false);
         boundFreeVar2ConstantUpdateCache(predIdx, argIdx, constantSymbol, true);
+        final long time_done = System.nanoTime();
+        monitor.boundConstCostInNano += time_start - time_done;
     }
 
     /**
