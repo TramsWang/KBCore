@@ -62,8 +62,8 @@ public class TestCachedModel {
         try {
             PrintStream ps_out = new PrintStream(new FileOutputStream(stdout_path));
             PrintStream ps_err = new PrintStream(new FileOutputStream(stderr_path));
-//            System.setOut(ps_out);
-//            System.setErr(ps_err);
+            System.setOut(ps_out);
+            System.setErr(ps_err);
             SincWithCachedRule sinc = new SincWithCachedRule(
                     config, dataset.getPath(), dump_path
             );

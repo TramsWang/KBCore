@@ -903,4 +903,9 @@ public class ForwardCachedRule extends Rule {
             }
         }
     }
+
+    public void releaseCache() {
+        groundings.clear();
+        groundingsBody.clear();
+    }
 }
