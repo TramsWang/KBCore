@@ -259,11 +259,6 @@ public abstract class SInC {
 
     abstract protected UpdateResult updateKb(Rule rule);
 
-    /**
-     * 释放和找到的rule相关的资源，减少内存占用
-     */
-    protected void releaseRuleResources(Rule rule) {}
-
     protected void updateGraph(List<Predicate[]> groundings) {
         for (Predicate[] grounding: groundings) {
             final Predicate head_pred = grounding[Rule.HEAD_PRED_IDX];
@@ -427,8 +422,6 @@ public abstract class SInC {
                 } else {
                     target_head_functors.remove(last_idx);
                 }
-
-                releaseRuleResources(rule);
             } while (!target_head_functors.isEmpty());
             performanceMonitor.hypothesisRuleNumber = hypothesis.size();
             performanceMonitor.counterExampleSize = counterExamples.size();

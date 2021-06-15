@@ -90,14 +90,6 @@ public class SincWithCachedRule extends SInC {
     }
 
     @Override
-    protected void releaseRuleResources(Rule rule) {
-        if (null != rule) {
-            ForwardCachedRule fr = (ForwardCachedRule) rule;
-            fr.releaseCache();
-        }
-    }
-
-    @Override
     protected Set<Predicate> getOriginalKb() {
         return kb.getOriginalKB();
     }
