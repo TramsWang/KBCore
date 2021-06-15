@@ -72,7 +72,7 @@ public class ForwardCachedRule extends Rule {
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, false);
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, true);
         final long time_done = System.nanoTime();
-        monitor.boundExistVarCostInNano += time_start - time_done;
+        monitor.boundExistVarCostInNano += time_done - time_start;
     }
 
     /**
@@ -182,7 +182,7 @@ public class ForwardCachedRule extends Rule {
         boundFreeVar2ExistingVarUpdateCache(newPredicate, argIdx, varId, false);
         boundFreeVar2ExistingVarUpdateCache(newPredicate, argIdx, varId, true);
         final long time_done = System.nanoTime();
-        monitor.boundExistVarInNewPredCostInNano += time_start - time_done;
+        monitor.boundExistVarInNewPredCostInNano += time_done - time_start;
     }
 
     /**
@@ -267,7 +267,7 @@ public class ForwardCachedRule extends Rule {
         boundFreeVars2NewVarUpdateCache(predIdx1, argIdx1, predIdx2, argIdx2, false);
         boundFreeVars2NewVarUpdateCache(predIdx1, argIdx1, predIdx2, argIdx2, true);
         final long time_done = System.nanoTime();
-        monitor.boundNewVarCostInNano += time_start - time_done;
+        monitor.boundNewVarCostInNano += time_done - time_start;
     }
 
     /**
@@ -450,7 +450,7 @@ public class ForwardCachedRule extends Rule {
         boundFreeVars2NewVarUpdateCache(newPredicate, argIdx1, predIdx2, argIdx2, false);
         boundFreeVars2NewVarUpdateCache(newPredicate, argIdx1, predIdx2, argIdx2, true);
         final long time_done = System.nanoTime();
-        monitor.boundNewVarInNewPredCostInNano += time_start - time_done;
+        monitor.boundNewVarInNewPredCostInNano += time_done - time_start;
     }
 
     /**
@@ -564,7 +564,7 @@ public class ForwardCachedRule extends Rule {
         boundFreeVar2ConstantUpdateCache(predIdx, argIdx, constantSymbol, false);
         boundFreeVar2ConstantUpdateCache(predIdx, argIdx, constantSymbol, true);
         final long time_done = System.nanoTime();
-        monitor.boundConstCostInNano += time_start - time_done;
+        monitor.boundConstCostInNano += time_done - time_start;
     }
 
     /**

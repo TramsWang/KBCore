@@ -466,7 +466,7 @@ public abstract class SInC {
                 /* Todo: 图结构上传Neo4j */
                 System.out.println("[DEBUG] Upload Graph to Neo4J...");
             }
-        } catch (Exception e) {
+        } catch (Exception | OutOfMemoryError e) {
             e.printStackTrace();
             System.err.flush();
 
