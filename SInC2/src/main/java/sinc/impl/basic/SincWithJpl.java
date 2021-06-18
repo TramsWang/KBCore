@@ -59,13 +59,14 @@ public class SincWithJpl extends SInC {
             return new KbStatistics(
                     kb.totalFacts(),
                     kb.functor2ArityMap.size(),
+                    kb.constants.size(),
                     kb.getActualConstantSubstitutions(),
                     kb.getTotalConstantSubstitutions()
             );
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new KbStatistics(-1, -1, -1, -1);
+        return new KbStatistics(-1, -1, -1, -1, -1);
     }
 
     @Override

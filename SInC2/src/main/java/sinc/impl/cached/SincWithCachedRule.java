@@ -54,13 +54,14 @@ public class SincWithCachedRule extends SInC {
             return new KbStatistics(
                     kb.totalFacts(),
                     kb.functor2ArityMap.size(),
+                    kb.totalConstants(),
                     kb.getActualConstantSubstitutions(),
                     kb.getTotalConstantSubstitutions()
             );
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new KbStatistics(-1, -1, -1, -1);
+        return new KbStatistics(-1, -1, -1, -1, -1);
     }
 
     @Override

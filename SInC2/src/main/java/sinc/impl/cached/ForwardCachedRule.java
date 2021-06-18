@@ -621,6 +621,9 @@ public class ForwardCachedRule extends Rule {
 
     @Override
     protected Eval calculateEval() {
+        /* 先记录当前的cache信息 */
+        monitor.cacheStats.add(new CachedQueryMonitor.CacheStat(groundings.size(), groundingsBody.size()));
+
         /* 统计head中的变量信息 */
         final Set<Integer> head_vars = new HashSet<>();
         int head_fv_cnt = 0;

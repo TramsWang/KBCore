@@ -392,6 +392,7 @@ public abstract class SInC {
             KbStatistics kb_stat = loadKb();
             performanceMonitor.kbSize = kb_stat.facts;
             performanceMonitor.kbFunctors = kb_stat.functors;
+            performanceMonitor.kbConstants = kb_stat.constants;
             performanceMonitor.totalConstantSubstitutions = kb_stat.totalConstantSubstitutions;
             performanceMonitor.actualConstantSubstitutions = kb_stat.actualConstantSubstitutions;
             final long time_kb_loaded = System.currentTimeMillis();

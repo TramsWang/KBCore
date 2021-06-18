@@ -27,6 +27,7 @@ public class PerformanceMonitor {
 
     /* Mining Statics Monitor */
     public int kbFunctors = 0;
+    public int kbConstants = 0;
     public int kbSize = 0;
     public int hypothesisRuleNumber = 0;
     public int hypothesisSize = 0;
@@ -58,12 +59,13 @@ public class PerformanceMonitor {
 
         System.out.println("--- Statistics ---");
         System.out.printf(
-                "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
-                "#F", "|B|", "#H", "|H|", "|N|", "|A|", "|N/FVS|", "#SCC", "|SCC|", "|FVS|", "Comp(%)"
+                "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
+                "#F", "|C|", "|B|", "#H", "|H|", "|N|", "|A|", "|N/FVS|", "#SCC", "|SCC|", "|FVS|", "Comp(%)"
         );
         System.out.printf(
-                "  %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10.2f\n\n",
+                "  %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10.2f\n\n",
                 kbFunctors,
+                kbConstants,
                 kbSize,
                 hypothesisRuleNumber,
                 hypothesisSize,
@@ -78,6 +80,7 @@ public class PerformanceMonitor {
 
         System.out.println("--- Other Statistics ---");
         int executed_evaluations = 0;
+        int max_branches = 0;
         int[] rule_size_arr = new int[branchProgress.size()];
         int[] ext_num_arr = new int[branchProgress.size()];
         int[] org_num_arr = new int[branchProgress.size()];
@@ -86,7 +89,9 @@ public class PerformanceMonitor {
             rule_size_arr[i] = branches.ruleSize;
             ext_num_arr[i] = branches.extNum;
             org_num_arr[i] = branches.orgNum;
-            executed_evaluations += branches.extNum + branches.orgNum;
+            final int cur_branches = branches.extNum + branches.orgNum;
+            executed_evaluations += cur_branches;
+            max_branches = Math.max(cur_branches, max_branches);
         }
         System.out.printf(
                 "Cache Hits: %.2f%%(%d/%d)\n",
@@ -107,6 +112,7 @@ public class PerformanceMonitor {
                 totalConstantSubstitutions
         );
         System.out.println("Branch Progress:");
+        System.out.printf("- Max Branches: %d\n", max_branches);
         System.out.print("- Rule Sizes: ");
         System.out.println(Arrays.toString(rule_size_arr));
         System.out.print("- Extensions: ");
