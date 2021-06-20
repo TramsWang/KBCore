@@ -9,11 +9,16 @@ public class ForwardCachedRule extends Rule {
     private static class PredicateCache {
         public final Predicate predicate;
         public Set<Predicate> inclusion;  /* 对这个Set的操作仅限于读取以及替换，不要向其中添加或删除元素，
-                                             这样可以做到copy on write */
+                                             这样可以做到copy on write */ // Todo: 这里可以改为map，按arg值索引
 
         public PredicateCache(Predicate predicate) {
             this.predicate = predicate;
             this.inclusion = new HashSet<>();
+        }
+
+        public PredicateCache(Predicate predicate, Set<Predicate> inclusion) {
+            this.predicate = predicate;
+            this.inclusion = inclusion;
         }
 
         public PredicateCache(PredicateCache another) {
@@ -21,9 +26,24 @@ public class ForwardCachedRule extends Rule {
             this.inclusion = another.inclusion;  // copy on write
         }
     }
+
+    /* Body FV 位置信息 */
+    private static class BodyFvPos {
+        final int bodyPredIdx;
+        final int bodyArgIdx;
+        final int headArgIdx;
+
+        public BodyFvPos(int bodyPredIdx, int bodyArgIdx, int headArgIdx) {
+            this.bodyPredIdx = bodyPredIdx;
+            this.bodyArgIdx = bodyArgIdx;
+            this.headArgIdx = headArgIdx;
+        }
+    }
+
     private final MemKB kb;
     private final List<List<PredicateCache>> groundings = new LinkedList<>();
     private final List<List<PredicateCache>> groundingsBody = new LinkedList<>();
+    private final Map<Integer, BodyFvPos> bodyFreeVars;  // 排除head时，在body中变成FV的BV及其位置
 
     protected static final CachedQueryMonitor monitor = new CachedQueryMonitor();
 
@@ -42,6 +62,8 @@ public class ForwardCachedRule extends Rule {
         grounding_body.add(null);  // 保持两种cache的index一致
         groundingsBody.add(grounding_body);
 
+        bodyFreeVars = new HashMap<>();
+
         this.eval = calculateEval();
     }
 
@@ -54,6 +76,7 @@ public class ForwardCachedRule extends Rule {
         for (final List<PredicateCache> grounding_body: another.groundingsBody) {
             this.groundingsBody.add(dupGrounding(grounding_body, true));
         }
+        this.bodyFreeVars = new HashMap<>(another.bodyFreeVars);
     }
 
     @Override
@@ -97,79 +120,60 @@ public class ForwardCachedRule extends Rule {
             grounding_list = groundings;
         }
 
-        boolean found = false;
-        final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
-        for (int pred_idx = pred_idx_start; pred_idx < structure.size() && !found; pred_idx++) {
-            final Predicate predicate = structure.get(pred_idx);
+        final BodyFvPos arg_pos = bodyFreeVars.remove(varId);
+        if (bodyOnly && null != arg_pos) {
+            /* 对应一个body FV，直接与之匹配 */
+            boundFreeVars2NewVarUpdateCache(arg_pos.bodyPredIdx, arg_pos.bodyArgIdx, predIdx, argIdx, true);
+        } else {
+            /* 新绑定的BV不对应body FV，需要遍历找到其他的出现 */
+            boolean found = false;
+            final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
+            for (int pred_idx = pred_idx_start; pred_idx < structure.size() && !found; pred_idx++) {
+                final Predicate predicate = structure.get(pred_idx);
 
-            /* 找到一个predicate对应当前BV的一个arg的位置 */
-            for (int arg_idx = 0; arg_idx < predicate.arity(); arg_idx++) {
-                final Argument argument = predicate.args[arg_idx];
-                if (null != argument && argument.isVar && varId == argument.id &&
-                        (pred_idx != predIdx || arg_idx != argIdx)) {  // 不要和刚设置的变量比较
-                    found = true;
+                /* 找到一个predicate对应当前BV的一个arg的位置 */
+                for (int arg_idx = 0; arg_idx < predicate.arity(); arg_idx++) {
+                    final Argument argument = predicate.args[arg_idx];
+                    if (null != argument && argument.isVar && varId == argument.id &&
+                            (pred_idx != predIdx || arg_idx != argIdx)) {  // 不要和刚设置的变量比较
+                        found = true;
 
-                    /* 根据当前pred和新绑定的参数列过滤grounding */
-                    while (grounding_itr.hasNext()) {
-                        final List<PredicateCache> grounding = grounding_itr.next();
-                        final PredicateCache compared_pred_cache = grounding.get(pred_idx);
-                        final Argument compared_argument = compared_pred_cache.predicate.args[arg_idx];
-                        final PredicateCache target_pred_cache = grounding.get(predIdx);
-                        final Set<Predicate> filtered_predicates = new HashSet<>();
-                        for (Predicate fv_pred: target_pred_cache.inclusion) {
-                            final Argument fv_arg = fv_pred.args[argIdx];
-                            if (compared_argument.name.equals(fv_arg.name)) {
-                                filtered_predicates.add(fv_pred);
+                        /* 根据当前pred和新绑定的参数列过滤grounding */
+                        while (grounding_itr.hasNext()) {
+                            final List<PredicateCache> grounding = grounding_itr.next();
+                            final PredicateCache compared_pred_cache = grounding.get(pred_idx);
+                            final Argument compared_argument = compared_pred_cache.predicate.args[arg_idx];
+                            final PredicateCache target_pred_cache = grounding.get(predIdx);
+                            final Set<Predicate> filtered_predicates = new HashSet<>();
+                            for (Predicate fv_pred: target_pred_cache.inclusion) {
+                                final Argument fv_arg = fv_pred.args[argIdx];
+                                if (compared_argument.name.equals(fv_arg.name)) {
+                                    filtered_predicates.add(fv_pred);
+                                }
+                            }
+
+                            if (filtered_predicates.isEmpty()) {
+                                /* 如果过滤之后FV集合为空，那么说明当前的grounding不能用 */
+                                grounding_itr.remove();
+                            } else {
+                                /* 如果当前grounding仍然满足要求，则更新对应参数 */
+                                target_pred_cache.predicate.args[argIdx] = compared_argument;
+                                target_pred_cache.inclusion = filtered_predicates;  // copy on write
                             }
                         }
-
-                        if (filtered_predicates.isEmpty()) {
-                            /* 如果过滤之后FV集合为空，那么说明当前的grounding不能用 */
-                            grounding_itr.remove();
-                        } else {
-                            /* 如果当前grounding仍然满足要求，则更新对应参数 */
-                            target_pred_cache.predicate.args[argIdx] = compared_argument;
-                            target_pred_cache.inclusion = filtered_predicates;  // copy on write
-                        }
+                        break;
                     }
-                    break;
                 }
             }
-        }
 
-        if (bodyOnly && !found) {
-            /* 如果body中没有找到其他相同的BV，那么目标参数对应的列应该按照所有值展开inclusion并设置对应的值 */
-            while (grounding_itr.hasNext()) {
-                final List<PredicateCache> grounding = grounding_itr.next();
-                final PredicateCache target_pred_cache = grounding.get(predIdx);
-
-                /* 按目标列的值划分inclusion */
-                final Map<String, Set<Predicate>> inclusion_map = new HashMap<>();
-                for (Predicate predicate: target_pred_cache.inclusion) {
-                    inclusion_map.compute(predicate.args[argIdx].name, (constant, set) -> {
-                        if (null == set) {
-                            set = new HashSet<>();
-                        }
-                        set.add(predicate);
-                        return set;
-                    });
-                }
-
-                /* 展开grounding */
-                if (1 == inclusion_map.size()) {
-                    /* 目标参数处只有一个值，直接修改grounding中对应参数即可 */
-                    target_pred_cache.predicate.args[argIdx] = new Constant(
-                            CONSTANT_ARG_ID, inclusion_map.keySet().iterator().next()
-                    );
-                } else {
-                    /* 用多个grounding替代原有grounding */
-                    grounding_itr.remove();
-                    for (Map.Entry<String, Set<Predicate>> entry: inclusion_map.entrySet()) {
-                        final List<PredicateCache> new_grounding = dupGrounding(grounding, true);
-                        final PredicateCache new_target_pred_cache = new_grounding.get(predIdx);
-                        new_target_pred_cache.predicate.args[argIdx] = new Constant(CONSTANT_ARG_ID, entry.getKey());
-                        new_target_pred_cache.inclusion = entry.getValue();
-                        grounding_itr.add(new_grounding);
+            if (bodyOnly && !found) {
+                /* 如果body中没有找到其他相同的BV，则记录一个Body FV */
+                final Predicate head_pred = structure.get(HEAD_PRED_IDX);
+                for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
+                    final Argument argument = head_pred.args[arg_idx];
+                    if (null != argument && argument.isVar && varId == argument.id) {
+                        bodyFreeVars.put(varId, new BodyFvPos(predIdx, argIdx, arg_idx));
+                        break;
                     }
                 }
             }
@@ -204,58 +208,66 @@ public class ForwardCachedRule extends Rule {
             grounding_list = groundings;
         }
 
-//        final Predicate target_predicate = structure.get(structure.size() - 1);
-        final Map<String, Set<Predicate>> arg_indices_map = kb.getIndices(newPredicate.functor, argIdx);
-        boolean found = false;
-        final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
-        for (int pred_idx = pred_idx_start; pred_idx < structure.size() - 1 && !found; pred_idx++) {  // 不要和刚设置的变量比较
-            final Predicate predicate = structure.get(pred_idx);
+        final BodyFvPos arg_pos = bodyFreeVars.remove(varId);
+        if (bodyOnly && null != arg_pos) {
+            /* 对应一个body FV，直接与之匹配 */
+            boundFreeVars2NewVarUpdateCache(newPredicate, argIdx, arg_pos.bodyPredIdx, arg_pos.bodyArgIdx, true);
+        } else {
+            final Map<String, Set<Predicate>> arg_indices_map = kb.getIndices(newPredicate.functor, argIdx);
+            boolean found = false;
+            final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
+            for (int pred_idx = pred_idx_start; pred_idx < structure.size() - 1 && !found; pred_idx++) {  // 不要和刚设置的变量比较
+                final Predicate predicate = structure.get(pred_idx);
 
-            /* 找到一个predicate对应当前BV的一个arg的位置 */
-            for (int arg_idx = 0; arg_idx < predicate.arity(); arg_idx++) {
-                final Argument argument = predicate.args[arg_idx];
-                if (null != argument && argument.isVar && varId == argument.id) {
-                    found = true;
+                /* 找到一个predicate对应当前BV的一个arg的位置 */
+                for (int arg_idx = 0; arg_idx < predicate.arity(); arg_idx++) {
+                    final Argument argument = predicate.args[arg_idx];
+                    if (null != argument && argument.isVar && varId == argument.id) {
+                        found = true;
 
-                    /* 根据当前pred过滤grounding */
-                    while (grounding_itr.hasNext()) {
-                        final List<PredicateCache> grounding = grounding_itr.next();
-                        final PredicateCache compared_pred_cache = grounding.get(pred_idx);
-                        final Argument compared_argument = compared_pred_cache.predicate.args[arg_idx];
-                        final Set<Predicate> inclusion = arg_indices_map.get(compared_argument.name);
+                        /* 根据当前pred过滤grounding */
+                        while (grounding_itr.hasNext()) {
+                            final List<PredicateCache> grounding = grounding_itr.next();
+                            final PredicateCache compared_pred_cache = grounding.get(pred_idx);
+                            final Argument compared_argument = compared_pred_cache.predicate.args[arg_idx];
+                            final Set<Predicate> inclusion = arg_indices_map.get(compared_argument.name);
 
-                        if (null == inclusion) {
-                            /* 对应变量在新参数中没有，删除grounding */
-                            grounding_itr.remove();
-                        } else {
-                            /* 将对应的值添加在grounding末尾 */
-                            final PredicateCache new_pred_cache = new PredicateCache(
-                                    new Predicate(newPredicate.functor, newPredicate.arity())
-                            );
-                            new_pred_cache.predicate.args[argIdx] = compared_argument;
-                            new_pred_cache.inclusion = inclusion;  // copy on write
-                            grounding.add(new_pred_cache);
+                            if (null == inclusion) {
+                                /* 对应变量在新参数中没有，删除grounding */
+                                grounding_itr.remove();
+                            } else {
+                                /* 将对应的值添加在grounding末尾 */
+                                final PredicateCache new_pred_cache = new PredicateCache(
+                                        new Predicate(newPredicate.functor, newPredicate.arity())
+                                );
+                                new_pred_cache.predicate.args[argIdx] = compared_argument;
+                                new_pred_cache.inclusion = inclusion;  // copy on write
+                                grounding.add(new_pred_cache);
+                            }
                         }
+                        break;
                     }
-                    break;
                 }
             }
-        }
 
-        if (bodyOnly && !found) {
-            /* 如果在body中没有找到其他相同的BV，那么就根据所有值展开grounding */
-            while (grounding_itr.hasNext()) {
-                final List<PredicateCache> grounding = grounding_itr.next();
-                grounding_itr.remove();
-                for (Map.Entry<String, Set<Predicate>> entry: arg_indices_map.entrySet()) {
-                    final List<PredicateCache> new_grounding = dupGrounding(grounding, true);
-                    final PredicateCache new_pred_cache = new PredicateCache(
-                            new Predicate(newPredicate.functor, newPredicate.arity())
-                    );
-                    new_pred_cache.predicate.args[argIdx] = new Constant(CONSTANT_ARG_ID, entry.getKey());
-                    new_pred_cache.inclusion.addAll(entry.getValue());
-                    new_grounding.add(new_pred_cache);
-                    grounding_itr.add(new_grounding);
+            if (bodyOnly && !found) {
+                /* 如果body中没有找到其他相同的BV，则记录一个Body FV */
+                final Predicate head_pred = structure.get(HEAD_PRED_IDX);
+                for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
+                    final Argument argument = head_pred.args[arg_idx];
+                    if (null != argument && argument.isVar && varId == argument.id) {
+                        bodyFreeVars.put(varId, new BodyFvPos(structure.size() - 1, argIdx, arg_idx));
+                        break;
+                    }
+                }
+
+                /* Cache中增加新的谓词 */
+                final Set<Predicate> new_inclusion = kb.getAllFacts(newPredicate.functor);
+                for (List<PredicateCache> grounding: grounding_list) {
+                    grounding.add(new PredicateCache(
+                            new Predicate(newPredicate.functor, newPredicate.arity()),
+                            new_inclusion
+                    ));
                 }
             }
         }
@@ -399,47 +411,20 @@ public class ForwardCachedRule extends Rule {
                 }
             } else {
                 /* bodyOnly且只有一个predIdx在body中 */
-                /* 展开 */
+                /* 记录一个Body FV */
                 final int pred_idx;
                 final int arg_idx;
-                if (HEAD_PRED_IDX == predIdx1) {
-                    pred_idx = predIdx2;
-                    arg_idx = argIdx2;
-                } else {
+                final int head_arg_idx;
+                if (HEAD_PRED_IDX != predIdx1) {
                     pred_idx = predIdx1;
                     arg_idx = argIdx1;
+                    head_arg_idx = argIdx2;
+                } else {
+                    pred_idx = predIdx2;
+                    arg_idx = argIdx2;
+                    head_arg_idx = argIdx1;
                 }
-                while (grounding_itr.hasNext()) {
-                    final List<PredicateCache> grounding = grounding_itr.next();
-                    final PredicateCache target_pred_cache = grounding.get(pred_idx);
-
-                    final Map<String, Set<Predicate>> inclusion_map = new HashMap<>();
-                    for (Predicate predicate: target_pred_cache.inclusion) {
-                        final Argument argument = predicate.args[arg_idx];
-                        inclusion_map.compute(argument.name, (constant, set) -> {
-                            if (null == set) {
-                                set = new HashSet<>();
-                            }
-                            set.add(predicate);
-                            return set;
-                        });
-                    }
-
-                    if (1 == inclusion_map.size()) {
-                        target_pred_cache.predicate.args[arg_idx] = new Constant(
-                                CONSTANT_ARG_ID, inclusion_map.keySet().iterator().next()
-                        );
-                    } else {
-                        grounding_itr.remove();
-                        for (Map.Entry<String, Set<Predicate>> entry : inclusion_map.entrySet()) {
-                            final List<PredicateCache> new_grounding = dupGrounding(grounding, true);
-                            final PredicateCache new_target_pred_cache = new_grounding.get(pred_idx);
-                            new_target_pred_cache.predicate.args[arg_idx] = new Constant(CONSTANT_ARG_ID, entry.getKey());
-                            new_target_pred_cache.inclusion = entry.getValue();
-                            grounding_itr.add(new_grounding);
-                        }
-                    }
-                }
+                bodyFreeVars.put(boundedVars.size() - 1, new BodyFvPos(pred_idx, arg_idx, head_arg_idx));
             }
         }
     }
@@ -474,20 +459,16 @@ public class ForwardCachedRule extends Rule {
         final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
         final Map<String, Set<Predicate>> inclusion_map1 = kb.getIndices(newPredicate.functor, argIdx1);
         if (bodyOnly && HEAD_PRED_IDX == predIdx2) {
-            /* 按值直接扩展 */
-            while (grounding_itr.hasNext()) {
-                final List<PredicateCache> grounding = grounding_itr.next();
-                grounding_itr.remove();
-                for (Map.Entry<String, Set<Predicate>> entry: inclusion_map1.entrySet()) {
-                    final List<PredicateCache> new_grounding = dupGrounding(grounding, true);
-                    final PredicateCache new_pred_cache = new PredicateCache(
-                            new Predicate(newPredicate.functor, newPredicate.arity())
-                    );
-                    new_pred_cache.predicate.args[argIdx1] = new Constant(CONSTANT_ARG_ID, entry.getKey());
-                    new_pred_cache.inclusion = entry.getValue();  // copy on write
-                    new_grounding.add(new_pred_cache);
-                    grounding_itr.add(new_grounding);
-                }
+            /* body中没有相同的BV，记录一个Body FV */
+            bodyFreeVars.put(boundedVars.size() - 1, new BodyFvPos(structure.size() - 1, argIdx1, argIdx2));
+
+            /* Cache中增加新的谓词 */
+            final Set<Predicate> new_inclusion = kb.getAllFacts(newPredicate.functor);
+            for (List<PredicateCache> grounding: grounding_list) {
+                grounding.add(new PredicateCache(
+                        new Predicate(newPredicate.functor, newPredicate.arity()),
+                        new_inclusion
+                ));
             }
         } else {
             /* 两张表一起过滤 */
@@ -625,7 +606,7 @@ public class ForwardCachedRule extends Rule {
         monitor.cacheStats.add(new CachedQueryMonitor.CacheStat(groundings.size(), groundingsBody.size()));
 
         /* 统计head中的变量信息 */
-        final Set<Integer> head_vars = new HashSet<>();
+        final Set<Integer> head_vars = new HashSet<>();  // 统计Head only BV
         int head_fv_cnt = 0;
         final Predicate head_pred = getHead();
         for (Argument argument: head_pred.args) {
@@ -640,12 +621,12 @@ public class ForwardCachedRule extends Rule {
 
         /* 在body中找出所有generative var 第一次出现的变量位置 */
         class PredArgPos {
-            final int predIdx;
-            final int argIdx;
+            final int bodyPredIdx;
+            final int bodyArgIdx;
 
-            public PredArgPos(int predIdx, int argIdx) {
-                this.predIdx = predIdx;
-                this.argIdx = argIdx;
+            public PredArgPos(int bodyPredIdx, int bodyArgIdx) {
+                this.bodyPredIdx = bodyPredIdx;
+                this.bodyArgIdx = bodyArgIdx;
             }
         }
         final List<PredArgPos> body_gv_pos = new ArrayList<>();
@@ -653,24 +634,62 @@ public class ForwardCachedRule extends Rule {
             final Predicate body_pred = structure.get(pred_idx);
             for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
                 final Argument argument = body_pred.args[arg_idx];
-                if (null != argument && argument.isVar && head_vars.remove(argument.id)) {
+                if (null != argument && argument.isVar &&
+                        head_vars.remove(argument.id) &&
+                        !bodyFreeVars.containsKey(argument.id)  // Body FV仍然当做Head only BV处理
+                ) {
                     body_gv_pos.add(new PredArgPos(pred_idx, arg_idx));
                 }
             }
         }
 
         /* 计算all entail的数量 */
-        final Set<ArrayList<String>> body_bv_bindings = new HashSet<>();
-        for (final List<PredicateCache> grounding_body: groundingsBody) {
-            final ArrayList<String> binding = new ArrayList<>(body_gv_pos.size());
-            for (final PredArgPos pos: body_gv_pos) {
-                final Predicate body_pred = grounding_body.get(pos.predIdx).predicate;
-                final Argument argument = body_pred.args[pos.argIdx];
-                binding.add(argument.name);
+        int body_gv_fv_bindings_cnt = 0;
+        if (!bodyFreeVars.isEmpty()) {
+            /* 统计Body FV与GV一起组合的数量 */  // Todo: 这里对List的比较可以通过自定义一个Array的Wrapper实现，开销更低
+            final Map<ArrayList<String>, Set<ArrayList<String>>> body_gv_bindings_2_fv_bindings = new HashMap<>();
+            for (final List<PredicateCache> grounding_body: groundingsBody) {
+                final ArrayList<String> binding = new ArrayList<>(body_gv_pos.size());
+                for (final PredArgPos pos: body_gv_pos) {
+                    final Predicate body_pred = grounding_body.get(pos.bodyPredIdx).predicate;
+                    final Argument argument = body_pred.args[pos.bodyArgIdx];
+                    binding.add(argument.name);
+                }
+
+                /* Body FV 的取值范围不是全部constant */
+                final Set<String>[] fv_values = new Set[bodyFreeVars.size()];
+                for (int i = 0; i < fv_values.length; i++) {
+                    final BodyFvPos fv_pos = bodyFreeVars.get(i);
+                    final Set<String> values = new HashSet<>();
+                    final PredicateCache pred_cache = grounding_body.get(fv_pos.bodyPredIdx);
+                    for (Predicate included_pred : pred_cache.inclusion) {
+                        values.add(included_pred.args[fv_pos.bodyArgIdx].name);
+                    }
+                    fv_values[i] = values;
+                }
+                final Set<ArrayList<String>> fv_bindings = body_gv_bindings_2_fv_bindings.computeIfAbsent(
+                        binding, k -> new HashSet<>()
+                );
+                addBodyFvBindings(fv_bindings, fv_values);
             }
-            body_bv_bindings.add(binding);
+            for (Set<ArrayList<String>> fv_bindings: body_gv_bindings_2_fv_bindings.values()) {
+                body_gv_fv_bindings_cnt += fv_bindings.size();
+            }
+        } else {
+            /* 只需要统计Body GV的binding组合 */
+            final Set<ArrayList<String>> body_gv_bindings = new HashSet<>();
+            for (final List<PredicateCache> grounding_body: groundingsBody) {
+                final ArrayList<String> binding = new ArrayList<>(body_gv_pos.size());
+                for (final PredArgPos pos: body_gv_pos) {
+                    final Predicate body_pred = grounding_body.get(pos.bodyPredIdx).predicate;
+                    final Argument argument = body_pred.args[pos.bodyArgIdx];
+                    binding.add(argument.name);
+                }
+                body_gv_bindings.add(binding);
+            }
+            body_gv_fv_bindings_cnt = body_gv_bindings.size();
         }
-        final double all_entails = body_bv_bindings.size() * Math.pow(
+        final double all_entails = body_gv_fv_bindings_cnt * Math.pow(
                 kb.totalConstants(), head_fv_cnt + head_vars.size()
         );
 
@@ -734,14 +753,12 @@ public class ForwardCachedRule extends Rule {
 
         /* 统计head中的变量信息 */
         /* 如果是FV，则创建具体变量，方便替换 */
-        final Map<Integer, List<Integer>> head_var_2_loc_map = new HashMap<>();
+        final Map<Integer, List<Integer>> head_var_2_loc_map = new HashMap<>();  // Head Only BV Locations
         int fv_id = boundedVars.size();
         final Predicate head_pred = new Predicate(getHead());
         for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
             final Argument argument = head_pred.args[arg_idx];
             if (null == argument) {
-//                final Variable fv = new Variable(fv_id);
-//                head_pred.args[arg_idx] = fv;
                 head_var_2_loc_map.put(fv_id, new ArrayList<>(Collections.singleton(arg_idx)));
                 fv_id++;
             } else {
@@ -766,7 +783,8 @@ public class ForwardCachedRule extends Rule {
                 final Argument argument = body_pred.args[arg_idx];
                 if (null != argument && argument.isVar) {
                     List<Integer> head_var_locs = head_var_2_loc_map.remove(argument.id);
-                    if (null != head_var_locs) {
+                    if (!bodyFreeVars.containsKey(argument.id) && // Body FV 单独扩展，不算Head FV 也不算 Body GV
+                            null != head_var_locs) {
                         body_gv_pos.add(new GVBindingInfo(
                                 pred_idx, arg_idx, head_var_locs.toArray(new Integer[0])
                         ));
@@ -807,7 +825,33 @@ public class ForwardCachedRule extends Rule {
                         head_template.args[loc] = argument;
                     }
                 }
-                head_templates.add(head_template);
+
+                if (!bodyFreeVars.isEmpty()) {
+                    /* 加上Body Fv */
+                    final Set<String>[] fv_values = new Set[bodyFreeVars.size()];
+                    for (int i = 0; i < fv_values.length; i++) {
+                        final BodyFvPos fv_pos = bodyFreeVars.get(i);
+                        final Set<String> values = new HashSet<>();
+                        final PredicateCache pred_cache = grounding_body.get(fv_pos.bodyPredIdx);
+                        for (Predicate included_pred : pred_cache.inclusion) {
+                            values.add(included_pred.args[fv_pos.bodyArgIdx].name);
+                        }
+                        fv_values[i] = values;
+                    }
+                    final Set<ArrayList<String>> fv_bindings = new HashSet<>();
+                    addBodyFvBindings(fv_bindings, fv_values);
+                    for (ArrayList<String> fv_binding: fv_bindings) {
+                        for (int i = 0; i < fv_values.length; i++) {
+                            final BodyFvPos fv_pos = bodyFreeVars.get(i);
+                            head_template.args[fv_pos.headArgIdx] = new Constant(
+                                    CONSTANT_ARG_ID, fv_binding.get(i)
+                            );
+                        }
+                        head_templates.add(new Predicate(head_template));
+                    }
+                } else {
+                    head_templates.add(head_template);
+                }
             }
 
             /* 遍历head template 找反例 */
@@ -907,8 +951,26 @@ public class ForwardCachedRule extends Rule {
         }
     }
 
-    public void releaseCache() {
-        groundings.clear();
-        groundingsBody.clear();
+    private void addBodyFvBindings(Set<ArrayList<String>> bindings, Set<String>[] values) {
+        addBodyFvBindingsHandler(bindings, values, new ArrayList<>(values.length), 0);
+    }
+
+    private void addBodyFvBindingsHandler(
+            Set<ArrayList<String>> bindings, Set<String>[] values, List<String> template, int idx
+    ) {
+        final Set<String> value_set = values[idx];
+        if (idx == values.length - 1) {
+            for (String value: value_set) {
+                template.set(idx, value);
+                bindings.add(new ArrayList<>(template));
+            }
+        } else {
+            for (String value: value_set) {
+                template.set(idx, value);
+                addBodyFvBindingsHandler(
+                        bindings, values, template, idx + 1
+                );
+            }
+        }
     }
 }
