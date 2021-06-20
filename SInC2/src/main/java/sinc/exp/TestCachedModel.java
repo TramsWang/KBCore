@@ -2,7 +2,7 @@ package sinc.exp;
 
 import sinc.SincConfig;
 import sinc.common.Eval;
-import sinc.impl.cached.SincWithCachedRule;
+import sinc.impl.cached.spec.SincWithSpecificCache;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -64,7 +64,7 @@ public class TestCachedModel {
             PrintStream ps_err = new PrintStream(new FileOutputStream(stderr_path));
             System.setOut(ps_out);
             System.setErr(ps_err);
-            SincWithCachedRule sinc = new SincWithCachedRule(
+            SincWithSpecificCache sinc = new SincWithSpecificCache(
                     config, dataset.getPath(), dump_path
             );
             sinc.run();

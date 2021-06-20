@@ -1,4 +1,4 @@
-package sinc.impl.cached;
+package sinc.impl.cached.spec;
 
 import org.junit.jupiter.api.Test;
 import sinc.SincConfig;
@@ -11,7 +11,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SincWithCachedRuleTest {
+class SincWithSpecificCacheTest {
 
     static final int CONSTANT_ID = Rule.CONSTANT_ARG_ID;
 
@@ -52,7 +52,7 @@ class SincWithCachedRuleTest {
                     false
             );
 
-            SincWithCachedRule sinc = new SincWithCachedRule(
+            SincWithSpecificCache sinc = new SincWithSpecificCache(
                     config,
                     tmp_bk_file_path,
                     null
@@ -150,7 +150,7 @@ class SincWithCachedRuleTest {
                     false
             );
 
-            SincWithCachedRule sinc = new SincWithCachedRule(
+            SincWithSpecificCache sinc = new SincWithSpecificCache(
                     config,
                     tmp_bk_file_path,
                     null

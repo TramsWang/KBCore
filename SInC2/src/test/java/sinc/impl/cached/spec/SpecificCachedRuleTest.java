@@ -1,14 +1,15 @@
-package sinc.impl.cached;
+package sinc.impl.cached.spec;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import sinc.common.*;
+import sinc.impl.cached.MemKB;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ForwardCachedRuleTest {
+class SpecificCachedRuleTest {
 
     static final String FUNCTOR_FATHER = "father";
     static final String FUNCTOR_PARENT = "parent";
@@ -137,7 +138,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* parent(?, ?) :- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_PARENT, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_PARENT, cache, kb);
         assertTrue(rule.toString().contains("parent(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-"));
         assertEquals(
@@ -255,7 +256,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* parent(?, ?) :- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_PARENT, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_PARENT, cache, kb);
         assertTrue(rule.toString().contains("parent(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-"));
         assertEquals(
@@ -353,7 +354,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* grandParent(?, ?) :- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_GRANDPARENT, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_GRANDPARENT, cache, kb);
         assertTrue(rule.toString().contains("grandParent(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X1):-"));
         assertEquals(
@@ -476,7 +477,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* grandParent(?, ?) :- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_GRANDPARENT, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_GRANDPARENT, cache, kb);
         assertTrue(rule.toString().contains("grandParent(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X1):-"));
         assertEquals(
@@ -585,7 +586,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* grandParent(?, ?) :- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_GRANDPARENT, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_GRANDPARENT, cache, kb);
         assertTrue(rule.toString().contains("grandParent(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X1):-"));
         assertEquals(
@@ -674,7 +675,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* grandParent(?, ?) :- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_GRANDPARENT, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_GRANDPARENT, cache, kb);
         assertTrue(rule.toString().contains("grandParent(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X1):-"));
         assertEquals(
@@ -760,7 +761,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* parent(?, ?) :- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_PARENT, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_PARENT, cache, kb);
         assertTrue(rule.toString().contains("parent(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-"));
         assertEquals(
@@ -799,7 +800,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* father(?, ?):- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_FATHER, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_FATHER, cache, kb);
         assertTrue(rule.toString().contains("father(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-"));
         assertEquals(
@@ -925,7 +926,7 @@ class ForwardCachedRuleTest {
     void testFamilyRule9() {
         final MemKB kb = kbFamily();
         /* #1: father(?, ?):- */
-        final ForwardCachedRule rule1 = new ForwardCachedRule(FUNCTOR_FATHER, new HashSet<>(), kb);
+        final SpecificCachedRule rule1 = new SpecificCachedRule(FUNCTOR_FATHER, new HashSet<>(), kb);
         assertTrue(rule1.toString().contains("father(?,?):-"));
         assertTrue(rule1.toCompleteRuleString().contains("father(X0,X1):-"));
         assertEquals(
@@ -948,7 +949,7 @@ class ForwardCachedRuleTest {
         rule1.updateInKb();
 
         /* #1: father(?, ?):- */
-        final ForwardCachedRule rule2 = new ForwardCachedRule(FUNCTOR_FATHER, new HashSet<>(), kb);
+        final SpecificCachedRule rule2 = new SpecificCachedRule(FUNCTOR_FATHER, new HashSet<>(), kb);
         assertTrue(rule2.toString().contains("father(?,?):-"));
         assertTrue(rule2.toCompleteRuleString().contains("father(X0,X1):-"));
         assertEquals(
@@ -1003,7 +1004,7 @@ class ForwardCachedRuleTest {
     void testCounterExample1() {
         final MemKB kb = kbFamily();
         /* father(?, ?):- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_FATHER, new HashSet<>(), kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_FATHER, new HashSet<>(), kb);
         assertTrue(rule.toString().contains("father(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-"));
         assertEquals(
@@ -1032,7 +1033,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* grandParent(?, ?) :- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_GRANDPARENT, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_GRANDPARENT, cache, kb);
         assertTrue(rule.toString().contains("grandParent(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X1):-"));
         assertEquals(
@@ -1044,7 +1045,7 @@ class ForwardCachedRuleTest {
         assertEquals(1, cache.size());
 
         /* #1: grandParent(X, ?) :- parent(X, ?) */
-        final ForwardCachedRule rule1 = new ForwardCachedRule(rule);
+        final SpecificCachedRule rule1 = new SpecificCachedRule(rule);
         assertTrue(rule1.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
         assertTrue(rule1.toString().contains("grandParent(X0,?):-parent(X0,?)"));
         assertTrue(rule1.toCompleteRuleString().contains("grandParent(X0,X1):-parent(X0,X2)"));
@@ -1116,12 +1117,12 @@ class ForwardCachedRuleTest {
         assertEquals(expected_counter_examples, update_result.counterExamples);
 
         /* #2: grandParent(X, ?) :- parent(X, ?) */
-        final ForwardCachedRule rule2 = new ForwardCachedRule(rule);
+        final SpecificCachedRule rule2 = new SpecificCachedRule(rule);
         assertFalse(rule2.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
         assertEquals(4, cache.size());
 
         /* #3: grandParent(?, X) :- father(?, X) */
-        final ForwardCachedRule rule3 = new ForwardCachedRule(rule);
+        final SpecificCachedRule rule3 = new SpecificCachedRule(rule);
         assertTrue(rule3.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 1));
         assertTrue(rule3.toString().contains("grandParent(?,X0):-father(?,X0)"));
         assertTrue(rule3.toCompleteRuleString().contains("grandParent(X1,X0):-father(X2,X0)"));
@@ -1170,7 +1171,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* #1: parent(?, ?) :- */
-        final ForwardCachedRule rule1 = new ForwardCachedRule(FUNCTOR_PARENT, cache, kb);
+        final SpecificCachedRule rule1 = new SpecificCachedRule(FUNCTOR_PARENT, cache, kb);
         assertTrue(rule1.toString().contains("parent(?,?):-"));
         assertTrue(rule1.toCompleteRuleString().contains("parent(X0,X1):-"));
         assertEquals(
@@ -1194,7 +1195,7 @@ class ForwardCachedRuleTest {
         assertEquals(2, cache.size());
 
         /* #2: parent(f2, d2) :- */
-        final ForwardCachedRule rule2 = new ForwardCachedRule(rule1);
+        final SpecificCachedRule rule2 = new SpecificCachedRule(rule1);
         assertTrue(rule2.boundFreeVar2Constant(0, 1, "d2"));
         assertTrue(rule2.toString().contains("parent(f2,d2):-"));
         assertTrue(rule2.toCompleteRuleString().contains("parent(f2,d2):-"));
@@ -1219,7 +1220,7 @@ class ForwardCachedRuleTest {
         assertTrue(update_result2.counterExamples.isEmpty());
 
         /* #3: parent(f2, X) :- father(?, X) */
-        final ForwardCachedRule rule3 = new ForwardCachedRule(rule1);
+        final SpecificCachedRule rule3 = new SpecificCachedRule(rule1);
         assertTrue(rule3.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 1));
         assertTrue(rule3.toString().contains("parent(f2,X0):-father(?,X0)"));
         assertTrue(rule3.toCompleteRuleString().contains("parent(f2,X0):-father(X1,X0)"));
@@ -1260,12 +1261,12 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* father(?,?):- */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_FATHER, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_FATHER, cache, kb);
         assertTrue(rule.toString().contains("father(?,?):-"));
         assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-"));
 
         /* #1: father(X,?) :- father(?,X) */
-        final ForwardCachedRule rule1 = new ForwardCachedRule(rule);
+        final SpecificCachedRule rule1 = new SpecificCachedRule(rule);
         assertTrue(rule1.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 0));
         assertTrue(rule1.toString().contains("father(X0,?):-father(?,X0)"));
         assertTrue(rule1.toCompleteRuleString().contains("father(X0,X1):-father(X2,X0)"));
@@ -1276,7 +1277,7 @@ class ForwardCachedRuleTest {
         assertTrue(rule1.toCompleteRuleString().contains("father(X0,X1):-father(X1,X0)"));
 
         /* #2: father(X,?) :- father(X,?) [invalid] */
-        final ForwardCachedRule rule2 = new ForwardCachedRule(rule);
+        final SpecificCachedRule rule2 = new SpecificCachedRule(rule);
         assertFalse(rule2.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
     }
 
@@ -1286,7 +1287,7 @@ class ForwardCachedRuleTest {
         final Set<RuleFingerPrint> cache = new HashSet<>();
 
         /* father(X,?) :- father(?,X) */
-        final ForwardCachedRule rule = new ForwardCachedRule(FUNCTOR_FATHER, cache, kb);
+        final SpecificCachedRule rule = new SpecificCachedRule(FUNCTOR_FATHER, cache, kb);
         assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 0));
         assertTrue(rule.toString().contains("father(X0,?):-father(?,X0)"));
         assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-father(X2,X0)"));

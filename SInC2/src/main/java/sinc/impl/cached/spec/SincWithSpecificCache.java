@@ -1,8 +1,9 @@
-package sinc.impl.cached;
+package sinc.impl.cached.spec;
 
 import sinc.SInC;
 import sinc.SincConfig;
 import sinc.common.*;
+import sinc.impl.cached.MemKB;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -11,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class SincWithCachedRule extends SInC {
+public class SincWithSpecificCache extends SInC {
 
     private final MemKB kb = new MemKB();
 
-    public SincWithCachedRule(SincConfig config, String kbPath, String dumpPath) {
+    public SincWithSpecificCache(SincConfig config, String kbPath, String dumpPath) {
         super(
                 new SincConfig(
                         config.threads,
@@ -53,7 +54,7 @@ public class SincWithCachedRule extends SInC {
 
             return new KbStatistics(
                     kb.totalFacts(),
-                    kb.functor2ArityMap.size(),
+                    kb.getFunctor2ArityMap().size(),
                     kb.totalConstants(),
                     kb.getActualConstantSubstitutions(),
                     kb.getTotalConstantSubstitutions()
@@ -71,7 +72,7 @@ public class SincWithCachedRule extends SInC {
 
     @Override
     protected Rule getStartRule(String headFunctor, Set<RuleFingerPrint> cache) {
-        return new ForwardCachedRule(headFunctor, cache, kb);
+        return new SpecificCachedRule(headFunctor, cache, kb);
     }
 
     @Override
@@ -86,7 +87,7 @@ public class SincWithCachedRule extends SInC {
 
     @Override
     protected UpdateResult updateKb(Rule rule) {
-        ForwardCachedRule forward_cached_rule = (ForwardCachedRule) rule;
+        SpecificCachedRule forward_cached_rule = (SpecificCachedRule) rule;
         return forward_cached_rule.updateInKb();
     }
 
@@ -98,6 +99,6 @@ public class SincWithCachedRule extends SInC {
     @Override
     protected void showMonitor() {
         super.showMonitor();
-        ForwardCachedRule.monitor.show();
+        SpecificCachedRule.monitor.show();
     }
 }
