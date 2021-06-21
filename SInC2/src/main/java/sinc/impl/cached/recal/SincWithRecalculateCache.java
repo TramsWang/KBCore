@@ -1,14 +1,16 @@
-package sinc.impl.cached.spec;
+package sinc.impl.cached.recal;
 
 import sinc.SincConfig;
-import sinc.common.*;
+import sinc.common.Rule;
+import sinc.common.RuleFingerPrint;
+import sinc.common.UpdateResult;
 import sinc.impl.cached.CachedSinc;
 
 import java.util.Set;
 
-public class SincWithSpecificCache extends CachedSinc {
+public class SincWithRecalculateCache extends CachedSinc {
 
-    public SincWithSpecificCache(SincConfig config, String kbPath, String dumpPath) {
+    public SincWithRecalculateCache(SincConfig config, String kbPath, String dumpPath) {
         super(
                 new SincConfig(
                         config.threads,
@@ -31,18 +33,18 @@ public class SincWithSpecificCache extends CachedSinc {
 
     @Override
     protected Rule getStartRule(String headFunctor, Set<RuleFingerPrint> cache) {
-        return new SpecificCachedRule(headFunctor, cache, kb);
+        return new RecalculateCachedRule(headFunctor, cache, kb);
     }
 
     @Override
     protected UpdateResult updateKb(Rule rule) {
-        SpecificCachedRule forward_cached_rule = (SpecificCachedRule) rule;
+        RecalculateCachedRule forward_cached_rule = (RecalculateCachedRule) rule;
         return forward_cached_rule.updateInKb();
     }
 
     @Override
     protected void showMonitor() {
         super.showMonitor();
-        SpecificCachedRule.monitor.show();
+        RecalculateCachedRule.monitor.show();
     }
 }

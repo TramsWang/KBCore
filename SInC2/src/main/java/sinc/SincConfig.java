@@ -16,7 +16,7 @@ public class SincConfig {
     public final double minConstantCoverage;
 
     /* Optimization Config */
-    public final boolean ruleCache;  // 如果开启ruleCache，那么searchOrigins被强制设置为false
+    public final boolean ruleCache;  // 如果开启ruleCache，那么searchOrigins被强制设置为false  // Todo: 这里可以把不同的Strategy做成enum
     public final double sampling;  // 0.0 <= sampling < 1.0, 其他值表示不采样
     public final boolean estimation;
     public final boolean kbBlocking;
