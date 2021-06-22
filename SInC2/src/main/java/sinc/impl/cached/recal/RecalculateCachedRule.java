@@ -605,10 +605,8 @@ public class RecalculateCachedRule extends Rule {
 
     @Override
     protected Eval calculateEval() {
-        /* 先记录当前的cache信息 */
-        monitor.cacheStats.add(new CachedQueryMonitor.CacheStat(groundings.size(), groundingsBody.size()));
-
         /* 统计head中的变量信息 */
+        final long time_query_begin = System.nanoTime();
         final Set<Integer> head_vars = new HashSet<>();  // 统计Head only BV
         int head_fv_cnt = 0;
         final Predicate head_pred = getHead();
@@ -645,9 +643,12 @@ public class RecalculateCachedRule extends Rule {
                 }
             }
         }
+        final long time_pre_done = System.nanoTime();
+        monitor.preComputingCostInNano += time_pre_done - time_query_begin;
 
         /* 计算all entail的数量 */
         int body_gv_fv_bindings_cnt = 0;
+        int cartesian_operations = 0;
         if (bodyFreeVars.isEmpty()) {
             /* 只需要统计Body GV的binding组合 */
             final Set<ComparableArray<String>> body_gv_bindings = new HashSet<>();
@@ -710,6 +711,11 @@ public class RecalculateCachedRule extends Rule {
                                 gv_binding, k -> new HashSet<>()
                         );
                 addBodyFvBindings(fv_bindings, fv_within_pred_bindings);
+                int delta_cartesian_operations = 1;
+                for (Set<ComparableArray<String>> fv_within_pred_values: fv_within_pred_bindings) {
+                    delta_cartesian_operations *= fv_within_pred_values.size();
+                }
+                cartesian_operations += delta_cartesian_operations;
             }
             for (Set<ComparableArray<ComparableArray<String>>> fv_bindings: body_gv_bindings_2_fv_bindings.values()) {
                 body_gv_fv_bindings_cnt += fv_bindings.size();
@@ -718,6 +724,8 @@ public class RecalculateCachedRule extends Rule {
         final double all_entails = body_gv_fv_bindings_cnt * Math.pow(
                 kb.totalConstants(), head_fv_cnt + head_vars.size()
         );
+        final long time_all_entail_done = System.nanoTime();
+        monitor.allEntailQueryCostInNano += time_all_entail_done - time_pre_done;
 
         /* 计算new pos entail的数量 */
         final Set<Predicate> newly_proved = new HashSet<>();
@@ -742,6 +750,13 @@ public class RecalculateCachedRule extends Rule {
                 }
             }
         }
+        final long time_pos_entail_done = System.nanoTime();
+        monitor.posEntailQueryCostInNano += time_pos_entail_done - time_all_entail_done;
+
+        /* 先记录当前的cache信息 */
+        monitor.cacheStats.add(new CachedQueryMonitor.CacheStat(
+                groundings.size(), groundingsBody.size(), cartesian_operations
+        ));
 
         /* 用HC剪枝 */
         double head_coverage = ((double) newly_proved.size()) / kb.getAllFacts(head_pred.functor).size();
@@ -779,6 +794,7 @@ public class RecalculateCachedRule extends Rule {
 
         /* 统计head中的变量信息 */
         /* 如果是FV，则创建具体变量，方便替换 */
+        final long time_query_start = System.nanoTime();
         final Map<Integer, List<Integer>> head_var_2_loc_map = new HashMap<>();  // Head Only BV Locations
         int fv_id = boundedVars.size();
         final Predicate head_pred = new Predicate(getHead());
@@ -826,8 +842,11 @@ public class RecalculateCachedRule extends Rule {
                 i++;
             }
         }
+        final long time_pre_done = System.nanoTime();
+        monitor.preComputingCostInNano += time_pre_done - time_query_start;
 
         /* 根据Rule结构找Counter Example */
+        int cartesian_operations = 0;
         if (1 == structure.size()) {
             /* 没有body */
             if (0 == head_only_var_locs.length) {
@@ -898,6 +917,11 @@ public class RecalculateCachedRule extends Rule {
                     }
                     final Set<ComparableArray<ComparableArray<String>>> fv_bindings = new HashSet<>();
                     addBodyFvBindings(fv_bindings, fv_within_pred_bindings);
+                    int delta_cartesian_operations = 1;
+                    for (Set<ComparableArray<String>> fv_within_pred_values: fv_within_pred_bindings) {
+                        delta_cartesian_operations *= fv_within_pred_values.size();
+                    }
+                    cartesian_operations += delta_cartesian_operations;
                     for (ComparableArray<ComparableArray<String>> fv_binding: fv_bindings) {
                         for (int i = 0; i < pred_idx_2_arg_idxs_of_bfv_entry_list.length; i++) {
                             final Map.Entry<Integer, List<BodyFvPos>> entry = pred_idx_2_arg_idxs_of_bfv_entry_list[i];
@@ -929,11 +953,18 @@ public class RecalculateCachedRule extends Rule {
                 }
             }
         }
+        final long time_all_entail_done = System.nanoTime();
+        monitor.allEntailQueryCostInNano += time_all_entail_done - time_pre_done;
+
+        monitor.cacheStats.add(new CachedQueryMonitor.CacheStat(
+                groundings.size(), groundingsBody.size(), cartesian_operations
+        ));
 
         return counter_example_set;
     }
 
     private List<Predicate[]> findGroundings() {
+        final long pos_entail_begin = System.nanoTime();
         final List<Predicate[]> grounding_list = new ArrayList<>();
         final Set<Predicate> entailed_head = new HashSet<>();
         for (final List<PredicateCache> grounding_cache: groundings) {
@@ -955,6 +986,8 @@ public class RecalculateCachedRule extends Rule {
                 }
             }
         }
+        final long pos_entail_done = System.nanoTime();
+        monitor.posEntailQueryCostInNano += pos_entail_done - pos_entail_begin;
         return grounding_list;
     }
 

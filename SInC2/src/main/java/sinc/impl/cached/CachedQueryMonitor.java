@@ -23,10 +23,12 @@ public class CachedQueryMonitor {
     public static class CacheStat {
         public final int headCachedEntries;
         public final int bodyCachedEntries;
+        public final int cartesianOperations;
 
-        public CacheStat(int headCachedEntries, int bodyCachedEntries) {
+        public CacheStat(int headCachedEntries, int bodyCachedEntries, int cartesianOperations) {
             this.headCachedEntries = headCachedEntries;
             this.bodyCachedEntries = bodyCachedEntries;
+            this.cartesianOperations = cartesianOperations;
         }
     }
     public final List<CacheStat> cacheStats = new ArrayList<>();
@@ -54,26 +56,36 @@ public class CachedQueryMonitor {
         System.out.println("--- Cache Entry Statistics ---");
         CacheStat max_head = cacheStats.get(0);
         CacheStat max_body = cacheStats.get(0);
+        CacheStat max_cart_opt = cacheStats.get(0);
         int[] head_entries = new int[cacheStats.size()];
         int[] body_entries = new int[cacheStats.size()];
+        int[] cartesian_operations = new int[cacheStats.size()];
         for (int i = 0; i < cacheStats.size(); i++) {
             CacheStat cache_stat = cacheStats.get(i);
             head_entries[i] = cache_stat.headCachedEntries;
             body_entries[i] = cache_stat.bodyCachedEntries;
+            cartesian_operations[i] = cache_stat.cartesianOperations;
             max_head = (cache_stat.headCachedEntries > max_head.headCachedEntries) ? cache_stat : max_head;
             max_body = (cache_stat.bodyCachedEntries > max_body.bodyCachedEntries) ? cache_stat : max_body;
+            max_cart_opt = (cache_stat.cartesianOperations > max_cart_opt.cartesianOperations) ? cache_stat : max_cart_opt;
         }
         System.out.printf(
-                "- Max Head Cache Entries: %d (%d in body)\n",
-                max_head.headCachedEntries, max_head.bodyCachedEntries
+                "- Max Head Cache Entries: %d (%d in body, %d cartesian operations)\n",
+                max_head.headCachedEntries, max_head.bodyCachedEntries, max_head.cartesianOperations
         );
         System.out.printf(
-                "- Max Body Cache Entries: %d (%d in head)\n",
-                max_body.bodyCachedEntries, max_body.headCachedEntries
+                "- Max Body Cache Entries: %d (%d in head, %d cartesian operations)\n",
+                max_body.bodyCachedEntries, max_body.headCachedEntries, max_body.cartesianOperations
+        );
+        System.out.printf(
+                "- Max Cartesian Operations: %d (%d cached entries in head, %d in body)\n",
+                max_cart_opt.cartesianOperations, max_cart_opt.headCachedEntries, max_cart_opt.bodyCachedEntries
         );
         System.out.print("- Head Cache Entries: ");
         System.out.println(Arrays.toString(head_entries));
         System.out.print("- Body Cache Entries: ");
         System.out.println(Arrays.toString(body_entries));
+        System.out.print("- Cartesian Operations: ");
+        System.out.println(Arrays.toString(cartesian_operations));
     }
 }
