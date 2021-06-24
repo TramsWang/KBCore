@@ -103,6 +103,18 @@ public class Eval {
         return compCapacity > COMP_CAPACITY_USEFUL_THRESHOLD;
     }
 
+    public double getAllCnt() {
+        return allCnt;
+    }
+
+    public double getPosCnt() {
+        return posCnt;
+    }
+
+    public double getNegCnt() {
+        return negCnt;
+    }
+
     @Override
     public String toString() {
         return String.format(

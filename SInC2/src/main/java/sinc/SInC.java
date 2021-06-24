@@ -407,7 +407,7 @@ public abstract class SInC {
                 final Rule rule = findRule(functor);
                 final long time_rule_found = System.currentTimeMillis();
                 performanceMonitor.hypothesisMiningTime += time_rule_found - time_rule_finding_start;
-                performanceMonitor.cacheHits = Rule.cacheHits;
+                performanceMonitor.duplications = Rule.duplications;
 
                 if (null != rule && rule.getEval().useful(config.evalMetric)) {
                     System.out.printf("Found: %s\n", rule);
@@ -426,7 +426,8 @@ public abstract class SInC {
             } while (!target_head_functors.isEmpty());
             performanceMonitor.hypothesisRuleNumber = hypothesis.size();
             performanceMonitor.counterExampleSize = counterExamples.size();
-            performanceMonitor.cacheHits = Rule.cacheHits;
+            performanceMonitor.invalidSearches = Rule.invalidSearches;
+            performanceMonitor.duplications = Rule.duplications;
 
             /* 解析Graph找start set */
             final long time_graph_analyse_begin = System.currentTimeMillis();

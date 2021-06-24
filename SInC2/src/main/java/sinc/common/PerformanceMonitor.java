@@ -39,7 +39,8 @@ public class PerformanceMonitor {
     public int fvsVertices = 0;
 
     /* Other Statistics Monitor */
-    public int cacheHits = 0;
+    public int invalidSearches = 0;
+    public int duplications = 0;
     public int hcFilteredRules = 0;
     public int totalConstantSubstitutions = 0;
     public int actualConstantSubstitutions = 0;
@@ -81,6 +82,12 @@ public class PerformanceMonitor {
         System.out.println("--- Other Statistics ---");
         int executed_evaluations = 0;
         int max_branches = 0;
+        int max_rule_size = 0;
+        int total_rule_size = 0;
+        int max_ext = 0;
+        int total_ext = 0;
+        int max_org = 0;
+        int total_org = 0;
         int[] rule_size_arr = new int[branchProgress.size()];
         int[] ext_num_arr = new int[branchProgress.size()];
         int[] org_num_arr = new int[branchProgress.size()];
@@ -89,30 +96,38 @@ public class PerformanceMonitor {
             rule_size_arr[i] = branches.ruleSize;
             ext_num_arr[i] = branches.extNum;
             org_num_arr[i] = branches.orgNum;
+
             final int cur_branches = branches.extNum + branches.orgNum;
             executed_evaluations += cur_branches;
             max_branches = Math.max(cur_branches, max_branches);
+            max_rule_size = Math.max(max_rule_size, branches.ruleSize);
+            total_rule_size += branches.ruleSize;
+            max_ext = Math.max(max_ext, branches.extNum);
+            total_ext += branches.extNum;
+            max_org = Math.max(max_org, branches.orgNum);
+            total_org += branches.orgNum;
         }
         System.out.printf(
-                "Cache Hits: %.2f%%(%d/%d)\n",
-                cacheHits * 100.0 / (executed_evaluations + cacheHits),
-                cacheHits,
-                executed_evaluations + cacheHits
+                "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
+                "#Invalid", "#Dup", "#Eval", "#+Subs", "#Subs", "max(Brh)", "avg(Brh)",
+                "max(|r|)", "avg(|r|)", "max(Ext)", "avg(Ext)", "max(Org)", "avg(Org)"
         );
         System.out.printf(
-                "Head Coverage Filtered Rules: %.2f%%(%d/%d)\n",
-                hcFilteredRules * 100.0 / executed_evaluations,
-                hcFilteredRules,
-                executed_evaluations
-        );
-        System.out.printf(
-                "Constant Coverage Filtered Substitutions: %.2f%%(%d/%d)\n",
-                (totalConstantSubstitutions - actualConstantSubstitutions) * 100.0 / totalConstantSubstitutions,
+                "  %10d %10d %10d %10d %10d %10d %10.2f %10d %10.2f %10d %10.2f %10d %10.2f\n\n",
+                invalidSearches,
+                duplications,
+                executed_evaluations,
                 actualConstantSubstitutions,
-                totalConstantSubstitutions
+                totalConstantSubstitutions,
+                max_branches,
+                (double) executed_evaluations / branchProgress.size(),
+                max_rule_size,
+                (double) total_rule_size / branchProgress.size(),
+                max_ext,
+                (double) total_ext / branchProgress.size(),
+                max_org,
+                (double) total_org / branchProgress.size()
         );
-        System.out.println("Branch Progress:");
-        System.out.printf("- Max Branches: %d\n", max_branches);
         System.out.print("- Rule Sizes: ");
         System.out.println(Arrays.toString(rule_size_arr));
         System.out.print("- Extensions: ");

@@ -12,7 +12,8 @@ public abstract class Rule {
     public static double MIN_HEAD_COVERAGE = 0.0;
 
     /* 统计Cache命中数 */
-    public static int cacheHits = 0;
+    public static int invalidSearches = 0;
+    public static int duplications = 0;
 
     protected final List<Predicate> structure;
     protected final List<Variable> boundedVars;  // Bounded vars use non-negative ids(list index)
@@ -20,9 +21,9 @@ public abstract class Rule {
     protected RuleFingerPrint fingerPrint;
     protected int equivConds;
     protected Eval eval;
-    protected final Set<RuleFingerPrint> cache;
+    protected final Set<RuleFingerPrint> searchedRules;
 
-    public Rule(String headFunctor, int arity, Set<RuleFingerPrint> cache) {
+    public Rule(String headFunctor, int arity, Set<RuleFingerPrint> searchedRules) {
         structure = new ArrayList<>();
         boundedVars = new ArrayList<>();
         boundedVarCnts = new ArrayList<>();
@@ -34,8 +35,8 @@ public abstract class Rule {
         equivConds = 0;
         eval = null;
 
-        this.cache = cache;
-        this.cache.add(fingerPrint);
+        this.searchedRules = searchedRules;
+        this.searchedRules.add(fingerPrint);
     }
 
     public Rule(Rule another) {
@@ -48,7 +49,7 @@ public abstract class Rule {
         this.fingerPrint = another.fingerPrint;
         this.equivConds = another.equivConds;
         this.eval = another.eval;
-        this.cache = another.cache;
+        this.searchedRules = another.searchedRules;
     }
 
     public abstract Rule clone();
@@ -85,8 +86,8 @@ public abstract class Rule {
      */
     protected boolean isInvalid() {
         /* 检查是否命中Cache */
-        if (!cache.add(fingerPrint)) {
-            cacheHits++;
+        if (!searchedRules.add(fingerPrint)) {
+            duplications++;
             return true;
         }
 
@@ -185,6 +186,7 @@ public abstract class Rule {
 
         /* 检查合法性 */
         if (isInvalid()) {
+            invalidSearches++;
             return false;
         }
 
@@ -218,6 +220,7 @@ public abstract class Rule {
 
         /* 检查合法性 */
         if (isInvalid()) {
+            invalidSearches++;
             return false;
         }
 
@@ -254,6 +257,7 @@ public abstract class Rule {
 
         /* 检查合法性 */
         if (isInvalid()) {
+            invalidSearches++;
             return false;
         }
 
@@ -291,6 +295,7 @@ public abstract class Rule {
 
         /* 检查合法性 */
         if (isInvalid()) {
+            invalidSearches++;
             return false;
         }
 
@@ -320,6 +325,7 @@ public abstract class Rule {
 
         /* 检查合法性 */
         if (isInvalid()) {
+            invalidSearches++;
             return false;
         }
 
@@ -399,6 +405,7 @@ public abstract class Rule {
 
         /* 检查合法性 */
         if (isInvalid()) {
+            invalidSearches++;
             return false;
         }
 

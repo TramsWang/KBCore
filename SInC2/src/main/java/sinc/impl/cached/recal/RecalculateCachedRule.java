@@ -757,6 +757,9 @@ public class RecalculateCachedRule extends Rule {
         monitor.cacheStats.add(new CachedQueryMonitor.CacheStat(
                 groundings.size(), groundingsBody.size(), cartesian_operations
         ));
+        monitor.evalStats.add(new Eval(
+                eval, newly_proved.size(), all_entails - already_proved.size(), size()
+        ));
 
         /* 用HC剪枝 */
         double head_coverage = ((double) newly_proved.size()) / kb.getAllFacts(head_pred.functor).size();

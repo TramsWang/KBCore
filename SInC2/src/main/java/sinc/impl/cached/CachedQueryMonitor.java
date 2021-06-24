@@ -1,5 +1,7 @@
 package sinc.impl.cached;
 
+import sinc.common.Eval;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,13 +34,15 @@ public class CachedQueryMonitor {
         }
     }
     public final List<CacheStat> cacheStats = new ArrayList<>();
+    public final List<Eval> evalStats = new ArrayList<>();
 
     public void show() {
         System.out.println("### Cached Query Monitored Info ###\n");
         System.out.println("--- Time Cost ---");
         System.out.printf(
                 "T(ms) %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
-                "[Pre", "AllEntail", "+Entail]", "[EBV", "EBV+", "NBV", "NBV+", "Const]", "#clone", "clone");
+                "[Pre", "AllEntail", "+Entail]", "[EBV", "EBV+", "NBV", "NBV+", "Const]", "#clone", "clone"
+        );
         System.out.printf(
                 "      %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n\n",
                 preComputingCostInNano / DENOMINATOR,
@@ -87,5 +91,32 @@ public class CachedQueryMonitor {
         System.out.println(Arrays.toString(body_entries));
         System.out.print("- Cartesian Operations: ");
         System.out.println(Arrays.toString(cartesian_operations));
+        System.out.println();
+
+        System.out.println("--- Evaluation Statistics ---");
+        double max_pos_ent = 0;
+        double total_pos_ent = 0;
+        double max_neg_ent = 0;
+        double total_neg_ent = 0;
+        double max_ent = 0;
+        double total_ent = 0;
+        for (Eval eval: evalStats) {
+            max_pos_ent = Math.max(max_pos_ent, eval.getPosCnt());
+            total_pos_ent += eval.getPosCnt();
+            max_neg_ent = Math.max(max_neg_ent, eval.getNegCnt());
+            total_neg_ent += eval.getNegCnt();
+            max_ent = Math.max(max_ent, eval.getAllCnt());
+            total_ent += eval.getAllCnt();
+        }
+        System.out.printf(
+                "# %10s %10s %10s %10s %10s %10s\n",
+                "max(+Ent)", "avg(+Ent)", "max(-Ent)", "avg(-Ent)", "max(Ent)", "avg(Ent)"
+        );
+        System.out.printf(
+                "  %10.0f %10.0f %10.0f %10.0f %10.0f %10.0f\n\n",
+                max_pos_ent, total_pos_ent / evalStats.size(),
+                max_neg_ent, total_neg_ent / evalStats.size(),
+                max_ent, total_ent / evalStats.size()
+        );
     }
 }
