@@ -6,6 +6,7 @@ import sinc.util.graph.FeedbackVertexSetSolver;
 import sinc.util.graph.Tarjan;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
@@ -24,6 +25,9 @@ public abstract class SInC {
     private final Set<Predicate> startSet = new HashSet<>();
     private final Set<Predicate> counterExamples = new HashSet<>();
     private final PerformanceMonitor performanceMonitor = new PerformanceMonitor();
+
+    /* 终止执行的flag */
+    private boolean interrupted = false;
 
     private static class GraphAnalyseResult {
         public int startSetSize = 0;
@@ -52,7 +56,7 @@ public abstract class SInC {
 
     abstract protected Rule getStartRule(String headFunctor, Set<RuleFingerPrint> cache);
 
-    protected Rule findRule(String headFunctor) {
+    protected Rule findRule(String headFunctor) throws InterruptedSignal {
         final Set<RuleFingerPrint> cache = new HashSet<>();
         final Rule start_rule = getStartRule(headFunctor, cache);
 
@@ -135,7 +139,7 @@ public abstract class SInC {
         }
     }
 
-    protected List<Rule> findExtension(final Rule rule) {
+    protected List<Rule> findExtension(final Rule rule) throws InterruptedSignal {
         List<Rule> extensions = new ArrayList<>();
 
         /* 先找到所有空白的参数 */
@@ -167,6 +171,9 @@ public abstract class SInC {
                 if (new_rule.boundFreeVar2ExistingVar(vacant.predIdx, vacant.argIdx, var_id)) {
                     extensions.add(new_rule);
                 }
+                if (interrupted) {
+                    throw new InterruptedSignal("Interrupted");
+                }
             }
 
             for (Map.Entry<String, Integer> entry: func_2_arity_map.entrySet()) {
@@ -177,6 +184,9 @@ public abstract class SInC {
                     final Rule new_rule = rule.clone();
                     if (new_rule.boundFreeVar2ExistingVar(functor, arity, arg_idx, var_id)) {
                         extensions.add(new_rule);
+                    }
+                    if (interrupted) {
+                        throw new InterruptedSignal("Interrupted");
                     }
                 }
             }
@@ -195,6 +205,9 @@ public abstract class SInC {
                 if (new_rule.boundFreeVar2Constant(first_vacant.predIdx, first_vacant.argIdx, const_symbol)) {
                     extensions.add(new_rule);
                 }
+                if (interrupted) {
+                    throw new InterruptedSignal("Interrupted");
+                }
             }
 
             /* 找到两个位置尝试同一个新变量 */
@@ -206,6 +219,9 @@ public abstract class SInC {
                         first_vacant.predIdx, first_vacant.argIdx, second_vacant.predIdx, second_vacant.argIdx
                 )) {
                     extensions.add(new_rule);
+                }
+                if (interrupted) {
+                    throw new InterruptedSignal("Interrupted");
                 }
             }
             for (Map.Entry<String, Integer> entry: func_2_arity_map.entrySet()) {
@@ -219,6 +235,9 @@ public abstract class SInC {
                     )) {
                         extensions.add(new_rule);
                     }
+                    if (interrupted) {
+                        throw new InterruptedSignal("Interrupted");
+                    }
                 }
             }
         }
@@ -230,7 +249,7 @@ public abstract class SInC {
 
     abstract protected Map<String, List<String>[]> getFunctor2PromisingConstantMap();
 
-    protected List<Rule> findOrigin(Rule rule) {
+    protected List<Rule> findOrigin(Rule rule) throws InterruptedSignal {
         final List<Rule> origins = new ArrayList<>();
         for (int pred_idx = Rule.HEAD_PRED_IDX; pred_idx < rule.length(); pred_idx++) {
             /* 从Head开始删除可能会出现Head中没有Bounded Var但是Body不为空的情况，按照定义来说，这种规则是不在
@@ -241,6 +260,9 @@ public abstract class SInC {
                     final Rule new_rule = rule.clone();
                     if (new_rule.removeBoundedArg(pred_idx, arg_idx)) {
                         origins.add(new_rule);
+                    }
+                    if (interrupted) {
+                        throw new InterruptedSignal("Interrupted");
                     }
                 }
             }
@@ -377,10 +399,10 @@ public abstract class SInC {
         return counterExamples;
     }
 
-    public final void run() {
+    private void runHandler() {
+        final long time_start = System.currentTimeMillis();
         try {
             /* 加载KB */
-            final long time_start = System.currentTimeMillis();
             KbStatistics kb_stat = loadKb();
             performanceMonitor.kbSize = kb_stat.facts;
             performanceMonitor.kbFunctors = kb_stat.functors;
@@ -461,8 +483,42 @@ public abstract class SInC {
                 /* Todo: 图结构上传Neo4j */
                 System.out.println("[DEBUG] Upload Graph to Neo4J...");
             }
+        } catch (InterruptedSignal e) {
+            /* 处理interruption (stdin里随便输入点什么) */
+            /* 从结束 Rule Finding 开始 */
+            performanceMonitor.hypothesisRuleNumber = hypothesis.size();
+            performanceMonitor.counterExampleSize = counterExamples.size();
+            performanceMonitor.invalidSearches = Rule.invalidSearches;
+            performanceMonitor.duplications = Rule.duplications;
+            performanceMonitor.fcFilteredRules = Rule.fcFiltered;
 
-            /* Todo: 处理interruption (Ctrl + C) */
+            /* 解析Graph找start set */
+            final long time_graph_analyse_begin = System.currentTimeMillis();
+            GraphAnalyseResult graph_analyse_result = findStartSet();
+            performanceMonitor.startSetSize = graph_analyse_result.startSetSize;
+            performanceMonitor.startSetSizeWithoutFvs = graph_analyse_result.startSetSizeWithoutFvs;
+            performanceMonitor.sccNumber = graph_analyse_result.sccNumber;
+            performanceMonitor.sccVertices = graph_analyse_result.sccVertices;
+            performanceMonitor.fvsVertices = graph_analyse_result.fvsVertices;
+            final long time_start_set_found = System.currentTimeMillis();
+            performanceMonitor.otherMiningTime += time_start_set_found - time_graph_analyse_begin;
+
+            /* 记录结果 */
+            dumpResult();
+            final long time_dumped = System.currentTimeMillis();
+            performanceMonitor.dumpTime = time_dumped - time_start_set_found;
+            performanceMonitor.totalTime = time_dumped - time_start;
+
+            /* 打印所有rules */
+            System.out.println("\n### Hypothesis Found ###");
+            for (Rule rule : hypothesis) {
+                System.out.println(rule);
+            }
+            System.out.println();
+
+            showMonitor();
+
+            System.out.println("!!! The Result is Reserved Before INTERRUPTION !!!");
         } catch (Exception | OutOfMemoryError e) {
             e.printStackTrace();
             System.err.flush();
@@ -475,6 +531,22 @@ public abstract class SInC {
             System.out.println();
 
             showMonitor();
+        }
+    }
+
+    public final void run() {
+        Thread task = new Thread(this::runHandler);
+        task.start();
+
+        try {
+            while (task.isAlive() && (System.in.available() <= 0)) {
+                Thread.sleep(1000);
+            }
+            interrupted = true;
+            task.join();
+        } catch (IOException | InterruptedException e) {
+            interrupted = true;
+            e.printStackTrace();
         }
     }
 }
