@@ -15,6 +15,7 @@ public enum Dataset {
     WEBKB_TEXAS("../datasets/webkb.texas.tsv", "WebKB.Texas", "WKt"),
     WEBKB_WASHINGTON("../datasets/webkb.washington.tsv", "WebKB.Washington", "WKw"),
     WEBKB_WISCONSIN("../datasets/webkb.wisconsin.tsv", "WebKB.Wisconsin", "WKi"),
+    NELL("../datasets/nell.tsv", "NELL", "N"),
     FAMILY_SIMPLE("../datasets/family_simple.tsv", "Family.simple", "Fs"),
     FAMILY_MEDIUM("../datasets/family_medium.tsv", "Family.medium", "Fm")
     ;

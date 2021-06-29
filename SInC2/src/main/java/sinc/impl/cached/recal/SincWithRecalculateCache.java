@@ -19,7 +19,7 @@ public class SincWithRecalculateCache extends CachedSinc {
                         config.beamWidth,
                         false,  // Rule Cache 的优化方案不支持向前搜索
                         config.evalMetric,
-                        config.minHeadCoverage,
+                        config.minFactCoverage,
                         config.minConstantCoverage,
                         true,
                         -1.0,

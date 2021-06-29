@@ -129,7 +129,7 @@ class SpecificCachedRuleTest {
 
     @BeforeAll
     static void setParameters() {
-        Rule.MIN_HEAD_COVERAGE = -1.0;
+        Rule.MIN_FACT_COVERAGE = -1.0;
     }
 
     @Test

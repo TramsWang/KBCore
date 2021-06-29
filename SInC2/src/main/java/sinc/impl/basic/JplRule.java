@@ -31,22 +31,10 @@ public class JplRule extends Rule {
     }
 
     @Override
-    public void boundFreeVar2ExistingVarHandler(int predIdx, int argIdx, int varId) {}
-
-    @Override
-    public void boundFreeVar2ExistingVarHandler(Predicate newPredicate, int argIdx, int varId) {}
-
-    @Override
-    public void boundFreeVars2NewVarHandler(int predIdx1, int argIdx1, int predIdx2, int argIdx2) {}
-
-    @Override
-    public void boundFreeVars2NewVarHandler(Predicate newPredicate, int argIdx1, int predIdx2, int argIdx2) {}
-
-    @Override
-    public void boundFreeVar2ConstantHandler(int predIdx, int argIdx, String constantSymbol) {}
-
-    @Override
-    public void removeBoundedArgHandler(int predIdx, int argIdx) {}
+    protected double factCoverage() {
+        /* Todo: Implement Here */
+        throw new Error("Not Implemented");
+    }
 
     @Override
     protected Eval calculateEval() {
@@ -173,11 +161,12 @@ public class JplRule extends Rule {
         jplQueryMonitor.allEntailQueryCostInNano += positive_entailments_query_begin - all_entailments_query_begin;
         jplQueryMonitor.posEntailQueryCostInNano += check_done - positive_entailments_query_begin;
 
-        /* 用HC剪枝 */
-        double head_coverage = ((double) positive_entailments) / global_facts.size();
-        if (Rule.MIN_HEAD_COVERAGE >= head_coverage) {
-            return Eval.MIN;
-        }
+//        /* 用HC剪枝 */
+//        double head_coverage = ((double) positive_entailments) / global_facts.size();
+//        if (Rule.MIN_FACT_COVERAGE >= head_coverage) {
+//            return Eval.MIN;
+//        }
+
         return new Eval(
                 eval, positive_entailments, all_entailments - already_entailed, this.size()
         );

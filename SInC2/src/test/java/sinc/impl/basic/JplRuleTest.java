@@ -134,7 +134,7 @@ class JplRuleTest {
             final Set<Predicate> cur_fact_set = KB.curFunctor2FactSetMap.get(entry.getKey());
             cur_fact_set.addAll(entry.getValue());
         }
-        Rule.MIN_HEAD_COVERAGE = -1.0;
+        Rule.MIN_FACT_COVERAGE = -1.0;
     }
 
     @Test

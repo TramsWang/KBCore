@@ -2,7 +2,7 @@ package sinc.exp;
 
 import sinc.SincConfig;
 import sinc.common.Eval;
-import sinc.impl.cached.spec.SincWithSpecificCache;
+import sinc.impl.cached.recal.SincWithRecalculateCache;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,7 +10,7 @@ import java.io.PrintStream;
 
 public class TestCachedModel {
     public static void main(String[] args) {
-        final String MODEL = "cached";
+        final String MODEL = "Cr";
 
         final String purpose = args[0];
         final int beam_width = Integer.parseInt(args[1]);
@@ -64,7 +64,7 @@ public class TestCachedModel {
             PrintStream ps_err = new PrintStream(new FileOutputStream(stderr_path));
             System.setOut(ps_out);
             System.setErr(ps_err);
-            SincWithSpecificCache sinc = new SincWithSpecificCache(
+            SincWithRecalculateCache sinc = new SincWithRecalculateCache(
                     config, dataset.getPath(), dump_path
             );
             sinc.run();

@@ -37,7 +37,7 @@ public abstract class SInC {
         this.config = config;
         this.kbPath = kbPath;
         this.dumpPath = dumpPath;
-        Rule.MIN_HEAD_COVERAGE = config.minHeadCoverage;
+        Rule.MIN_FACT_COVERAGE = config.minFactCoverage;
     }
 
     /**
@@ -90,10 +90,6 @@ public abstract class SInC {
                             r_max = r_e;
                         }
                     }
-                    if (Eval.MIN == r_e.getEval()) {
-                        /* 说明是被HC干掉的 */
-                        performanceMonitor.hcFilteredRules++;
-                    }
                 }
                 if (config.searchOrigins) {
                     for (Rule r_o : origins) {
@@ -102,10 +98,6 @@ public abstract class SInC {
                             if (r_o.getEval().value(eval_metric) > r_max.getEval().value(eval_metric)) {
                                 r_max = r_o;
                             }
-                        }
-                        if (Eval.MIN == r_o.getEval()) {
-                            /* 说明是被HC干掉的 */
-                            performanceMonitor.hcFilteredRules++;
                         }
                     }
                 }
@@ -428,6 +420,7 @@ public abstract class SInC {
             performanceMonitor.counterExampleSize = counterExamples.size();
             performanceMonitor.invalidSearches = Rule.invalidSearches;
             performanceMonitor.duplications = Rule.duplications;
+            performanceMonitor.fcFilteredRules = Rule.fcFiltered;
 
             /* 解析Graph找start set */
             final long time_graph_analyse_begin = System.currentTimeMillis();
@@ -468,6 +461,8 @@ public abstract class SInC {
                 /* Todo: 图结构上传Neo4j */
                 System.out.println("[DEBUG] Upload Graph to Neo4J...");
             }
+
+            /* Todo: 处理interruption (Ctrl + C) */
         } catch (Exception | OutOfMemoryError e) {
             e.printStackTrace();
             System.err.flush();

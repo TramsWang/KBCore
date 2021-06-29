@@ -1,6 +1,6 @@
 package sinc.impl.cached.recal;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import sinc.common.*;
 import sinc.impl.cached.MemKB;
@@ -127,9 +127,9 @@ class RecalculateCachedRuleTest {
         return kb;
     }
 
-    @BeforeAll
-    static void setParameters() {
-        Rule.MIN_HEAD_COVERAGE = -1.0;
+    @BeforeEach
+    void setParameters() {
+        Rule.MIN_FACT_COVERAGE = -1.0;
     }
 
     @Test
@@ -1339,5 +1339,52 @@ class RecalculateCachedRuleTest {
 
         /* father(X,?) :- father(Y,X), father(Y,X) [invalid] */
         assertFalse(rule.boundFreeVars2NewVar(1, 0, 2, 0));
+    }
+
+    @Test
+    void testFcFiltering1() {
+        Rule.MIN_FACT_COVERAGE = 0.44;
+        final MemKB kb = kbFamily();
+        /* parent(X, ?) :- father(X, ?) */
+        final RecalculateCachedRule rule = new RecalculateCachedRule(FUNCTOR_PARENT, new HashSet<>(), kb);
+        assertTrue(rule.toString().contains("parent(?,?):-"));
+        assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-"));
+        assertEquals(
+                new Eval(null, 9, 16 * 16, 0),
+                rule.getEval()
+        );
+        assertEquals(0, rule.usedBoundedVars());
+        assertEquals(1, rule.length());
+
+        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
+        assertTrue(rule.toString().contains("parent(X0,?):-father(X0,?)"));
+        assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-father(X0,X2)"));
+        assertEquals(
+                new Eval(null, 4, 4 * 16, 1),
+                rule.getEval()
+        );
+        assertEquals(1, rule.usedBoundedVars());
+        assertEquals(2, rule.length());
+        UpdateResult update_result = rule.updateInKb();
+    }
+
+    @Test
+    void testFcFiltering2() {
+        Rule.MIN_FACT_COVERAGE = 0.45;
+        final MemKB kb = kbFamily();
+        /* parent(X, ?) :- father(X, ?) */
+        final RecalculateCachedRule rule = new RecalculateCachedRule(FUNCTOR_PARENT, new HashSet<>(), kb);
+        assertTrue(rule.toString().contains("parent(?,?):-"));
+        assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-"));
+        assertEquals(
+                new Eval(null, 9, 16 * 16, 0),
+                rule.getEval()
+        );
+        assertEquals(0, rule.usedBoundedVars());
+        assertEquals(1, rule.length());
+
+        assertFalse(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
+        assertTrue(rule.toString().contains("parent(X0,?):-father(X0,?)"));
+        assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-father(X0,X2)"));
     }
 }

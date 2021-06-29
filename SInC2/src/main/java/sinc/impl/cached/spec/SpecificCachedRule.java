@@ -69,12 +69,19 @@ public class SpecificCachedRule extends Rule {
     }
 
     @Override
-    public void boundFreeVar2ExistingVarHandler(int predIdx, int argIdx, int varId) {
+    protected boolean boundFreeVar2ExistingVarHandler(int predIdx, int argIdx, int varId) {
         final long time_start = System.nanoTime();
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, false);
+
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, true);
         final long time_done = System.nanoTime();
         monitor.boundExistVarCostInNano += time_done - time_start;
+        return true;
     }
 
     /**
@@ -179,12 +186,19 @@ public class SpecificCachedRule extends Rule {
     }
 
     @Override
-    public void boundFreeVar2ExistingVarHandler(Predicate newPredicate, int argIdx, int varId) {
+    protected boolean boundFreeVar2ExistingVarHandler(Predicate newPredicate, int argIdx, int varId) {
         final long time_start = System.nanoTime();
         boundFreeVar2ExistingVarUpdateCache(newPredicate, argIdx, varId, false);
+
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+
         boundFreeVar2ExistingVarUpdateCache(newPredicate, argIdx, varId, true);
         final long time_done = System.nanoTime();
         monitor.boundExistVarInNewPredCostInNano += time_done - time_start;
+        return true;
     }
 
     /**
@@ -263,12 +277,19 @@ public class SpecificCachedRule extends Rule {
     }
 
     @Override
-    public void boundFreeVars2NewVarHandler(int predIdx1, int argIdx1, int predIdx2, int argIdx2) {
+    protected boolean boundFreeVars2NewVarHandler(int predIdx1, int argIdx1, int predIdx2, int argIdx2) {
         final long time_start = System.nanoTime();
         boundFreeVars2NewVarUpdateCache(predIdx1, argIdx1, predIdx2, argIdx2, false);
+
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+
         boundFreeVars2NewVarUpdateCache(predIdx1, argIdx1, predIdx2, argIdx2, true);
         final long time_done = System.nanoTime();
         monitor.boundNewVarCostInNano += time_done - time_start;
+        return true;
     }
 
     /**
@@ -446,12 +467,19 @@ public class SpecificCachedRule extends Rule {
     }
 
     @Override
-    public void boundFreeVars2NewVarHandler(Predicate newPredicate, int argIdx1, int predIdx2, int argIdx2) {
+    protected boolean boundFreeVars2NewVarHandler(Predicate newPredicate, int argIdx1, int predIdx2, int argIdx2) {
         final long time_start = System.nanoTime();
         boundFreeVars2NewVarUpdateCache(newPredicate, argIdx1, predIdx2, argIdx2, false);
+
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+
         boundFreeVars2NewVarUpdateCache(newPredicate, argIdx1, predIdx2, argIdx2, true);
         final long time_done = System.nanoTime();
         monitor.boundNewVarInNewPredCostInNano += time_done - time_start;
+        return true;
     }
 
     /**
@@ -560,12 +588,19 @@ public class SpecificCachedRule extends Rule {
     }
 
     @Override
-    public void boundFreeVar2ConstantHandler(int predIdx, int argIdx, String constantSymbol) {
+    protected boolean boundFreeVar2ConstantHandler(int predIdx, int argIdx, String constantSymbol) {
         final long time_start = System.nanoTime();
         boundFreeVar2ConstantUpdateCache(predIdx, argIdx, constantSymbol, false);
+
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+
         boundFreeVar2ConstantUpdateCache(predIdx, argIdx, constantSymbol, true);
         final long time_done = System.nanoTime();
         monitor.boundConstCostInNano += time_done - time_start;
+        return true;
     }
 
     /**
@@ -616,8 +651,15 @@ public class SpecificCachedRule extends Rule {
     }
 
     @Override
-    public void removeBoundedArgHandler(int predIdx, int argIdx) {
+    protected boolean removeBoundedArgHandler(int predIdx, int argIdx) {
         /* 这里也是什么都不做 */
+        return false;
+    }
+
+    @Override
+    protected double factCoverage() {
+        /* Todo: Implement Here */
+        throw new Error("Not Implemented");
     }
 
     @Override
@@ -710,11 +752,11 @@ public class SpecificCachedRule extends Rule {
                 eval, newly_proved.size(), all_entails - already_proved.size(), size()
         ));
 
-        /* 用HC剪枝 */
-        double head_coverage = ((double) newly_proved.size()) / kb.getAllFacts(head_pred.functor).size();
-        if (Rule.MIN_HEAD_COVERAGE >= head_coverage) {
-            return Eval.MIN;
-        }
+//        /* 用HC剪枝 */
+//        double head_coverage = ((double) newly_proved.size()) / kb.getAllFacts(head_pred.functor).size();
+//        if (Rule.MIN_FACT_COVERAGE >= head_coverage) {
+//            return Eval.MIN;
+//        }
 
         /* 更新eval */
         /* all entailments中需要刨除已经被证明的，否则这些默认被算作了counter examples的数量 */

@@ -14,32 +14,19 @@ public class RuleTest {
             super(headFunctor, arity, cache);
         }
 
+        @Override
+        public Rule clone() {
+            return null;
+        }
+
         public RuleImpl(RuleImpl another) {
             super(another);
         }
 
         @Override
-        public Rule clone() {
-            return new RuleImpl(this);
+        protected double factCoverage() {
+            return Rule.MIN_FACT_COVERAGE + 1;
         }
-
-        @Override
-        public void boundFreeVar2ExistingVarHandler(int predIdx, int argIdx, int varId) { }
-
-        @Override
-        public void boundFreeVar2ExistingVarHandler(Predicate newPredicate, int argIdx, int varId) { }
-
-        @Override
-        public void boundFreeVars2NewVarHandler(int predIdx1, int argIdx1, int predIdx2, int argIdx2) { }
-
-        @Override
-        public void boundFreeVars2NewVarHandler(Predicate newPredicate, int argIdx1, int predIdx2, int argIdx2) { }
-
-        @Override
-        public void boundFreeVar2ConstantHandler(int predIdx, int argIdx, String constantSymbol) { }
-
-        @Override
-        public void removeBoundedArgHandler(int predIdx, int argIdx) { }
 
         @Override
         protected Eval calculateEval() {

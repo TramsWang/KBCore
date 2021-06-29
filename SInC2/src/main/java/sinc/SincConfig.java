@@ -12,7 +12,7 @@ public class SincConfig {
     public final int beamWidth;
     public final boolean searchOrigins;
     public final Eval.EvalMetric evalMetric;
-    public final double minHeadCoverage;
+    public final double minFactCoverage;
     public final double minConstantCoverage;
 
     /* Optimization Config */
@@ -23,7 +23,7 @@ public class SincConfig {
 
     public SincConfig(
             int threads, boolean validation, boolean debug, int beamWidth, boolean searchOrigins,
-            Eval.EvalMetric evalMetric, double minHeadCoverage, double minConstantCoverage,
+            Eval.EvalMetric evalMetric, double minFactCoverage, double minConstantCoverage,
             boolean ruleCache, double sampling, boolean estimation, boolean kbBlocking
     ) {
         this.threads = threads;
@@ -32,7 +32,7 @@ public class SincConfig {
         this.beamWidth = beamWidth;
         this.searchOrigins = searchOrigins;
         this.evalMetric = evalMetric;
-        this.minHeadCoverage = minHeadCoverage;
+        this.minFactCoverage = minFactCoverage;
         this.minConstantCoverage = minConstantCoverage;
         this.ruleCache = ruleCache;
         this.sampling = sampling;

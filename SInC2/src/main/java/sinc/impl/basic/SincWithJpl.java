@@ -29,7 +29,7 @@ public class SincWithJpl extends SInC {
                         config.beamWidth,
                         config.searchOrigins,
                         config.evalMetric,
-                        config.minHeadCoverage,
+                        config.minFactCoverage,
                         config.minConstantCoverage,
                         false,
                         -1.0,

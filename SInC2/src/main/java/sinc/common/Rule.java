@@ -9,11 +9,12 @@ public abstract class Rule {
     public static final int FIRST_BODY_PRED_IDX = HEAD_PRED_IDX + 1;
     public static final int CONSTANT_ARG_ID = -1;
 
-    public static double MIN_HEAD_COVERAGE = 0.0;
+    public static double MIN_FACT_COVERAGE = 0.0;
 
-    /* 统计Cache命中数 */
+    /* 统计数值 */
     public static int invalidSearches = 0;
     public static int duplications = 0;
+    public static int fcFiltered = 0;
 
     protected final List<Predicate> structure;
     protected final List<Variable> boundedVars;  // Bounded vars use non-negative ids(list index)
@@ -191,16 +192,24 @@ public abstract class Rule {
         }
 
         /* 执行handler */
-        boundFreeVar2ExistingVarHandler(predIdx, argIdx, varId);
+        if (!boundFreeVar2ExistingVarHandler(predIdx, argIdx, varId)) {
+            return false;
+        }
 
         /* 更新Eval */
         this.eval = calculateEval();
         return true;
     }
 
-    public abstract void boundFreeVar2ExistingVarHandler(
+    protected boolean boundFreeVar2ExistingVarHandler(
             final int predIdx, final int argIdx, final int varId
-    );
+    ) {
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+        return true;
+    }
 
     /**
      * 新添加一个Predicate，然后将其中的一个FV绑定成一个已有的BV
@@ -225,16 +234,24 @@ public abstract class Rule {
         }
 
         /* 执行handler */
-        boundFreeVar2ExistingVarHandler(target_predicate, argIdx, varId);
+        if (!boundFreeVar2ExistingVarHandler(target_predicate, argIdx, varId)) {
+            return false;
+        }
 
         /* 更新Eval */
         this.eval = calculateEval();
         return true;
     }
 
-    public abstract void boundFreeVar2ExistingVarHandler(
+    protected boolean boundFreeVar2ExistingVarHandler(
             final Predicate newPredicate, final int argIdx, final int varId
-    );
+    ) {
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+        return true;
+    }
 
     /**
      * 将两个已有的FV绑定成同一个新的BV
@@ -262,16 +279,24 @@ public abstract class Rule {
         }
 
         /* 执行handler */
-        boundFreeVars2NewVarHandler(predIdx1, argIdx1, predIdx2, argIdx2);
+        if (!boundFreeVars2NewVarHandler(predIdx1, argIdx1, predIdx2, argIdx2)) {
+            return false;
+        }
 
         /* 更新Eval */
         this.eval = calculateEval();
         return true;
     }
 
-    public abstract void boundFreeVars2NewVarHandler(
+    protected boolean boundFreeVars2NewVarHandler(
             final int predIdx1, final int argIdx1, final int predIdx2, final int argIdx2
-    );
+    ) {
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+        return true;
+    }
 
     /**
      * 添加一个新的Predicate，然后将其中的一个FV以及一个已有的FV绑定成同一个新的BV
@@ -300,16 +325,24 @@ public abstract class Rule {
         }
 
         /* 执行handler */
-        boundFreeVars2NewVarHandler(target_predicate1, argIdx1, predIdx2, argIdx2);
+        if (!boundFreeVars2NewVarHandler(target_predicate1, argIdx1, predIdx2, argIdx2)) {
+            return false;
+        }
 
         /* 更新Eval */
         this.eval = calculateEval();
         return true;
     }
 
-    public abstract void boundFreeVars2NewVarHandler(
+    protected boolean boundFreeVars2NewVarHandler(
             final Predicate newPredicate, final int argIdx1, final int predIdx2, final int argIdx2
-    );
+    ) {
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+        return true;
+    }
 
     /**
      * 将一个已有的FV绑定成常量
@@ -330,14 +363,22 @@ public abstract class Rule {
         }
 
         /* 执行handler */
-        boundFreeVar2ConstantHandler(predIdx, argIdx, constantSymbol);
+        if (!boundFreeVar2ConstantHandler(predIdx, argIdx, constantSymbol)) {
+            return false;
+        }
 
         /* 更新Eval */
         this.eval = calculateEval();
         return true;
     }
 
-    public abstract void boundFreeVar2ConstantHandler(final int predIdx, final int argIdx, final String constantSymbol);
+    protected boolean boundFreeVar2ConstantHandler(final int predIdx, final int argIdx, final String constantSymbol) {
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+        return true;
+    }
 
     public boolean removeBoundedArg(final int predIdx, final int argIdx) {
         final Predicate predicate = structure.get(predIdx);
@@ -410,14 +451,24 @@ public abstract class Rule {
         }
 
         /* 执行handler */
-        removeBoundedArgHandler(predIdx, argIdx);
+        if (!removeBoundedArgHandler(predIdx, argIdx)) {
+            return false;
+        }
 
         /* 更新Eval */
         this.eval = calculateEval();
         return true;
     }
 
-    public abstract void removeBoundedArgHandler(final int predIdx, final int argIdx);
+    protected boolean removeBoundedArgHandler(final int predIdx, final int argIdx) {
+        if (MIN_FACT_COVERAGE >= factCoverage()) {
+            fcFiltered++;
+            return false;
+        }
+        return true;
+    }
+
+    protected abstract double factCoverage();
 
     /**
      * @return 如果不符合Head Coverage，返回Eval.MIN

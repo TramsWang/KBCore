@@ -41,7 +41,7 @@ public class PerformanceMonitor {
     /* Other Statistics Monitor */
     public int invalidSearches = 0;
     public int duplications = 0;
-    public int hcFilteredRules = 0;
+    public int fcFilteredRules = 0;
     public int totalConstantSubstitutions = 0;
     public int actualConstantSubstitutions = 0;
     public List<BranchInfo> branchProgress = new ArrayList<>();
