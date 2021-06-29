@@ -393,8 +393,11 @@ public class FamilyRelationGenerator {
     }
 
     public static void main(String[] args) throws IOException {
-        generateTiny("testData/familyRelation/FamilyRelationTiny(10x)(0.0)", 10, 0.0);
-        generateSimple("testData/familyRelation/FamilyRelationSimple(10x)(0.0)", 10, 0.0);
-        generateMedium("testData/familyRelation/FamilyRelationMedium(10x)(0.0)", 10, 0.0);
+//        generateTiny("testData/familyRelation/FamilyRelationTiny(10x)(0.0)", 10, 0.0);
+//        generateSimple("testData/familyRelation/FamilyRelationSimple(10x)(0.0)", 10, 0.0);
+//        generateMedium("testData/familyRelation/FamilyRelationMedium(10x)(0.0)", 10, 0.0);
+        for (int i: new int[]{2, 4, 6, 8, 10, 12, 14, 16, 18, 20}) {
+            generateMedium(String.format("Fm_%d.tsv", i), i, 0.0);
+        }
     }
 }
