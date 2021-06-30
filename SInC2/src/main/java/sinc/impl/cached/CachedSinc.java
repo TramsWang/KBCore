@@ -15,7 +15,7 @@ public abstract class CachedSinc extends SInC {
 
     protected final MemKB kb = new MemKB();
 
-    public CachedSinc(SincConfig config, String kbPath, String dumpPath) {
+    public CachedSinc(SincConfig config, String kbPath, String dumpPath, String logPath) {
         super(
                 new SincConfig(
                         config.threads,
@@ -32,7 +32,8 @@ public abstract class CachedSinc extends SInC {
                         false
                 ),
                 kbPath,
-                dumpPath
+                dumpPath,
+                logPath
         );
     }
 

@@ -20,7 +20,7 @@ public class SincWithJpl extends SInC {
 
     private final PrologKb kb = new PrologKb();
 
-    public SincWithJpl(SincConfig config, String bkPath, String dumpPath) {
+    public SincWithJpl(SincConfig config, String bkPath, String dumpPath, String logPath) {
         super(
                 new SincConfig(
                         1,  // Jpl 目前暂不支持多线程
@@ -37,7 +37,8 @@ public class SincWithJpl extends SInC {
                         false
                 ),
                 bkPath,
-                dumpPath
+                dumpPath,
+                logPath
         );
     }
 

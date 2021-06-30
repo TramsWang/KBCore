@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class SincWithRecalculateCache extends CachedSinc {
 
-    public SincWithRecalculateCache(SincConfig config, String kbPath, String dumpPath) {
+    public SincWithRecalculateCache(SincConfig config, String kbPath, String dumpPath, String logPath) {
         super(
                 new SincConfig(
                         config.threads,
@@ -27,7 +27,8 @@ public class SincWithRecalculateCache extends CachedSinc {
                         false
                 ),
                 kbPath,
-                dumpPath
+                dumpPath,
+                logPath
         );
     }
 
@@ -45,6 +46,6 @@ public class SincWithRecalculateCache extends CachedSinc {
     @Override
     protected void showMonitor() {
         super.showMonitor();
-        RecalculateCachedRule.monitor.show();
+        RecalculateCachedRule.monitor.show(logger);
     }
 }

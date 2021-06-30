@@ -56,6 +56,10 @@ public class TestCachedModel {
                 "%s/%s/%s_%s_%d.result",
                 purpose, dataset.getName(), MODEL, eval_metric.getName(), beam_width
         );
+        final String log_path = String.format(
+                "%s/%s/%s_%s_%d.log",
+                purpose, dataset.getName(), MODEL, eval_metric.getName(), beam_width
+        );
 
         PrintStream original_out = System.out;
         PrintStream original_err = System.err;
@@ -65,7 +69,7 @@ public class TestCachedModel {
             System.setOut(ps_out);
             System.setErr(ps_err);
             SincWithRecalculateCache sinc = new SincWithRecalculateCache(
-                    config, dataset.getPath(), dump_path
+                    config, dataset.getPath(), dump_path, log_path
             );
             sinc.run();
         } catch (Exception e) {

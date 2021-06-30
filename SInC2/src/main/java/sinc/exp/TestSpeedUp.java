@@ -59,6 +59,10 @@ public class TestSpeedUp {
                 "%s/%s_%s_%d.result",
                 PURPOSE, MODEL, eval_metric.getName(), FAMILIES
         );
+        final String log_path = String.format(
+                "%s/%s_%s_%d.log",
+                PURPOSE, MODEL, eval_metric.getName(), FAMILIES
+        );
 
         PrintStream original_out = System.out;
         PrintStream original_err = System.err;
@@ -70,14 +74,14 @@ public class TestSpeedUp {
             switch (MODEL) {
                 case "basic": {
                     SInC sinc = new SincWithJpl(
-                            config, DATASET_PATH, dump_path
+                            config, DATASET_PATH, dump_path, log_path
                     );
                     sinc.run();
                     break;
                 }
                 case "Cr": {
                     SInC sinc = new SincWithRecalculateCache(
-                            config, DATASET_PATH, dump_path
+                            config, DATASET_PATH, dump_path, log_path
                     );
                     sinc.run();
                     break;

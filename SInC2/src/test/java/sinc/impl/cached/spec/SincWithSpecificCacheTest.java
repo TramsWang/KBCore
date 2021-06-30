@@ -55,6 +55,7 @@ class SincWithSpecificCacheTest {
             SincWithSpecificCache sinc = new SincWithSpecificCache(
                     config,
                     tmp_bk_file_path,
+                    null,
                     null
             );
             sinc.run();
@@ -153,6 +154,7 @@ class SincWithSpecificCacheTest {
             SincWithSpecificCache sinc = new SincWithSpecificCache(
                     config,
                     tmp_bk_file_path,
+                    null,
                     null
             );
             sinc.run();

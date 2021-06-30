@@ -55,6 +55,7 @@ class SincWithRecalculateCacheTest {
             SincWithRecalculateCache sinc = new SincWithRecalculateCache(
                     config,
                     tmp_bk_file_path,
+                    null,
                     null
             );
             sinc.run();
@@ -153,6 +154,7 @@ class SincWithRecalculateCacheTest {
             SincWithRecalculateCache sinc = new SincWithRecalculateCache(
                     config,
                     tmp_bk_file_path,
+                    null,
                     null
             );
             sinc.run();

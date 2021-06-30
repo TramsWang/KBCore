@@ -45,6 +45,10 @@ public class TestBasicModel {
                 "%s/%s/%s_%s_%d.result",
                 PURPOSE, dataset.getName(), MODEL, eval_metric.getName(), beam_width
         );
+        final String log_path = String.format(
+                "%s/%s/%s_%s_%d.log",
+                PURPOSE, dataset.getName(), MODEL, eval_metric.getName(), beam_width
+        );
 
         try {
             PrintStream ps_out = new PrintStream(new FileOutputStream(stdout_path));
@@ -52,7 +56,7 @@ public class TestBasicModel {
             System.setOut(ps_out);
             System.setErr(ps_err);
             SincWithJpl sinc = new SincWithJpl(
-                    config, dataset.getPath(), dump_path
+                    config, dataset.getPath(), dump_path, log_path
             );
             sinc.run();
         } catch (FileNotFoundException e) {

@@ -70,6 +70,10 @@ public class TestScalability {
                     "%s/%s_%s_%d.result",
                     PURPOSE, MODEL, eval_metric.getName(), families
             );
+            final String log_path = String.format(
+                    "%s/%s_%s_%d.log",
+                    PURPOSE, MODEL, eval_metric.getName(), families
+            );
 
             PrintStream original_out = System.out;
             PrintStream original_err = System.err;
@@ -79,7 +83,7 @@ public class TestScalability {
                 System.setOut(ps_out);
                 System.setErr(ps_err);
                 SincWithRecalculateCache sinc = new SincWithRecalculateCache(
-                        config, dataset_path, dump_path
+                        config, dataset_path, dump_path, log_path
                 );
                 sinc.run();
             } catch (Exception e) {

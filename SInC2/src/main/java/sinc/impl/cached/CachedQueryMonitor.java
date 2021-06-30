@@ -2,6 +2,7 @@ package sinc.impl.cached;
 
 import sinc.common.Eval;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,14 +37,14 @@ public class CachedQueryMonitor {
     public final List<CacheStat> cacheStats = new ArrayList<>();
     public final List<Eval> evalStats = new ArrayList<>();
 
-    public void show() {
-        System.out.println("### Cached Query Monitored Info ###\n");
-        System.out.println("--- Time Cost ---");
-        System.out.printf(
+    public void show(PrintWriter writer) {
+        writer.println("### Cached Query Monitored Info ###\n");
+        writer.println("--- Time Cost ---");
+        writer.printf(
                 "T(ms) %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
                 "[Pre", "AllEntail", "+Entail]", "[EBV", "EBV+", "NBV", "NBV+", "Const]", "#clone", "clone"
         );
-        System.out.printf(
+        writer.printf(
                 "      %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d\n\n",
                 preComputingCostInNano / DENOMINATOR,
                 allEntailQueryCostInNano / DENOMINATOR,
@@ -57,7 +58,7 @@ public class CachedQueryMonitor {
                 cloneCostInNano / DENOMINATOR
         );
 
-        System.out.println("--- Cache Entry Statistics ---");
+        writer.println("--- Cache Entry Statistics ---");
         CacheStat max_head = cacheStats.get(0);
         CacheStat max_body = cacheStats.get(0);
         CacheStat max_cart_opt = cacheStats.get(0);
@@ -73,27 +74,27 @@ public class CachedQueryMonitor {
             max_body = (cache_stat.bodyCachedEntries > max_body.bodyCachedEntries) ? cache_stat : max_body;
             max_cart_opt = (cache_stat.cartesianOperations > max_cart_opt.cartesianOperations) ? cache_stat : max_cart_opt;
         }
-        System.out.printf(
+        writer.printf(
                 "- Max Head Cache Entries: %d (%d in body, %d cartesian operations)\n",
                 max_head.headCachedEntries, max_head.bodyCachedEntries, max_head.cartesianOperations
         );
-        System.out.printf(
+        writer.printf(
                 "- Max Body Cache Entries: %d (%d in head, %d cartesian operations)\n",
                 max_body.bodyCachedEntries, max_body.headCachedEntries, max_body.cartesianOperations
         );
-        System.out.printf(
+        writer.printf(
                 "- Max Cartesian Operations: %d (%d cached entries in head, %d in body)\n",
                 max_cart_opt.cartesianOperations, max_cart_opt.headCachedEntries, max_cart_opt.bodyCachedEntries
         );
-        System.out.print("- Head Cache Entries: ");
-        System.out.println(Arrays.toString(head_entries));
-        System.out.print("- Body Cache Entries: ");
-        System.out.println(Arrays.toString(body_entries));
-        System.out.print("- Cartesian Operations: ");
-        System.out.println(Arrays.toString(cartesian_operations));
-        System.out.println();
+        writer.print("- Head Cache Entries: ");
+        writer.println(Arrays.toString(head_entries));
+        writer.print("- Body Cache Entries: ");
+        writer.println(Arrays.toString(body_entries));
+        writer.print("- Cartesian Operations: ");
+        writer.println(Arrays.toString(cartesian_operations));
+        writer.println();
 
-        System.out.println("--- Evaluation Statistics ---");
+        writer.println("--- Evaluation Statistics ---");
         double max_pos_ent = 0;
         double total_pos_ent = 0;
         double max_neg_ent = 0;
@@ -108,11 +109,11 @@ public class CachedQueryMonitor {
             max_ent = Math.max(max_ent, eval.getAllCnt());
             total_ent += eval.getAllCnt();
         }
-        System.out.printf(
+        writer.printf(
                 "# %10s %10s %10s %10s %10s %10s\n",
                 "max(+Ent)", "avg(+Ent)", "max(-Ent)", "avg(-Ent)", "max(Ent)", "avg(Ent)"
         );
-        System.out.printf(
+        writer.printf(
                 "  %10.0f %10.0f %10.0f %10.0f %10.0f %10.0f\n\n",
                 max_pos_ent, total_pos_ent / evalStats.size(),
                 max_neg_ent, total_neg_ent / evalStats.size(),

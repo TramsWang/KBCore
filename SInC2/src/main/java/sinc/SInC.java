@@ -18,6 +18,7 @@ public abstract class SInC {
     protected final SincConfig config;
     protected final String kbPath;
     protected final String dumpPath;
+    protected final PrintWriter logger;
 
     private final List<Rule> hypothesis = new ArrayList<>();
     private final Map<Predicate, BaseGraphNode<Predicate>> predicate2NodeMap = new HashMap<>();
@@ -37,10 +38,17 @@ public abstract class SInC {
         public int fvsVertices = 0;
     }
 
-    public SInC(SincConfig config, String kbPath, String dumpPath) {
+    public SInC(SincConfig config, String kbPath, String dumpPath, String logPath) {
         this.config = config;
         this.kbPath = kbPath;
         this.dumpPath = dumpPath;
+        PrintWriter writer;
+        try {
+            writer = (null == logPath) ? new PrintWriter(System.out) : new PrintWriter(logPath);
+        } catch (IOException e) {
+            writer = new PrintWriter(System.out);
+        }
+        this.logger = writer;
         Rule.MIN_FACT_COVERAGE = config.minFactCoverage;
     }
 
@@ -76,7 +84,7 @@ public abstract class SInC {
                     Comparator.comparingDouble((Rule r) -> r.getEval().value(eval_metric)).reversed()
             );
             for (Rule r: beams) {
-                System.out.printf("Extend: %s\n", r);
+                logger.printf("Extend: %s\n", r);
                 Rule r_max = r;
 
                 /* 遍历r的邻居 */
@@ -384,7 +392,7 @@ public abstract class SInC {
     abstract protected Set<Predicate> getOriginalKb();
 
     protected void showMonitor() {
-        performanceMonitor.show();
+        performanceMonitor.show(logger);
     }
 
     public List<Rule> getHypothesis() {
@@ -424,7 +432,7 @@ public abstract class SInC {
                 performanceMonitor.duplications = Rule.duplications;
 
                 if (null != rule && rule.getEval().useful(config.evalMetric)) {
-                    System.out.printf("Found: %s\n", rule);
+                    logger.printf("Found: %s\n", rule);
                     hypothesis.add(rule);
                     performanceMonitor.hypothesisSize += rule.size();
 
@@ -471,17 +479,17 @@ public abstract class SInC {
             performanceMonitor.totalTime = time_dumped - time_start;
 
             /* 打印所有rules */
-            System.out.println("\n### Hypothesis Found ###");
+            logger.println("\n### Hypothesis Found ###");
             for (Rule rule : hypothesis) {
-                System.out.println(rule);
+                logger.println(rule);
             }
-            System.out.println();
+            logger.println();
 
             showMonitor();
 
             if (config.debug) {
                 /* Todo: 图结构上传Neo4j */
-                System.out.println("[DEBUG] Upload Graph to Neo4J...");
+                logger.println("[DEBUG] Upload Graph to Neo4J...");
             }
         } catch (InterruptedSignal e) {
             /* 处理interruption (stdin里随便输入点什么) */
@@ -510,25 +518,25 @@ public abstract class SInC {
             performanceMonitor.totalTime = time_dumped - time_start;
 
             /* 打印所有rules */
-            System.out.println("\n### Hypothesis Found ###");
+            logger.println("\n### Hypothesis Found ###");
             for (Rule rule : hypothesis) {
-                System.out.println(rule);
+                logger.println(rule);
             }
-            System.out.println();
+            logger.println();
 
             showMonitor();
 
-            System.out.println("!!! The Result is Reserved Before INTERRUPTION !!!");
+            logger.println("!!! The Result is Reserved Before INTERRUPTION !!!");
         } catch (Exception | OutOfMemoryError e) {
             e.printStackTrace();
             System.err.flush();
 
             /* 打印当前已经得到的rules */
-            System.out.println("\n### Hypothesis Found (Current) ###");
+            logger.println("\n### Hypothesis Found (Current) ###");
             for (Rule rule : hypothesis) {
-                System.out.println(rule);
+                logger.println(rule);
             }
-            System.out.println();
+            logger.println();
 
             showMonitor();
         }
@@ -542,11 +550,15 @@ public abstract class SInC {
             while (task.isAlive() && (System.in.available() <= 0)) {
                 Thread.sleep(1000);
             }
-            interrupted = true;
-            task.join();
         } catch (IOException | InterruptedException e) {
-            interrupted = true;
             e.printStackTrace();
+        } finally {
+            interrupted = true;
+            try {
+                task.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -59,6 +59,7 @@ class SincWithJplTest {
             SincWithJpl sinc = new SincWithJpl(
                     config,
                     tmp_bk_file_path,
+                    null,
                     null
             );
             sinc.run();
@@ -158,6 +159,7 @@ class SincWithJplTest {
             SincWithJpl sinc = new SincWithJpl(
                     config,
                     tmp_bk_file_path,
+                    null,
                     null
             );
             sinc.run();

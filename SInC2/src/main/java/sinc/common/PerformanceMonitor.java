@@ -1,5 +1,6 @@
 package sinc.common;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,24 +47,24 @@ public class PerformanceMonitor {
     public int actualConstantSubstitutions = 0;
     public List<BranchInfo> branchProgress = new ArrayList<>();
 
-    public void show() {
-        System.out.println("### Monitored Performance Info ###\n");
-        System.out.println("--- Time Cost ---");
-        System.out.printf(
+    public void show(PrintWriter writer) {
+        writer.println("### Monitored Performance Info ###\n");
+        writer.println("--- Time Cost ---");
+        writer.printf(
                 "(ms) %10s %10s %10s %10s %10s %10s\n",
                 "Load", "Hypo", "N&A", "Validate", "Dump", "Total"
         );
-        System.out.printf(
+        writer.printf(
                 "     %10d %10d %10d %10d %10d %10d\n\n",
                 kbLoadTime, hypothesisMiningTime, otherMiningTime, validationTime, dumpTime, totalTime
         );
 
-        System.out.println("--- Statistics ---");
-        System.out.printf(
+        writer.println("--- Statistics ---");
+        writer.printf(
                 "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
                 "#F", "|C|", "|B|", "#H", "|H|", "|N|", "|A|", "|N/FVS|", "#SCC", "|SCC|", "|FVS|", "Comp(%)"
         );
-        System.out.printf(
+        writer.printf(
                 "  %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10.2f\n\n",
                 kbFunctors,
                 kbConstants,
@@ -79,7 +80,7 @@ public class PerformanceMonitor {
                 (startSetSize + counterExampleSize + hypothesisSize) * 100.0 / kbSize
         );
 
-        System.out.println("--- Other Statistics ---");
+        writer.println("--- Other Statistics ---");
         int executed_evaluations = 0;
         int max_branches = 0;
         int max_rule_size = 0;
@@ -107,12 +108,12 @@ public class PerformanceMonitor {
             max_org = Math.max(max_org, branches.orgNum);
             total_org += branches.orgNum;
         }
-        System.out.printf(
+        writer.printf(
                 "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
                 "#Invalid", "#Dup", "#Eval", "#+Subs", "#Subs", "max(Brh)", "avg(Brh)",
                 "max(|r|)", "avg(|r|)", "max(Ext)", "avg(Ext)", "max(Org)", "avg(Org)"
         );
-        System.out.printf(
+        writer.printf(
                 "  %10d %10d %10d %10d %10d %10d %10.2f %10d %10.2f %10d %10.2f %10d %10.2f\n\n",
                 invalidSearches,
                 duplications,
@@ -128,12 +129,12 @@ public class PerformanceMonitor {
                 max_org,
                 (double) total_org / branchProgress.size()
         );
-        System.out.print("- Rule Sizes: ");
-        System.out.println(Arrays.toString(rule_size_arr));
-        System.out.print("- Extensions: ");
-        System.out.println(Arrays.toString(ext_num_arr));
-        System.out.print("- Origins: ");
-        System.out.println(Arrays.toString(org_num_arr));
-        System.out.println();
+        writer.print("- Rule Sizes: ");
+        writer.println(Arrays.toString(rule_size_arr));
+        writer.print("- Extensions: ");
+        writer.println(Arrays.toString(ext_num_arr));
+        writer.print("- Origins: ");
+        writer.println(Arrays.toString(org_num_arr));
+        writer.println();
     }
 }
