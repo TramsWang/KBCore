@@ -109,14 +109,15 @@ public class PerformanceMonitor {
             total_org += branches.orgNum;
         }
         writer.printf(
-                "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
-                "#Invalid", "#Dup", "#Eval", "#+Subs", "#Subs", "max(Brh)", "avg(Brh)",
+                "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
+                "#Invalid", "#Dup", "#FC", "#Eval", "#+Subs", "#Subs", "max(Brh)", "avg(Brh)",
                 "max(|r|)", "avg(|r|)", "max(Ext)", "avg(Ext)", "max(Org)", "avg(Org)"
         );
         writer.printf(
-                "  %10d %10d %10d %10d %10d %10d %10.2f %10d %10.2f %10d %10.2f %10d %10.2f\n\n",
+                "  %10d %10d %10d %10d %10d %10d %10d %10.2f %10d %10.2f %10d %10.2f %10d %10.2f\n\n",
                 invalidSearches,
                 duplications,
+                fcFilteredRules,
                 executed_evaluations,
                 actualConstantSubstitutions,
                 totalConstantSubstitutions,
