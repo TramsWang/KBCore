@@ -657,6 +657,7 @@ public class RecalculateCachedRule extends Rule {
 
     @Override
     protected Eval calculateEval() {
+        monitor.actualEvaluations++;
         /* 统计head中的变量信息 */
         final long time_query_begin = System.nanoTime();
         final Set<Integer> head_vars = new HashSet<>();  // 统计Head only BV

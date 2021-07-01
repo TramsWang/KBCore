@@ -422,6 +422,7 @@ public abstract class SInC {
 
             /* 逐个functor找rule */
             final List<String> target_head_functors = getTargetFunctors();
+            final int total_targets = target_head_functors.size();
             do {
                 final long time_rule_finding_start = System.currentTimeMillis();
                 final int last_idx = target_head_functors.size() - 1;
@@ -444,6 +445,7 @@ public abstract class SInC {
                     performanceMonitor.otherMiningTime += time_kb_updated - time_rule_found;
                 } else {
                     target_head_functors.remove(last_idx);
+                    logger.printf("Target Done: %d/%d\n", total_targets - target_head_functors.size(), total_targets);
                 }
             } while (!target_head_functors.isEmpty());
             performanceMonitor.hypothesisRuleNumber = hypothesis.size();
@@ -539,6 +541,8 @@ public abstract class SInC {
             logger.println();
 
             showMonitor();
+
+            logger.println("!!! The Result is Reserved Before EXCEPTION !!!");
         }
     }
 
@@ -550,12 +554,13 @@ public abstract class SInC {
             while (task.isAlive() && (System.in.available() <= 0)) {
                 Thread.sleep(1000);
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             interrupted = true;
             try {
                 task.join();
+                logger.close();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
