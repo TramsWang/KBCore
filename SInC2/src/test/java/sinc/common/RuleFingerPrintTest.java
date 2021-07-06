@@ -3,9 +3,7 @@ package sinc.common;
 import org.junit.jupiter.api.Test;
 import sinc.util.MultiSet;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,13 +22,14 @@ class RuleFingerPrintTest {
         /* h(X, c) <- p(X, Y), q(Y, Z, e), h(Z, ?), h(X, ?) */
         /* Equivalence Classes:
          * - In Head:
-         *      X: {h[0], p[0], h[0]}
-         *      c: {h[1], c}
+         *      X: {{h[0]}, {p[0]}, {h[0]}}
+         *      c: {{h[1], c}}
          * - In Body:
-         *      Y: {p[1], q[0]}
-         *      Z: {q[1], h[0]}
-         *      e: {q[2], e}
-         *      ?: {h[1]}, {h[1]}
+         *      Y: {{p[1]}, {q[0]}}
+         *      Z: {{q[1]}, {h[0]}}
+         *      e: {{q[2], e}}
+         *      ?: {{h[1]}}
+         *      ?: {{h[1]}}
          */
         final Predicate head = new Predicate("h", 2);
         head.args[0] = new Variable(0);
@@ -57,52 +56,49 @@ class RuleFingerPrintTest {
         ));
         assertEquals(rule2String(rule), actual_string);
 
-        try {
-            RuleFingerPrint finger_print = new RuleFingerPrint(rule);
+        RuleFingerPrint finger_print = new RuleFingerPrint(rule);
 
-            String head_functor = finger_print.getHeadFunctor();
-            MultiSet<ArgIndicator>[] head_equiv_classes = finger_print.getHeadEquivClasses();
-            MultiSet<MultiSet<ArgIndicator>> other_equiv_classes = finger_print.getOtherEquivClasses();
+        String head_functor = finger_print.getHeadFunctor();
+        MultiSet<Set<ArgIndicator>>[] head_equiv_classes = finger_print.getHeadEquivClasses();
+        MultiSet<MultiSet<Set<ArgIndicator>>> other_equiv_classes = finger_print.getOtherEquivClasses();
 
-            assertEquals("h", head_functor);
+        assertEquals("h", head_functor);
 
-            MultiSet<ArgIndicator> ms_h0 = new MultiSet<>();
-            ms_h0.add(new VarIndicator("h", 0));
-            ms_h0.add(new VarIndicator("p", 0));
-            ms_h0.add(new VarIndicator("h", 0));
-            MultiSet<ArgIndicator> ms_h1 = new MultiSet<>();
-            ms_h1.add(new VarIndicator("h", 1));
-            ms_h1.add(new ConstIndicator("c"));
-            assertArrayEquals(new MultiSet[]{ms_h0, ms_h1}, head_equiv_classes);
+        MultiSet<Set<ArgIndicator>> ms_h0 = new MultiSet<>();
+        ms_h0.add(new HashSet<>(Collections.singleton(new VarIndicator("h", 0))));
+        ms_h0.add(new HashSet<>(Collections.singleton(new VarIndicator("p", 0))));
+        ms_h0.add(new HashSet<>(Collections.singleton(new VarIndicator("h", 0))));
+        MultiSet<Set<ArgIndicator>> ms_h1 = new MultiSet<>();
+        ms_h1.add(new HashSet<>(Arrays.asList(
+                new VarIndicator("h", 1), new ConstIndicator("c")
+        )));
+        assertArrayEquals(new MultiSet[]{ms_h0, ms_h1}, head_equiv_classes);
 
-            MultiSet<ArgIndicator> ms_y = new MultiSet<>();
-            ms_y.add(new VarIndicator("p", 1));
-            ms_y.add(new VarIndicator("q", 0));
-            MultiSet<ArgIndicator> ms_z = new MultiSet<>();
-            ms_z.add(new VarIndicator("q", 1));
-            ms_z.add(new VarIndicator("h", 0));
-            MultiSet<ArgIndicator> ms_e = new MultiSet<>();
-            ms_e.add(new VarIndicator("q", 2));
-            ms_e.add(new ConstIndicator("e"));
-            MultiSet<ArgIndicator> ms_u1 = new MultiSet<>();
-            ms_u1.add(new VarIndicator("h", 1));
-            MultiSet<ArgIndicator> ms_u2 = new MultiSet<>();
-            ms_u2.add(new VarIndicator("h", 1));
-            MultiSet<MultiSet<ArgIndicator>> expected_multi_set = new MultiSet<>();
-            expected_multi_set.add(ms_y);
-            expected_multi_set.add(ms_z);
-            expected_multi_set.add(ms_e);
-            expected_multi_set.add(ms_u1);
-            expected_multi_set.add(ms_u2);
-            assertEquals(expected_multi_set, other_equiv_classes);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+        MultiSet<Set<ArgIndicator>> ms_y = new MultiSet<>();
+        ms_y.add(new HashSet<>(Collections.singleton(new VarIndicator("p", 1))));
+        ms_y.add(new HashSet<>(Collections.singleton(new VarIndicator("q", 0))));
+        MultiSet<Set<ArgIndicator>> ms_z = new MultiSet<>();
+        ms_z.add(new HashSet<>(Collections.singleton(new VarIndicator("q", 1))));
+        ms_z.add(new HashSet<>(Collections.singleton(new VarIndicator("h", 0))));
+        MultiSet<Set<ArgIndicator>> ms_e = new MultiSet<>();
+        ms_e.add(new HashSet<>(Arrays.asList(
+                new VarIndicator("q", 2), new ConstIndicator("e")
+        )));
+        MultiSet<Set<ArgIndicator>> ms_u1 = new MultiSet<>();
+        ms_u1.add(new HashSet<>(Collections.singleton(new VarIndicator("h", 1))));
+        MultiSet<Set<ArgIndicator>> ms_u2 = new MultiSet<>();
+        ms_u2.add(new HashSet<>(Collections.singleton(new VarIndicator("h", 1))));
+        MultiSet<MultiSet<Set<ArgIndicator>>> expected_multi_set = new MultiSet<>();
+        expected_multi_set.add(ms_y);
+        expected_multi_set.add(ms_z);
+        expected_multi_set.add(ms_e);
+        expected_multi_set.add(ms_u1);
+        expected_multi_set.add(ms_u2);
+        assertEquals(expected_multi_set, other_equiv_classes);
     }
 
     @Test
-    public void testEquality() {
+    public void testEquality1() {
         /* R1: h(X, Y) <- h(Y, X) */
         /* R2: h(Y, X) <- h(X, Y) */
         final Predicate head1 = new Predicate("h", 2);
@@ -175,6 +171,39 @@ class RuleFingerPrintTest {
 
         assertNotEquals(finger_print5, finger_print6);
         assertNotEquals(finger_print6, finger_print5);
+    }
+
+    @Test
+    void testEquality2() {
+        /* r1: h(X,Y) :- p(X,X), p(?,Y) */
+        final Predicate head1 = new Predicate("h", 2);
+        head1.args[0] = new Variable(0);
+        head1.args[1] = new Variable(1);
+        final Predicate body11 = new Predicate("p", 2);
+        body11.args[0] = new Variable(0);
+        body11.args[1] = new Variable(0);
+        final Predicate body12 = new Predicate("p", 2);
+        body12.args[0] = null;
+        body12.args[1] = new Variable(1);
+        final List<Predicate> rule1 = new ArrayList<>(Arrays.asList(head1, body11, body12));
+        assertEquals(rule2String(rule1), "h(X0,X1):-p(X0,X0),p(?,X1)");
+        final RuleFingerPrint finger_print1 = new RuleFingerPrint(rule1);
+
+        /* r2: h(X,Y) :- p(X,Y), p(?,X) */
+        final Predicate head2 = new Predicate("h", 2);
+        head2.args[0] = new Variable(0);
+        head2.args[1] = new Variable(1);
+        final Predicate body21 = new Predicate("p", 2);
+        body21.args[0] = new Variable(0);
+        body21.args[1] = new Variable(1);
+        final Predicate body22 = new Predicate("p", 2);
+        body22.args[0] = null;
+        body22.args[1] = new Variable(0);
+        final List<Predicate> rule2 = new ArrayList<>(Arrays.asList(head2, body21, body22));
+        assertEquals(rule2String(rule2), "h(X0,X1):-p(X0,X1),p(?,X0)");
+        final RuleFingerPrint finger_print2 = new RuleFingerPrint(rule2);
+
+        assertNotEquals(finger_print1, finger_print2);
     }
 
     @Test
