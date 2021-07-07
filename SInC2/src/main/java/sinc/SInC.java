@@ -119,9 +119,10 @@ public abstract class SInC {
                 }
 
                 /* 监测：分支数量信息 */
-                performanceMonitor.branchProgress.add(new PerformanceMonitor.BranchInfo(
+                final PerformanceMonitor.BranchInfo branch_info = new PerformanceMonitor.BranchInfo(
                         r.size(), extensions.size(), origins.size()
-                ));
+                );
+                performanceMonitor.branchProgress.add(branch_info);
             }
 
             /* 如果有多个optimal，选择最优的返回 */
@@ -176,8 +177,24 @@ public abstract class SInC {
             for (ArgPos vacant: vacant_list) {
                 /* 尝试将已知变量填入空白参数 */
                 final Rule new_rule = rule.clone();
-                if (new_rule.boundFreeVar2ExistingVar(vacant.predIdx, vacant.argIdx, var_id)) {
-                    extensions.add(new_rule);
+                final Rule.UpdateStatus update_status = new_rule.boundFreeVar2ExistingVar(
+                        vacant.predIdx, vacant.argIdx, var_id
+                );
+                switch (update_status) {
+                    case NORMAL:
+                        extensions.add(new_rule);
+                        break;
+                    case INVALID:
+                        performanceMonitor.invalidSearches++;
+                        break;
+                    case DUPLICATED:
+                        performanceMonitor.duplications++;
+                        break;
+                    case INSUFFICIENT_COVERAGE:
+                        performanceMonitor.fcFilteredRules++;
+                        break;
+                    default:
+                        throw new Error("Unknown Update Status of Rule: " + update_status.name());
                 }
                 if (interrupted) {
                     throw new InterruptedSignal("Interrupted");
@@ -190,8 +207,24 @@ public abstract class SInC {
                 final int arity = entry.getValue();
                 for (int arg_idx = 0; arg_idx < arity; arg_idx++) {
                     final Rule new_rule = rule.clone();
-                    if (new_rule.boundFreeVar2ExistingVar(functor, arity, arg_idx, var_id)) {
-                        extensions.add(new_rule);
+                    final Rule.UpdateStatus update_status = new_rule.boundFreeVar2ExistingVar(
+                            functor, arity, arg_idx, var_id
+                    );
+                    switch (update_status) {
+                        case NORMAL:
+                            extensions.add(new_rule);
+                            break;
+                        case INVALID:
+                            performanceMonitor.invalidSearches++;
+                            break;
+                        case DUPLICATED:
+                            performanceMonitor.duplications++;
+                            break;
+                        case INSUFFICIENT_COVERAGE:
+                            performanceMonitor.fcFilteredRules++;
+                            break;
+                        default:
+                            throw new Error("Unknown Update Status of Rule: " + update_status.name());
                     }
                     if (interrupted) {
                         throw new InterruptedSignal("Interrupted");
@@ -210,8 +243,24 @@ public abstract class SInC {
             final List<String> const_list = func_2_promising_const_map.get(predicate.functor)[first_vacant.argIdx];
             for (String const_symbol: const_list) {
                 final Rule new_rule = rule.clone();
-                if (new_rule.boundFreeVar2Constant(first_vacant.predIdx, first_vacant.argIdx, const_symbol)) {
-                    extensions.add(new_rule);
+                final Rule.UpdateStatus update_status = new_rule.boundFreeVar2Constant(
+                        first_vacant.predIdx, first_vacant.argIdx, const_symbol
+                );
+                switch (update_status) {
+                    case NORMAL:
+                        extensions.add(new_rule);
+                        break;
+                    case INVALID:
+                        performanceMonitor.invalidSearches++;
+                        break;
+                    case DUPLICATED:
+                        performanceMonitor.duplications++;
+                        break;
+                    case INSUFFICIENT_COVERAGE:
+                        performanceMonitor.fcFilteredRules++;
+                        break;
+                    default:
+                        throw new Error("Unknown Update Status of Rule: " + update_status.name());
                 }
                 if (interrupted) {
                     throw new InterruptedSignal("Interrupted");
@@ -223,10 +272,24 @@ public abstract class SInC {
                 /* 新变量的第二个位置可以是当前rule中的其他空位 */
                 final ArgPos second_vacant = vacant_list.get(j);
                 final Rule new_rule = rule.clone();
-                if (new_rule.boundFreeVars2NewVar(
+                final Rule.UpdateStatus update_status = new_rule.boundFreeVars2NewVar(
                         first_vacant.predIdx, first_vacant.argIdx, second_vacant.predIdx, second_vacant.argIdx
-                )) {
-                    extensions.add(new_rule);
+                );
+                switch (update_status) {
+                    case NORMAL:
+                        extensions.add(new_rule);
+                        break;
+                    case INVALID:
+                        performanceMonitor.invalidSearches++;
+                        break;
+                    case DUPLICATED:
+                        performanceMonitor.duplications++;
+                        break;
+                    case INSUFFICIENT_COVERAGE:
+                        performanceMonitor.fcFilteredRules++;
+                        break;
+                    default:
+                        throw new Error("Unknown Update Status of Rule: " + update_status.name());
                 }
                 if (interrupted) {
                     throw new InterruptedSignal("Interrupted");
@@ -238,10 +301,24 @@ public abstract class SInC {
                 final int arity = entry.getValue();
                 for (int arg_idx = 0; arg_idx < arity; arg_idx++) {
                     final Rule new_rule = rule.clone();
-                    if (new_rule.boundFreeVars2NewVar(
+                    final Rule.UpdateStatus update_status = new_rule.boundFreeVars2NewVar(
                             functor, arity, arg_idx, first_vacant.predIdx, first_vacant.argIdx
-                    )) {
-                        extensions.add(new_rule);
+                    );
+                    switch (update_status) {
+                        case NORMAL:
+                            extensions.add(new_rule);
+                            break;
+                        case INVALID:
+                            performanceMonitor.invalidSearches++;
+                            break;
+                        case DUPLICATED:
+                            performanceMonitor.duplications++;
+                            break;
+                        case INSUFFICIENT_COVERAGE:
+                            performanceMonitor.fcFilteredRules++;
+                            break;
+                        default:
+                            throw new Error("Unknown Update Status of Rule: " + update_status.name());
                     }
                     if (interrupted) {
                         throw new InterruptedSignal("Interrupted");
@@ -266,8 +343,22 @@ public abstract class SInC {
             for (int arg_idx = 0; arg_idx < predicate.arity(); arg_idx++) {
                 if (null != predicate.args[arg_idx]) {
                     final Rule new_rule = rule.clone();
-                    if (new_rule.removeBoundedArg(pred_idx, arg_idx)) {
-                        origins.add(new_rule);
+                    final Rule.UpdateStatus update_status = new_rule.removeBoundedArg(pred_idx, arg_idx);
+                    switch (update_status) {
+                        case NORMAL:
+                            origins.add(new_rule);
+                            break;
+                        case INVALID:
+                            performanceMonitor.invalidSearches++;
+                            break;
+                        case DUPLICATED:
+                            performanceMonitor.duplications++;
+                            break;
+                        case INSUFFICIENT_COVERAGE:
+                            performanceMonitor.fcFilteredRules++;
+                            break;
+                        default:
+                            throw new Error("Unknown Update Status of Rule: " + update_status.name());
                     }
                     if (interrupted) {
                         throw new InterruptedSignal("Interrupted");
@@ -407,6 +498,10 @@ public abstract class SInC {
         return counterExamples;
     }
 
+    public PerformanceMonitor getPerformanceMonitor() {
+        return performanceMonitor;
+    }
+
     private void runHandler() {
         final long time_start = System.currentTimeMillis();
         try {
@@ -430,7 +525,6 @@ public abstract class SInC {
                 final Rule rule = findRule(functor);
                 final long time_rule_found = System.currentTimeMillis();
                 performanceMonitor.hypothesisMiningTime += time_rule_found - time_rule_finding_start;
-                performanceMonitor.duplications = Rule.duplications;
 
                 if (null != rule && rule.getEval().useful(config.evalMetric)) {
                     logger.printf("Found: %s\n", rule);
@@ -450,9 +544,6 @@ public abstract class SInC {
             } while (!target_head_functors.isEmpty());
             performanceMonitor.hypothesisRuleNumber = hypothesis.size();
             performanceMonitor.counterExampleSize = counterExamples.size();
-            performanceMonitor.invalidSearches = Rule.invalidSearches;
-            performanceMonitor.duplications = Rule.duplications;
-            performanceMonitor.fcFilteredRules = Rule.fcFiltered;
 
             /* 解析Graph找start set */
             final long time_graph_analyse_begin = System.currentTimeMillis();
@@ -498,9 +589,6 @@ public abstract class SInC {
             /* 从结束 Rule Finding 开始 */
             performanceMonitor.hypothesisRuleNumber = hypothesis.size();
             performanceMonitor.counterExampleSize = counterExamples.size();
-            performanceMonitor.invalidSearches = Rule.invalidSearches;
-            performanceMonitor.duplications = Rule.duplications;
-            performanceMonitor.fcFilteredRules = Rule.fcFiltered;
 
             /* 解析Graph找start set */
             final long time_graph_analyse_begin = System.currentTimeMillis();
@@ -560,7 +648,7 @@ public abstract class SInC {
             interrupted = true;
             try {
                 task.join();
-                logger.close();
+                logger.flush();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

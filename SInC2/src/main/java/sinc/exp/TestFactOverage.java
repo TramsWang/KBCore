@@ -2,6 +2,7 @@ package sinc.exp;
 
 import sinc.SincConfig;
 import sinc.common.Eval;
+import sinc.impl.basic.SincWithJpl;
 import sinc.impl.cached.recal.SincWithRecalculateCache;
 
 import java.io.File;
@@ -14,7 +15,7 @@ public class TestFactOverage {
 
         final String purpose = "Test Fact Coverage";
         final int beam_width = 2;
-        final Dataset dataset = Dataset.FAMILY_MEDIUM;
+        final Dataset dataset = Dataset.ELTI;
         final Eval.EvalMetric eval_metric = Eval.EvalMetric.CompressionCapacity;
 
         for (double fc = 0; fc <= 0.05; fc += 0.01) {

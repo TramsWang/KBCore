@@ -150,7 +150,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, cache.size());
 
         /* parent(X, ?) :- father(X, ?) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
         assertTrue(rule.toString().contains("parent(X0,?):-father(X0,?)"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-father(X0,X2)"));
         assertEquals(
@@ -228,7 +228,7 @@ class RecalculateCachedRuleTest {
         assertEquals(2, cache.size());
 
         /* parent(X, Y) :- father(X, Y) */
-        assertTrue(rule.boundFreeVars2NewVar(0, 1, 1, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(0, 1, 1, 1));
         assertTrue(rule.toString().contains("parent(X0,X1):-father(X0,X1)"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-father(X0,X1)"));
         assertEquals(
@@ -268,7 +268,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, cache.size());
 
         /* parent(?, X) :- father(?, X) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 1));
         assertTrue(rule.toString().contains("parent(?,X0):-father(?,X0)"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X1,X0):-father(X2,X0)"));
         assertEquals(
@@ -326,7 +326,7 @@ class RecalculateCachedRuleTest {
         assertEquals(2, cache.size());
 
         /* parent(Y, X) :- father(Y, X) */
-        assertTrue(rule.boundFreeVars2NewVar(0, 0, 1, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(0, 0, 1, 0));
         assertTrue(rule.toString().contains("parent(X1,X0):-father(X1,X0)"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X1,X0):-father(X1,X0)"));
         assertEquals(
@@ -366,7 +366,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, cache.size());
 
         /* grandParent(X, ?) :- parent(X, ?) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
         assertTrue(rule.toString().contains("grandParent(X0,?):-parent(X0,?)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X1):-parent(X0,X2)"));
         assertEquals(
@@ -378,7 +378,7 @@ class RecalculateCachedRuleTest {
         assertEquals(2, cache.size());
 
         /* grandParent(X, Y) :- parent(X, ?), parent(?, Y) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 1, 0, 1));
         assertTrue(rule.toString().contains("grandParent(X0,X1):-parent(X0,?),parent(?,X1)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X1):-parent(X0,X2),parent(X3,X1)"));
         assertEquals(
@@ -449,7 +449,7 @@ class RecalculateCachedRuleTest {
         assertEquals(expected_counter_examples, update_result.counterExamples);
 
         /* grandParent(X, Y) :- parent(X, Z), parent(Z, Y) */
-        assertTrue(rule.boundFreeVars2NewVar(1, 1, 2, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(1, 1, 2, 0));
         assertTrue(rule.toString().contains("grandParent(X0,X1):-parent(X0,X2),parent(X2,X1)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X1):-parent(X0,X2),parent(X2,X1)"));
         assertEquals(
@@ -489,7 +489,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, cache.size());
 
         /* grandParent(X, ?) :- parent(X, ?) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
         assertTrue(rule.toString().contains("grandParent(X0,?):-parent(X0,?)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X1):-parent(X0,X2)"));
         assertEquals(
@@ -501,7 +501,7 @@ class RecalculateCachedRuleTest {
         assertEquals(2, cache.size());
 
         /* grandParent(X, ?) :- parent(X, Y), parent(Y, ?) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 1, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 1, 1));
         assertTrue(rule.toString().contains("grandParent(X0,?):-parent(X0,X1),parent(X1,?)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X2):-parent(X0,X1),parent(X1,X3)"));
         assertEquals(
@@ -513,7 +513,7 @@ class RecalculateCachedRuleTest {
         assertEquals(3, cache.size());
 
         /* grandParent(X, Z) :- parent(X, Y), parent(Y, Z) */
-        assertTrue(rule.boundFreeVars2NewVar(2, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(2, 1, 0, 1));
         assertTrue(rule.toString().contains("grandParent(X0,X2):-parent(X0,X1),parent(X1,X2)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X2):-parent(X0,X1),parent(X1,X2)"));
         assertEquals(
@@ -598,7 +598,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, cache.size());
 
         /* grandParent(X, ?) :- parent(X, ?) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
         assertTrue(rule.toString().contains("grandParent(X0,?):-parent(X0,?)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X1):-parent(X0,X2)"));
         assertEquals(
@@ -610,7 +610,7 @@ class RecalculateCachedRuleTest {
         assertEquals(2, cache.size());
 
         /* grandParent(X, ?) :- parent(X, Y), father(Y, ?) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 1, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 1, 1));
         assertTrue(rule.toString().contains("grandParent(X0,?):-parent(X0,X1),father(X1,?)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X2):-parent(X0,X1),father(X1,X3)"));
         assertEquals(
@@ -622,7 +622,7 @@ class RecalculateCachedRuleTest {
         assertEquals(3, cache.size());
 
         /* grandParent(X, Z) :- parent(X, Y), father(Y, Z) */
-        assertTrue(rule.boundFreeVars2NewVar(2, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(2, 1, 0, 1));
         assertTrue(rule.toString().contains("grandParent(X0,X2):-parent(X0,X1),father(X1,X2)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X0,X2):-parent(X0,X1),father(X1,X2)"));
         assertEquals(
@@ -687,7 +687,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, cache.size());
 
         /* grandParent(?, X) :- father(?, X) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 1));
         assertTrue(rule.toString().contains("grandParent(?,X0):-father(?,X0)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(X1,X0):-father(X2,X0)"));
         assertEquals(
@@ -699,7 +699,7 @@ class RecalculateCachedRuleTest {
         assertEquals(2, cache.size());
 
         /* grandParent(g1, X) :- father(?, X) */
-        assertTrue(rule.boundFreeVar2Constant(0, 0, "g1"));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVar2Constant(0, 0, "g1"));
         assertTrue(rule.toString().contains("grandParent(g1,X0):-father(?,X0)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(g1,X0):-father(X1,X0)"));
         assertEquals(
@@ -733,7 +733,7 @@ class RecalculateCachedRuleTest {
         assertEquals(expected_counter_examples, update_result.counterExamples);
 
         /* grandParent(g1, X) :- father(f2, X) */
-        assertTrue(rule.boundFreeVar2Constant(1, 0, "f2"));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVar2Constant(1, 0, "f2"));
         assertTrue(rule.toString().contains("grandParent(g1,X0):-father(f2,X0)"));
         assertTrue(rule.toCompleteRuleString().contains("grandParent(g1,X0):-father(f2,X0)"));
         assertEquals(
@@ -773,7 +773,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, cache.size());
 
         /* parent(X, X) :- */
-        assertTrue(rule.boundFreeVars2NewVar(0, 0, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(0, 0, 0, 1));
         assertTrue(rule.toString().contains("parent(X0,X0):-"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X0,X0):-"));
         assertEquals(
@@ -812,7 +812,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, cache.size());
 
         /* father(X, ?):- parent(?, X) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 1, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 1, 0, 0));
         assertTrue(rule.toString().contains("father(X0,?):-parent(?,X0)"));
         assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-parent(X2,X0)"));
         assertEquals(
@@ -824,7 +824,7 @@ class RecalculateCachedRuleTest {
         assertEquals(2, cache.size());
 
         /* father(X, ?):- parent(?, X), parent(X, ?) */
-        assertTrue(rule.boundFreeVar2ExistingVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVar2ExistingVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0));
         assertTrue(rule.toString().contains("father(X0,?):-parent(?,X0),parent(X0,?)"));
         assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-parent(X2,X0),parent(X0,X3)"));
         assertEquals(
@@ -937,7 +937,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, rule1.length());
 
         /* #1: father(f2,?):- */
-        assertTrue(rule1.boundFreeVar2Constant(0, 0, "f2"));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule1.boundFreeVar2Constant(0, 0, "f2"));
         assertTrue(rule1.toString().contains("father(f2,?):-"));
         assertTrue(rule1.toCompleteRuleString().contains("father(f2,X0):-"));
         assertEquals(
@@ -1015,7 +1015,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, rule.length());
 
         /* father(X, ?):- father(X, ?) */
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
         assertTrue(rule.toString().contains("father(X0,?):-parent(X0,?)"));
         assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-parent(X0,X2)"));
         assertEquals(
@@ -1026,7 +1026,7 @@ class RecalculateCachedRuleTest {
         assertEquals(2, rule.length());
 
         /* father(X, ?):- father(X, X) */
-        assertTrue(rule.boundFreeVar2ExistingVar(1, 1, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVar2ExistingVar(1, 1, 0));
         assertTrue(rule.toString().contains("father(X0,?):-parent(X0,X0)"));
         assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-parent(X0,X0)"));
         assertEquals(
@@ -1086,7 +1086,7 @@ class RecalculateCachedRuleTest {
 
         /* #1: grandParent(X, ?) :- parent(X, ?) */
         final RecalculateCachedRule rule1 = new RecalculateCachedRule(rule);
-        assertTrue(rule1.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule1.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
         assertTrue(rule1.toString().contains("grandParent(X0,?):-parent(X0,?)"));
         assertTrue(rule1.toCompleteRuleString().contains("grandParent(X0,X1):-parent(X0,X2)"));
         assertEquals(
@@ -1098,7 +1098,7 @@ class RecalculateCachedRuleTest {
         assertEquals(2, cache.size());
 
         /* #1: grandParent(X, ?) :- parent(X, Y), father(Y, ?) */
-        assertTrue(rule1.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 1, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule1.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 1, 1));
         assertTrue(rule1.toString().contains("grandParent(X0,?):-parent(X0,X1),father(X1,?)"));
         assertTrue(rule1.toCompleteRuleString().contains("grandParent(X0,X2):-parent(X0,X1),father(X1,X3)"));
         assertEquals(
@@ -1110,7 +1110,7 @@ class RecalculateCachedRuleTest {
         assertEquals(3, cache.size());
 
         /* #1: grandParent(X, Z) :- parent(X, Y), father(Y, Z) */
-        assertTrue(rule1.boundFreeVars2NewVar(2, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule1.boundFreeVars2NewVar(2, 1, 0, 1));
         assertTrue(rule1.toString().contains("grandParent(X0,X2):-parent(X0,X1),father(X1,X2)"));
         assertTrue(rule1.toCompleteRuleString().contains("grandParent(X0,X2):-parent(X0,X1),father(X1,X2)"));
         assertEquals(
@@ -1158,12 +1158,12 @@ class RecalculateCachedRuleTest {
 
         /* #2: grandParent(X, ?) :- parent(X, ?) */
         final RecalculateCachedRule rule2 = new RecalculateCachedRule(rule);
-        assertFalse(rule2.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, rule2.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_PARENT, 0, 0, 0));
         assertEquals(4, cache.size());
 
         /* #3: grandParent(?, X) :- father(?, X) */
         final RecalculateCachedRule rule3 = new RecalculateCachedRule(rule);
-        assertTrue(rule3.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule3.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 1));
         assertTrue(rule3.toString().contains("grandParent(?,X0):-father(?,X0)"));
         assertTrue(rule3.toCompleteRuleString().contains("grandParent(X1,X0):-father(X2,X0)"));
         assertEquals(
@@ -1175,7 +1175,7 @@ class RecalculateCachedRuleTest {
         assertEquals(5, cache.size());
 
         /* #3: grandParent(Y, X) :- father(?, X), parent(Y, ?) */
-        assertTrue(rule3.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_FATHER, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule3.boundFreeVars2NewVar(FUNCTOR_PARENT, ARITY_FATHER, 0, 0, 0));
         assertTrue(rule3.toString().contains("grandParent(X1,X0):-father(?,X0),parent(X1,?)"));
         assertTrue(rule3.toCompleteRuleString().contains("grandParent(X1,X0):-father(X2,X0),parent(X1,X3)"));
         assertEquals(
@@ -1201,7 +1201,7 @@ class RecalculateCachedRuleTest {
         assertEquals(expected_counter_examples, update_result.counterExamples);
 
         /* #3: grandParent(Y, X) :- father(Z, X), parent(Y, Z) */
-        assertFalse(rule3.boundFreeVars2NewVar(1, 0, 2, 1));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, rule3.boundFreeVars2NewVar(1, 0, 2, 1));
         assertEquals(6, cache.size());
     }
 
@@ -1223,7 +1223,7 @@ class RecalculateCachedRuleTest {
         assertEquals(1, cache.size());
 
         /* #1: parent(f2, ?) :- */
-        assertTrue(rule1.boundFreeVar2Constant(0, 0, "f2"));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule1.boundFreeVar2Constant(0, 0, "f2"));
         assertTrue(rule1.toString().contains("parent(f2,?):-"));
         assertTrue(rule1.toCompleteRuleString().contains("parent(f2,X0):-"));
         assertEquals(
@@ -1236,7 +1236,7 @@ class RecalculateCachedRuleTest {
 
         /* #2: parent(f2, d2) :- */
         final RecalculateCachedRule rule2 = new RecalculateCachedRule(rule1);
-        assertTrue(rule2.boundFreeVar2Constant(0, 1, "d2"));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule2.boundFreeVar2Constant(0, 1, "d2"));
         assertTrue(rule2.toString().contains("parent(f2,d2):-"));
         assertTrue(rule2.toCompleteRuleString().contains("parent(f2,d2):-"));
         assertEquals(
@@ -1261,7 +1261,7 @@ class RecalculateCachedRuleTest {
 
         /* #3: parent(f2, X) :- father(?, X) */
         final RecalculateCachedRule rule3 = new RecalculateCachedRule(rule1);
-        assertTrue(rule3.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule3.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 1));
         assertTrue(rule3.toString().contains("parent(f2,X0):-father(?,X0)"));
         assertTrue(rule3.toCompleteRuleString().contains("parent(f2,X0):-father(X1,X0)"));
         assertEquals(
@@ -1307,18 +1307,18 @@ class RecalculateCachedRuleTest {
 
         /* #1: father(X,?) :- father(?,X) */
         final RecalculateCachedRule rule1 = new RecalculateCachedRule(rule);
-        assertTrue(rule1.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule1.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 0));
         assertTrue(rule1.toString().contains("father(X0,?):-father(?,X0)"));
         assertTrue(rule1.toCompleteRuleString().contains("father(X0,X1):-father(X2,X0)"));
 
         /* #1: father(X,Y) :- father(Y,X) */
-        assertTrue(rule1.boundFreeVars2NewVar(0, 1, 1, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule1.boundFreeVars2NewVar(0, 1, 1, 0));
         assertTrue(rule1.toString().contains("father(X0,X1):-father(X1,X0)"));
         assertTrue(rule1.toCompleteRuleString().contains("father(X0,X1):-father(X1,X0)"));
 
         /* #2: father(X,?) :- father(X,?) [invalid] */
         final RecalculateCachedRule rule2 = new RecalculateCachedRule(rule);
-        assertFalse(rule2.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, rule2.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
     }
 
     @Test
@@ -1328,17 +1328,17 @@ class RecalculateCachedRuleTest {
 
         /* father(X,?) :- father(?,X) */
         final RecalculateCachedRule rule = new RecalculateCachedRule(FUNCTOR_FATHER, cache, kb);
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0, 0));
         assertTrue(rule.toString().contains("father(X0,?):-father(?,X0)"));
         assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-father(X2,X0)"));
 
         /* father(X,?) :- father(?,X), father(?,X) */
-        assertTrue(rule.boundFreeVar2ExistingVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVar2ExistingVar(FUNCTOR_FATHER, ARITY_FATHER, 1, 0));
         assertTrue(rule.toString().contains("father(X0,?):-father(?,X0),father(?,X0)"));
         assertTrue(rule.toCompleteRuleString().contains("father(X0,X1):-father(X2,X0),father(X3,X0)"));
 
         /* father(X,?) :- father(Y,X), father(Y,X) [invalid] */
-        assertFalse(rule.boundFreeVars2NewVar(1, 0, 2, 0));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(1, 0, 2, 0));
     }
 
     @Test
@@ -1356,7 +1356,7 @@ class RecalculateCachedRuleTest {
         assertEquals(0, rule.usedBoundedVars());
         assertEquals(1, rule.length());
 
-        assertTrue(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
         assertTrue(rule.toString().contains("parent(X0,?):-father(X0,?)"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-father(X0,X2)"));
         assertEquals(
@@ -1383,7 +1383,7 @@ class RecalculateCachedRuleTest {
         assertEquals(0, rule.usedBoundedVars());
         assertEquals(1, rule.length());
 
-        assertFalse(rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(FUNCTOR_FATHER, ARITY_FATHER, 0, 0, 0));
         assertTrue(rule.toString().contains("parent(X0,?):-father(X0,?)"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-father(X0,X2)"));
     }

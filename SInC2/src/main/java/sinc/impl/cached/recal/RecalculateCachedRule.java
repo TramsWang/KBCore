@@ -93,19 +93,18 @@ public class RecalculateCachedRule extends Rule {
     }
 
     @Override
-    protected boolean boundFreeVar2ExistingVarHandler(int predIdx, int argIdx, int varId) {
+    protected UpdateStatus boundFreeVar2ExistingVarHandler(int predIdx, int argIdx, int varId) {
         final long time_start = System.nanoTime();
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, false);
 
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
 
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, true);
         final long time_done = System.nanoTime();
         monitor.boundExistVarCostInNano += time_done - time_start;
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
     /**
@@ -191,19 +190,18 @@ public class RecalculateCachedRule extends Rule {
     }
 
     @Override
-    protected boolean boundFreeVar2ExistingVarHandler(Predicate newPredicate, int argIdx, int varId) {
+    protected UpdateStatus boundFreeVar2ExistingVarHandler(Predicate newPredicate, int argIdx, int varId) {
         final long time_start = System.nanoTime();
         boundFreeVar2ExistingVarUpdateCache(newPredicate, argIdx, varId, false);
 
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
 
         boundFreeVar2ExistingVarUpdateCache(newPredicate, argIdx, varId, true);
         final long time_done = System.nanoTime();
         monitor.boundExistVarInNewPredCostInNano += time_done - time_start;
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
     /**
@@ -291,19 +289,18 @@ public class RecalculateCachedRule extends Rule {
     }
 
     @Override
-    protected boolean boundFreeVars2NewVarHandler(int predIdx1, int argIdx1, int predIdx2, int argIdx2) {
+    protected UpdateStatus boundFreeVars2NewVarHandler(int predIdx1, int argIdx1, int predIdx2, int argIdx2) {
         final long time_start = System.nanoTime();
         boundFreeVars2NewVarUpdateCache(predIdx1, argIdx1, predIdx2, argIdx2, false);
 
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
 
         boundFreeVars2NewVarUpdateCache(predIdx1, argIdx1, predIdx2, argIdx2, true);
         final long time_done = System.nanoTime();
         monitor.boundNewVarCostInNano += time_done - time_start;
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
     /**
@@ -454,19 +451,18 @@ public class RecalculateCachedRule extends Rule {
     }
 
     @Override
-    protected boolean boundFreeVars2NewVarHandler(Predicate newPredicate, int argIdx1, int predIdx2, int argIdx2) {
+    protected UpdateStatus boundFreeVars2NewVarHandler(Predicate newPredicate, int argIdx1, int predIdx2, int argIdx2) {
         final long time_start = System.nanoTime();
         boundFreeVars2NewVarUpdateCache(newPredicate, argIdx1, predIdx2, argIdx2, false);
 
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
 
         boundFreeVars2NewVarUpdateCache(newPredicate, argIdx1, predIdx2, argIdx2, true);
         final long time_done = System.nanoTime();
         monitor.boundNewVarInNewPredCostInNano += time_done - time_start;
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
     /**
@@ -571,19 +567,18 @@ public class RecalculateCachedRule extends Rule {
     }
 
     @Override
-    protected boolean boundFreeVar2ConstantHandler(int predIdx, int argIdx, String constantSymbol) {
+    protected UpdateStatus boundFreeVar2ConstantHandler(int predIdx, int argIdx, String constantSymbol) {
         final long time_start = System.nanoTime();
         boundFreeVar2ConstantUpdateCache(predIdx, argIdx, constantSymbol, false);
 
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
 
         boundFreeVar2ConstantUpdateCache(predIdx, argIdx, constantSymbol, true);
         final long time_done = System.nanoTime();
         monitor.boundConstCostInNano += time_done - time_start;
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
     /**
@@ -628,15 +623,15 @@ public class RecalculateCachedRule extends Rule {
     }
 
     @Override
-    public boolean removeBoundedArg(int predIdx, int argIdx) {
+    public UpdateStatus removeBoundedArg(int predIdx, int argIdx) {
         /* Forward Cached Rule 不支持向前做cache */
-        return false;
+        return UpdateStatus.INVALID;
     }
 
     @Override
-    protected boolean removeBoundedArgHandler(int predIdx, int argIdx) {
+    protected UpdateStatus removeBoundedArgHandler(int predIdx, int argIdx) {
         /* 这里也是什么都不做 */
-        return false;
+        return UpdateStatus.INVALID;
     }
 
     @Override

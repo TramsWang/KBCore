@@ -11,10 +11,9 @@ public abstract class Rule {
 
     public static double MIN_FACT_COVERAGE = 0.0;
 
-    /* 统计数值 */
-    public static int invalidSearches = 0;
-    public static int duplications = 0;
-    public static int fcFiltered = 0;
+    public enum UpdateStatus {
+        NORMAL, DUPLICATED, INVALID, INSUFFICIENT_COVERAGE
+    }
 
     protected final List<Predicate> structure;
     protected final List<Variable> boundedVars;  // Bounded vars use non-negative ids(list index)
@@ -22,9 +21,9 @@ public abstract class Rule {
     protected RuleFingerPrint fingerPrint;
     protected int equivConds;
     protected Eval eval;
-    protected final Set<RuleFingerPrint> searchedRules;
+    protected final Set<RuleFingerPrint> searchedFingerprints;
 
-    public Rule(String headFunctor, int arity, Set<RuleFingerPrint> searchedRules) {
+    public Rule(String headFunctor, int arity, Set<RuleFingerPrint> searchedFingerprints) {
         structure = new ArrayList<>();
         boundedVars = new ArrayList<>();
         boundedVarCnts = new ArrayList<>();
@@ -36,8 +35,8 @@ public abstract class Rule {
         equivConds = 0;
         eval = null;
 
-        this.searchedRules = searchedRules;
-        this.searchedRules.add(fingerPrint);
+        this.searchedFingerprints = searchedFingerprints;
+        this.searchedFingerprints.add(fingerPrint);
     }
 
     public Rule(Rule another) {
@@ -50,7 +49,7 @@ public abstract class Rule {
         this.fingerPrint = another.fingerPrint;
         this.equivConds = another.equivConds;
         this.eval = another.eval;
-        this.searchedRules = another.searchedRules;
+        this.searchedFingerprints = another.searchedFingerprints;
     }
 
     public abstract Rule clone();
@@ -83,15 +82,8 @@ public abstract class Rule {
      * 以下几种情况为Invalid：
      *   1. Trivial
      *   2. Independent Fragment
-     *   3. Cache Hit
      */
     protected boolean isInvalid() {
-        /* 检查是否命中Cache */
-        if (!searchedRules.add(fingerPrint)) {
-            duplications++;
-            return true;
-        }
-
         /* Independent Fragment(可能在找origin的时候出现) */
         /* 用并查集检查 */
         /* Assumption: 没有全部是Free Var或Const的Pred(除了head)，因此把所有Bounded Var根据在一个Pred里出现进行合并即可 */
@@ -175,7 +167,7 @@ public abstract class Rule {
      *
      * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
      */
-    public boolean boundFreeVar2ExistingVar(
+    public UpdateStatus boundFreeVar2ExistingVar(
             final int predIdx, final int argIdx, final int varId
     ) {
         /* 改变Rule结构 */
@@ -185,30 +177,34 @@ public abstract class Rule {
         equivConds++;
         fingerPrint = new RuleFingerPrint(structure);
 
+        /* 检查是否命中Cache */
+        if (!searchedFingerprints.add(fingerPrint)) {
+            return UpdateStatus.DUPLICATED;
+        }
+
         /* 检查合法性 */
         if (isInvalid()) {
-            invalidSearches++;
-            return false;
+            return UpdateStatus.INVALID;
         }
 
         /* 执行handler */
-        if (!boundFreeVar2ExistingVarHandler(predIdx, argIdx, varId)) {
-            return false;
+        final UpdateStatus status = boundFreeVar2ExistingVarHandler(predIdx, argIdx, varId);
+        if (UpdateStatus.NORMAL != status) {
+            return status;
         }
 
         /* 更新Eval */
         this.eval = calculateEval();
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
-    protected boolean boundFreeVar2ExistingVarHandler(
+    protected UpdateStatus boundFreeVar2ExistingVarHandler(
             final int predIdx, final int argIdx, final int varId
     ) {
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
     /**
@@ -216,7 +212,7 @@ public abstract class Rule {
      *
      * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
      */
-    public boolean boundFreeVar2ExistingVar(
+    public UpdateStatus boundFreeVar2ExistingVar(
             final String functor, final int arity, final int argIdx, final int varId
     ) {
         /* 改变Rule结构 */
@@ -227,30 +223,34 @@ public abstract class Rule {
         equivConds++;
         fingerPrint = new RuleFingerPrint(structure);
 
+        /* 检查是否命中Cache */
+        if (!searchedFingerprints.add(fingerPrint)) {
+            return UpdateStatus.DUPLICATED;
+        }
+
         /* 检查合法性 */
         if (isInvalid()) {
-            invalidSearches++;
-            return false;
+            return UpdateStatus.INVALID;
         }
 
         /* 执行handler */
-        if (!boundFreeVar2ExistingVarHandler(target_predicate, argIdx, varId)) {
-            return false;
+        final UpdateStatus status = boundFreeVar2ExistingVarHandler(target_predicate, argIdx, varId);
+        if (UpdateStatus.NORMAL != status) {
+            return status;
         }
 
         /* 更新Eval */
         this.eval = calculateEval();
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
-    protected boolean boundFreeVar2ExistingVarHandler(
+    protected UpdateStatus boundFreeVar2ExistingVarHandler(
             final Predicate newPredicate, final int argIdx, final int varId
     ) {
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
     /**
@@ -258,7 +258,7 @@ public abstract class Rule {
      *
      * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
      */
-    public boolean boundFreeVars2NewVar(
+    public UpdateStatus boundFreeVars2NewVar(
             final int predIdx1, final int argIdx1, final int predIdx2, final int argIdx2
     ) {
         /* 改变Rule结构 */
@@ -272,30 +272,34 @@ public abstract class Rule {
         equivConds++;
         fingerPrint = new RuleFingerPrint(structure);
 
+        /* 检查是否命中Cache */
+        if (!searchedFingerprints.add(fingerPrint)) {
+            return UpdateStatus.DUPLICATED;
+        }
+
         /* 检查合法性 */
         if (isInvalid()) {
-            invalidSearches++;
-            return false;
+            return UpdateStatus.INVALID;
         }
 
         /* 执行handler */
-        if (!boundFreeVars2NewVarHandler(predIdx1, argIdx1, predIdx2, argIdx2)) {
-            return false;
+        final UpdateStatus status = boundFreeVars2NewVarHandler(predIdx1, argIdx1, predIdx2, argIdx2);
+        if (UpdateStatus.NORMAL != status) {
+            return status;
         }
 
         /* 更新Eval */
         this.eval = calculateEval();
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
-    protected boolean boundFreeVars2NewVarHandler(
+    protected UpdateStatus boundFreeVars2NewVarHandler(
             final int predIdx1, final int argIdx1, final int predIdx2, final int argIdx2
     ) {
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
     /**
@@ -303,7 +307,7 @@ public abstract class Rule {
      *
      * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
      */
-    public boolean boundFreeVars2NewVar(
+    public UpdateStatus boundFreeVars2NewVar(
             final String functor, final int arity, final int argIdx1, final int predIdx2, final int argIdx2
     ) {
         /* 改变Rule结构 */
@@ -318,30 +322,34 @@ public abstract class Rule {
         equivConds++;
         fingerPrint = new RuleFingerPrint(structure);
 
+        /* 检查是否命中Cache */
+        if (!searchedFingerprints.add(fingerPrint)) {
+            return UpdateStatus.DUPLICATED;
+        }
+
         /* 检查合法性 */
         if (isInvalid()) {
-            invalidSearches++;
-            return false;
+            return UpdateStatus.INVALID;
         }
 
         /* 执行handler */
-        if (!boundFreeVars2NewVarHandler(target_predicate1, argIdx1, predIdx2, argIdx2)) {
-            return false;
+        final UpdateStatus status = boundFreeVars2NewVarHandler(target_predicate1, argIdx1, predIdx2, argIdx2);
+        if (UpdateStatus.NORMAL != status) {
+            return status;
         }
 
         /* 更新Eval */
         this.eval = calculateEval();
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
-    protected boolean boundFreeVars2NewVarHandler(
+    protected UpdateStatus boundFreeVars2NewVarHandler(
             final Predicate newPredicate, final int argIdx1, final int predIdx2, final int argIdx2
     ) {
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
     /**
@@ -349,38 +357,42 @@ public abstract class Rule {
      *
      * @return 绑定合理且新规则未曾计算过，返回true；否则返回false
      */
-    public boolean boundFreeVar2Constant(final int predIdx, final int argIdx, final String constantSymbol) {
+    public UpdateStatus boundFreeVar2Constant(final int predIdx, final int argIdx, final String constantSymbol) {
         /* 改变Rule结构 */
         final Predicate predicate = structure.get(predIdx);
         predicate.args[argIdx] = new Constant(CONSTANT_ARG_ID, constantSymbol);
         equivConds++;
         fingerPrint = new RuleFingerPrint(structure);
 
+        /* 检查是否命中Cache */
+        if (!searchedFingerprints.add(fingerPrint)) {
+            return UpdateStatus.DUPLICATED;
+        }
+
         /* 检查合法性 */
         if (isInvalid()) {
-            invalidSearches++;
-            return false;
+            return UpdateStatus.INVALID;
         }
 
         /* 执行handler */
-        if (!boundFreeVar2ConstantHandler(predIdx, argIdx, constantSymbol)) {
-            return false;
+        final UpdateStatus status = boundFreeVar2ConstantHandler(predIdx, argIdx, constantSymbol);
+        if (UpdateStatus.NORMAL != status) {
+            return status;
         }
 
         /* 更新Eval */
         this.eval = calculateEval();
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
-    protected boolean boundFreeVar2ConstantHandler(final int predIdx, final int argIdx, final String constantSymbol) {
+    protected UpdateStatus boundFreeVar2ConstantHandler(final int predIdx, final int argIdx, final String constantSymbol) {
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
-    public boolean removeBoundedArg(final int predIdx, final int argIdx) {
+    public UpdateStatus removeBoundedArg(final int predIdx, final int argIdx) {
         final Predicate predicate = structure.get(predIdx);
         final Argument argument = predicate.args[argIdx];
         predicate.args[argIdx] = null;
@@ -444,28 +456,32 @@ public abstract class Rule {
 
         fingerPrint = new RuleFingerPrint(structure);
 
+        /* 检查是否命中Cache */
+        if (!searchedFingerprints.add(fingerPrint)) {
+            return UpdateStatus.DUPLICATED;
+        }
+
         /* 检查合法性 */
         if (isInvalid()) {
-            invalidSearches++;
-            return false;
+            return UpdateStatus.INVALID;
         }
 
         /* 执行handler */
-        if (!removeBoundedArgHandler(predIdx, argIdx)) {
-            return false;
+        final UpdateStatus status = removeBoundedArgHandler(predIdx, argIdx);
+        if (UpdateStatus.NORMAL != status) {
+            return status;
         }
 
         /* 更新Eval */
         this.eval = calculateEval();
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
-    protected boolean removeBoundedArgHandler(final int predIdx, final int argIdx) {
+    protected UpdateStatus removeBoundedArgHandler(final int predIdx, final int argIdx) {
         if (MIN_FACT_COVERAGE >= factCoverage()) {
-            fcFiltered++;
-            return false;
+            return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
-        return true;
+        return UpdateStatus.NORMAL;
     }
 
     protected abstract double factCoverage();

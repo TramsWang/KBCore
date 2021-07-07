@@ -46,7 +46,7 @@ public class RuleTest {
         assertEquals(0, r.usedBoundedVars());
         assertEquals(1, cache.size());
 
-        assertTrue(r.boundFreeVars2NewVar("p", 1, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVars2NewVar("p", 1, 0, 0, 0));
         assertTrue(r.toString().contains("h(X0,?,?):-p(X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X0,X1,X2):-p(X0)"));
         assertEquals(1, r.size());
@@ -54,7 +54,7 @@ public class RuleTest {
         assertEquals(1, r.usedBoundedVars());
         assertEquals(2, cache.size());
 
-        assertTrue(r.boundFreeVars2NewVar("q", 2, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVars2NewVar("q", 2, 1, 0, 1));
         assertTrue(r.toString().contains("h(X0,X1,?):-p(X0),q(?,X1)"));
         assertTrue(r.toCompleteRuleString().contains("h(X0,X1,X2):-p(X0),q(X3,X1)"));
         assertEquals(2, r.size());
@@ -62,7 +62,7 @@ public class RuleTest {
         assertEquals(2, r.usedBoundedVars());
         assertEquals(3, cache.size());
 
-        assertTrue(r.boundFreeVar2ExistingVar("q", 2, 1, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVar2ExistingVar("q", 2, 1, 0));
         assertTrue(r.toString().contains("h(X0,X1,?):-p(X0),q(?,X1),q(?,X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X0,X1,X2):-p(X0),q(X3,X1),q(X4,X0)"));
         assertEquals(3, r.size());
@@ -70,7 +70,7 @@ public class RuleTest {
         assertEquals(2, r.usedBoundedVars());
         assertEquals(4, cache.size());
 
-        assertTrue(r.boundFreeVar2Constant(3, 0, "c"));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVar2Constant(3, 0, "c"));
         assertTrue(r.toString().contains("h(X0,X1,?):-p(X0),q(?,X1),q(c,X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X0,X1,X2):-p(X0),q(X3,X1),q(c,X0)"));
         assertEquals(4, r.size());
@@ -78,7 +78,7 @@ public class RuleTest {
         assertEquals(2, r.usedBoundedVars());
         assertEquals(5, cache.size());
 
-        assertTrue(r.boundFreeVar2Constant(0, 2, "c"));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVar2Constant(0, 2, "c"));
         assertTrue(r.toString().contains("h(X0,X1,c):-p(X0),q(?,X1),q(c,X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X0,X1,c):-p(X0),q(X2,X1),q(c,X0)"));
         assertEquals(5, r.size());
@@ -110,11 +110,11 @@ public class RuleTest {
         /* h(X, Y, c) <- p(X), q(?, Y), q(c, X) */
         final Set<RuleFingerPrint> cache = new HashSet<>();
         Rule r = new RuleImpl("h", 3, cache);
-        assertTrue(r.boundFreeVars2NewVar("p", 1, 0, 0, 0));
-        assertTrue(r.boundFreeVars2NewVar("q", 2, 1, 0, 1));
-        assertTrue(r.boundFreeVar2ExistingVar("q", 2, 1, 0));
-        assertTrue(r.boundFreeVar2Constant(3, 0, "c"));
-        assertTrue(r.boundFreeVar2Constant(0, 2, "c"));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVars2NewVar("p", 1, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVars2NewVar("q", 2, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVar2ExistingVar("q", 2, 1, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVar2Constant(3, 0, "c"));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVar2Constant(0, 2, "c"));
         assertTrue(r.toString().contains("h(X0,X1,c):-p(X0),q(?,X1),q(c,X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X0,X1,c):-p(X0),q(X2,X1),q(c,X0)"));
         assertEquals(5, r.size());
@@ -123,7 +123,7 @@ public class RuleTest {
         assertEquals(6, cache.size());
 
         cache.clear();
-        assertTrue(r.removeBoundedArg(1, 0));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, r.removeBoundedArg(1, 0));
         assertTrue(r.toString().contains("h(X0,X1,c):-q(?,X1),q(c,X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X0,X1,c):-q(X2,X1),q(c,X0)"));
         assertEquals(4, r.size());
@@ -131,7 +131,7 @@ public class RuleTest {
         assertEquals(2, r.usedBoundedVars());
         assertEquals(1, cache.size());
 
-        assertTrue(r.removeBoundedArg(2, 0));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, r.removeBoundedArg(2, 0));
         assertTrue(r.toString().contains("h(X0,X1,c):-q(?,X1),q(?,X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X0,X1,c):-q(X2,X1),q(X3,X0)"));
         assertEquals(3, r.size());
@@ -139,7 +139,7 @@ public class RuleTest {
         assertEquals(2, r.usedBoundedVars());
         assertEquals(2, cache.size());
 
-        assertTrue(r.removeBoundedArg(2, 1));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, r.removeBoundedArg(2, 1));
         assertTrue(r.toString().contains("h(?,X0,c):-q(?,X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X1,X0,c):-q(X2,X0)"));
         assertEquals(2, r.size());
@@ -147,7 +147,7 @@ public class RuleTest {
         assertEquals(1, r.usedBoundedVars());
         assertEquals(3, cache.size());
 
-        assertTrue(r.removeBoundedArg(0, 2));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, r.removeBoundedArg(0, 2));
         assertTrue(r.toString().contains("h(?,X0,?):-q(?,X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X1,X0,X2):-q(X3,X0)"));
         assertEquals(1, r.size());
@@ -155,7 +155,7 @@ public class RuleTest {
         assertEquals(1, r.usedBoundedVars());
         assertEquals(4, cache.size());
 
-        assertTrue(r.removeBoundedArg(0, 1));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, r.removeBoundedArg(0, 1));
         assertTrue(r.toString().contains("h(?,?,?):-"));
         assertTrue(r.toCompleteRuleString().contains("h(X0,X1,X2):-"));
         assertEquals(0, r.size());
@@ -170,11 +170,11 @@ public class RuleTest {
         /* h(X, Y, Z) <- p(X), q(Z, Y), q(Z, X) */
         final Set<RuleFingerPrint> cache = new HashSet<>();
         Rule r = new RuleImpl("h", 3, cache);
-        assertTrue(r.boundFreeVars2NewVar("p", 1, 0, 0, 0));
-        assertTrue(r.boundFreeVars2NewVar("q", 2, 1, 0, 1));
-        assertTrue(r.boundFreeVar2ExistingVar("q", 2, 1, 0));
-        assertTrue(r.boundFreeVars2NewVar(2, 0, 0, 2));
-        assertTrue(r.boundFreeVar2ExistingVar(3, 0, 2));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVars2NewVar("p", 1, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVars2NewVar("q", 2, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVar2ExistingVar("q", 2, 1, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVars2NewVar(2, 0, 0, 2));
+        assertEquals(Rule.UpdateStatus.NORMAL, r.boundFreeVar2ExistingVar(3, 0, 2));
         assertTrue(r.toString().contains("h(X0,X1,X2):-p(X0),q(X2,X1),q(X2,X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X0,X1,X2):-p(X0),q(X2,X1),q(X2,X0)"));
         assertEquals(5, r.size());
@@ -183,7 +183,7 @@ public class RuleTest {
         assertEquals(6, cache.size());
 
         cache.clear();
-        assertTrue(r.removeBoundedArg(0, 0));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, r.removeBoundedArg(0, 0));
         assertTrue(r.toString().contains("h(?,X1,X2):-p(X0),q(X2,X1),q(X2,X0)"));
         assertTrue(r.toCompleteRuleString().contains("h(X3,X1,X2):-p(X0),q(X2,X1),q(X2,X0)"));
         assertEquals(4, r.size());
@@ -191,7 +191,7 @@ public class RuleTest {
         assertEquals(3, r.usedBoundedVars());
         assertEquals(1, cache.size());
 
-        assertTrue(r.removeBoundedArg(3, 1));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, r.removeBoundedArg(3, 1));
         assertTrue(r.toString().contains("h(?,X1,X0):-q(X0,X1),q(X0,?)"));
         assertTrue(r.toCompleteRuleString().contains("h(X2,X1,X0):-q(X0,X1),q(X0,X3)"));
         assertEquals(3, r.size());
@@ -199,7 +199,7 @@ public class RuleTest {
         assertEquals(2, r.usedBoundedVars());
         assertEquals(2, cache.size());
 
-        assertTrue(r.removeBoundedArg(1, 1));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, r.removeBoundedArg(1, 1));
         assertTrue(r.toString().contains("h(?,?,X0):-q(X0,?),q(X0,?)"));
         assertTrue(r.toCompleteRuleString().contains("h(X1,X2,X0):-q(X0,X3),q(X0,X4)"));
         assertEquals(2, r.size());
@@ -207,16 +207,16 @@ public class RuleTest {
         assertEquals(1, r.usedBoundedVars());
         assertEquals(3, cache.size());
 
-        assertFalse(r.removeBoundedArg(0, 2));
+        assertNotEquals(Rule.UpdateStatus.NORMAL, r.removeBoundedArg(0, 2));
     }
 
     @Test
     void testCopyConstructor() {
         final Set<RuleFingerPrint> cache = new HashSet<>();
         Rule r1 = new RuleImpl("h", 3, cache);
-        assertTrue(r1.boundFreeVars2NewVar("p", 1, 0, 0, 0));
-        assertTrue(r1.boundFreeVars2NewVar("q", 2, 1, 0, 1));
-        assertTrue(r1.boundFreeVar2ExistingVar("q", 2, 1, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, r1.boundFreeVars2NewVar("p", 1, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, r1.boundFreeVars2NewVar("q", 2, 1, 0, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, r1.boundFreeVar2ExistingVar("q", 2, 1, 0));
         assertTrue(r1.toString().contains("h(X0,X1,?):-p(X0),q(?,X1),q(?,X0)"));
         assertTrue(r1.toCompleteRuleString().contains("h(X0,X1,X2):-p(X0),q(X3,X1),q(X4,X0)"));
         assertEquals(3, r1.size());
@@ -225,8 +225,8 @@ public class RuleTest {
         assertEquals(4, cache.size());
 
         Rule r2 = r1.clone();
-        assertTrue(r2.removeBoundedArg(1, 0));
-        assertTrue(r2.removeBoundedArg(0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, r2.removeBoundedArg(1, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, r2.removeBoundedArg(0, 0));
         assertTrue(r2.toString().contains("h(?,X0,?):-q(?,X0)"));
         assertTrue(r2.toCompleteRuleString().contains("h(X1,X0,X2):-q(X3,X0)"));
         assertEquals(1, r2.size());

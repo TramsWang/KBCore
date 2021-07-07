@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class PerformanceMonitor {
     public static class BranchInfo {
@@ -15,6 +16,24 @@ public class PerformanceMonitor {
             this.ruleSize = ruleSize;
             this.extNum = extNum;
             this.orgNum = orgNum;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BranchInfo that = (BranchInfo) o;
+            return ruleSize == that.ruleSize && extNum == that.extNum && orgNum == that.orgNum;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(ruleSize, extNum, orgNum);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("(%d,%d,%d)", ruleSize, extNum, orgNum);
         }
     }
 
