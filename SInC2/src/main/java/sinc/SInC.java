@@ -180,25 +180,7 @@ public abstract class SInC {
                 final Rule.UpdateStatus update_status = new_rule.boundFreeVar2ExistingVar(
                         vacant.predIdx, vacant.argIdx, var_id
                 );
-                switch (update_status) {
-                    case NORMAL:
-                        extensions.add(new_rule);
-                        break;
-                    case INVALID:
-                        performanceMonitor.invalidSearches++;
-                        break;
-                    case DUPLICATED:
-                        performanceMonitor.duplications++;
-                        break;
-                    case INSUFFICIENT_COVERAGE:
-                        performanceMonitor.fcFilteredRules++;
-                        break;
-                    default:
-                        throw new Error("Unknown Update Status of Rule: " + update_status.name());
-                }
-                if (interrupted) {
-                    throw new InterruptedSignal("Interrupted");
-                }
+                checkThenAddRule(extensions, update_status, new_rule);
             }
 
             for (Map.Entry<String, Integer> entry: func_2_arity_map.entrySet()) {
@@ -210,25 +192,7 @@ public abstract class SInC {
                     final Rule.UpdateStatus update_status = new_rule.boundFreeVar2ExistingVar(
                             functor, arity, arg_idx, var_id
                     );
-                    switch (update_status) {
-                        case NORMAL:
-                            extensions.add(new_rule);
-                            break;
-                        case INVALID:
-                            performanceMonitor.invalidSearches++;
-                            break;
-                        case DUPLICATED:
-                            performanceMonitor.duplications++;
-                            break;
-                        case INSUFFICIENT_COVERAGE:
-                            performanceMonitor.fcFilteredRules++;
-                            break;
-                        default:
-                            throw new Error("Unknown Update Status of Rule: " + update_status.name());
-                    }
-                    if (interrupted) {
-                        throw new InterruptedSignal("Interrupted");
-                    }
+                    checkThenAddRule(extensions, update_status, new_rule);
                 }
             }
         }
@@ -246,25 +210,7 @@ public abstract class SInC {
                 final Rule.UpdateStatus update_status = new_rule.boundFreeVar2Constant(
                         first_vacant.predIdx, first_vacant.argIdx, const_symbol
                 );
-                switch (update_status) {
-                    case NORMAL:
-                        extensions.add(new_rule);
-                        break;
-                    case INVALID:
-                        performanceMonitor.invalidSearches++;
-                        break;
-                    case DUPLICATED:
-                        performanceMonitor.duplications++;
-                        break;
-                    case INSUFFICIENT_COVERAGE:
-                        performanceMonitor.fcFilteredRules++;
-                        break;
-                    default:
-                        throw new Error("Unknown Update Status of Rule: " + update_status.name());
-                }
-                if (interrupted) {
-                    throw new InterruptedSignal("Interrupted");
-                }
+                checkThenAddRule(extensions, update_status, new_rule);
             }
 
             /* 找到两个位置尝试同一个新变量 */
@@ -275,25 +221,7 @@ public abstract class SInC {
                 final Rule.UpdateStatus update_status = new_rule.boundFreeVars2NewVar(
                         first_vacant.predIdx, first_vacant.argIdx, second_vacant.predIdx, second_vacant.argIdx
                 );
-                switch (update_status) {
-                    case NORMAL:
-                        extensions.add(new_rule);
-                        break;
-                    case INVALID:
-                        performanceMonitor.invalidSearches++;
-                        break;
-                    case DUPLICATED:
-                        performanceMonitor.duplications++;
-                        break;
-                    case INSUFFICIENT_COVERAGE:
-                        performanceMonitor.fcFilteredRules++;
-                        break;
-                    default:
-                        throw new Error("Unknown Update Status of Rule: " + update_status.name());
-                }
-                if (interrupted) {
-                    throw new InterruptedSignal("Interrupted");
-                }
+                checkThenAddRule(extensions, update_status, new_rule);
             }
             for (Map.Entry<String, Integer> entry: func_2_arity_map.entrySet()) {
                 /* 新变量的第二个位置也可以是拓展一个谓词以后的位置 */
@@ -304,25 +232,7 @@ public abstract class SInC {
                     final Rule.UpdateStatus update_status = new_rule.boundFreeVars2NewVar(
                             functor, arity, arg_idx, first_vacant.predIdx, first_vacant.argIdx
                     );
-                    switch (update_status) {
-                        case NORMAL:
-                            extensions.add(new_rule);
-                            break;
-                        case INVALID:
-                            performanceMonitor.invalidSearches++;
-                            break;
-                        case DUPLICATED:
-                            performanceMonitor.duplications++;
-                            break;
-                        case INSUFFICIENT_COVERAGE:
-                            performanceMonitor.fcFilteredRules++;
-                            break;
-                        default:
-                            throw new Error("Unknown Update Status of Rule: " + update_status.name());
-                    }
-                    if (interrupted) {
-                        throw new InterruptedSignal("Interrupted");
-                    }
+                    checkThenAddRule(extensions, update_status, new_rule);
                 }
             }
         }
@@ -344,25 +254,7 @@ public abstract class SInC {
                 if (null != predicate.args[arg_idx]) {
                     final Rule new_rule = rule.clone();
                     final Rule.UpdateStatus update_status = new_rule.removeBoundedArg(pred_idx, arg_idx);
-                    switch (update_status) {
-                        case NORMAL:
-                            origins.add(new_rule);
-                            break;
-                        case INVALID:
-                            performanceMonitor.invalidSearches++;
-                            break;
-                        case DUPLICATED:
-                            performanceMonitor.duplications++;
-                            break;
-                        case INSUFFICIENT_COVERAGE:
-                            performanceMonitor.fcFilteredRules++;
-                            break;
-                        default:
-                            throw new Error("Unknown Update Status of Rule: " + update_status.name());
-                    }
-                    if (interrupted) {
-                        throw new InterruptedSignal("Interrupted");
-                    }
+                    checkThenAddRule(origins, update_status, new_rule);
                 }
             }
         }
@@ -501,6 +393,32 @@ public abstract class SInC {
     public PerformanceMonitor getPerformanceMonitor() {
         return performanceMonitor;
     }
+
+    protected void checkThenAddRule(Collection<Rule> collection, Rule.UpdateStatus updateStatus, Rule rule)
+            throws InterruptedSignal {
+        switch (updateStatus) {
+            case NORMAL:
+                collection.add(rule);
+                break;
+            case INVALID:
+                performanceMonitor.invalidSearches++;
+                break;
+            case DUPLICATED:
+                performanceMonitor.duplications++;
+                break;
+            case INSUFFICIENT_COVERAGE:
+                performanceMonitor.fcFilteredRules++;
+                break;
+            default:
+                throw new Error("Unknown Update Status of Rule: " + updateStatus.name());
+        }
+        recordRuleStatus(rule, updateStatus);
+        if (interrupted) {
+            throw new InterruptedSignal("Interrupted");
+        }
+    }
+
+    protected abstract void recordRuleStatus(Rule rule, Rule.UpdateStatus updateStatus);
 
     private void runHandler() {
         final long time_start = System.currentTimeMillis();

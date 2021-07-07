@@ -37,8 +37,6 @@ public class CachedQueryMonitor {
     public final List<CacheStat> cacheStats = new ArrayList<>();
     public final List<Eval> evalStats = new ArrayList<>();
 
-    public int actualEvaluations = 0;
-
     public void show(PrintWriter writer) {
         writer.println("### Cached Query Monitored Info ###\n");
         writer.println("--- Time Cost ---");
@@ -121,6 +119,5 @@ public class CachedQueryMonitor {
                 max_neg_ent, total_neg_ent / evalStats.size(),
                 max_ent, total_ent / evalStats.size()
         );
-        writer.printf("Actual Executed Evaluations: %d\n", actualEvaluations);
     }
 }

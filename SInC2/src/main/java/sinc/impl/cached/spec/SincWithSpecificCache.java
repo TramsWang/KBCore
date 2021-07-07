@@ -40,10 +40,4 @@ public class SincWithSpecificCache extends CachedSinc {
         SpecificCachedRule forward_cached_rule = (SpecificCachedRule) rule;
         return forward_cached_rule.updateInKb();
     }
-
-    @Override
-    protected void showMonitor() {
-        super.showMonitor();
-        SpecificCachedRule.monitor.show(logger);
-    }
 }

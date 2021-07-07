@@ -190,6 +190,9 @@ class SInCTest {
         protected Set<Predicate> getOriginalKb() {
             return kb.getOriginalKB();
         }
+
+        @Override
+        protected void recordRuleStatus(Rule rule, Rule.UpdateStatus updateStatus) {}
     }
 
     @Test

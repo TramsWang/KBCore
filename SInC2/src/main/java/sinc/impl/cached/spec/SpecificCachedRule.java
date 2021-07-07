@@ -2,11 +2,12 @@ package sinc.impl.cached.spec;
 
 import sinc.common.*;
 import sinc.impl.cached.CachedQueryMonitor;
+import sinc.impl.cached.CachedRule;
 import sinc.impl.cached.MemKB;
 
 import java.util.*;
 
-public class SpecificCachedRule extends Rule {
+public class SpecificCachedRule extends CachedRule {
     /* 记录符合条件的grounding的中间结果 */
     private static class PredicateCache {
         public final Predicate predicate;
@@ -26,8 +27,6 @@ public class SpecificCachedRule extends Rule {
     private final MemKB kb;
     private final List<List<PredicateCache>> groundings = new LinkedList<>();
     private final List<List<PredicateCache>> groundingsBody = new LinkedList<>();
-
-    protected static final CachedQueryMonitor monitor = new CachedQueryMonitor();
 
     public SpecificCachedRule(String headFunctor, Set<RuleFingerPrint> cache, MemKB kb) {
         super(headFunctor, kb.getArity(headFunctor), cache);
@@ -63,8 +62,7 @@ public class SpecificCachedRule extends Rule {
         final long time_start = System.nanoTime();
         Rule r =  new SpecificCachedRule(this);
         final long time_done = System.nanoTime();
-        monitor.cloneCostInNano += time_done - time_start;
-        monitor.totalClones++;
+        cacheMonitor.cloneCostInNano += time_done - time_start;
         return r;
     }
 
@@ -74,12 +72,14 @@ public class SpecificCachedRule extends Rule {
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, false);
 
         if (MIN_FACT_COVERAGE >= factCoverage()) {
+            final long time_done = System.nanoTime();
+            cacheMonitor.boundExistVarCostInNano += time_done - time_start;
             return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
 
         boundFreeVar2ExistingVarUpdateCache(predIdx, argIdx, varId, true);
         final long time_done = System.nanoTime();
-        monitor.boundExistVarCostInNano += time_done - time_start;
+        cacheMonitor.boundExistVarCostInNano += time_done - time_start;
         return UpdateStatus.NORMAL;
     }
 
@@ -190,12 +190,14 @@ public class SpecificCachedRule extends Rule {
         boundFreeVar2ExistingVarUpdateCache(newPredicate, argIdx, varId, false);
 
         if (MIN_FACT_COVERAGE >= factCoverage()) {
+            final long time_done = System.nanoTime();
+            cacheMonitor.boundExistVarInNewPredCostInNano += time_done - time_start;
             return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
 
         boundFreeVar2ExistingVarUpdateCache(newPredicate, argIdx, varId, true);
         final long time_done = System.nanoTime();
-        monitor.boundExistVarInNewPredCostInNano += time_done - time_start;
+        cacheMonitor.boundExistVarInNewPredCostInNano += time_done - time_start;
         return UpdateStatus.NORMAL;
     }
 
@@ -280,12 +282,14 @@ public class SpecificCachedRule extends Rule {
         boundFreeVars2NewVarUpdateCache(predIdx1, argIdx1, predIdx2, argIdx2, false);
 
         if (MIN_FACT_COVERAGE >= factCoverage()) {
+            final long time_done = System.nanoTime();
+            cacheMonitor.boundNewVarCostInNano += time_done - time_start;
             return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
 
         boundFreeVars2NewVarUpdateCache(predIdx1, argIdx1, predIdx2, argIdx2, true);
         final long time_done = System.nanoTime();
-        monitor.boundNewVarCostInNano += time_done - time_start;
+        cacheMonitor.boundNewVarCostInNano += time_done - time_start;
         return UpdateStatus.NORMAL;
     }
 
@@ -469,12 +473,14 @@ public class SpecificCachedRule extends Rule {
         boundFreeVars2NewVarUpdateCache(newPredicate, argIdx1, predIdx2, argIdx2, false);
 
         if (MIN_FACT_COVERAGE >= factCoverage()) {
+            final long time_done = System.nanoTime();
+            cacheMonitor.boundNewVarInNewPredCostInNano += time_done - time_start;
             return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
 
         boundFreeVars2NewVarUpdateCache(newPredicate, argIdx1, predIdx2, argIdx2, true);
         final long time_done = System.nanoTime();
-        monitor.boundNewVarInNewPredCostInNano += time_done - time_start;
+        cacheMonitor.boundNewVarInNewPredCostInNano += time_done - time_start;
         return UpdateStatus.NORMAL;
     }
 
@@ -589,12 +595,14 @@ public class SpecificCachedRule extends Rule {
         boundFreeVar2ConstantUpdateCache(predIdx, argIdx, constantSymbol, false);
 
         if (MIN_FACT_COVERAGE >= factCoverage()) {
+            final long time_done = System.nanoTime();
+            cacheMonitor.boundConstCostInNano += time_done - time_start;
             return UpdateStatus.INSUFFICIENT_COVERAGE;
         }
 
         boundFreeVar2ConstantUpdateCache(predIdx, argIdx, constantSymbol, true);
         final long time_done = System.nanoTime();
-        monitor.boundConstCostInNano += time_done - time_start;
+        cacheMonitor.boundConstCostInNano += time_done - time_start;
         return UpdateStatus.NORMAL;
     }
 
@@ -695,7 +703,7 @@ public class SpecificCachedRule extends Rule {
             }
         }
         final long time_pre_done = System.nanoTime();
-        monitor.preComputingCostInNano += time_pre_done - time_query_begin;
+        cacheMonitor.preComputingCostInNano += time_pre_done - time_query_begin;
 
         /* 计算all entail的数量 */
         final Set<ArrayList<String>> body_bv_bindings = new HashSet<>();
@@ -712,7 +720,7 @@ public class SpecificCachedRule extends Rule {
                 kb.totalConstants(), head_fv_cnt + head_vars.size()
         );
         final long time_all_entail_done = System.nanoTime();
-        monitor.allEntailQueryCostInNano += time_all_entail_done - time_pre_done;
+        cacheMonitor.allEntailQueryCostInNano += time_all_entail_done - time_pre_done;
 
         /* 计算new pos entail的数量 */
         final Set<Predicate> newly_proved = new HashSet<>();
@@ -738,12 +746,12 @@ public class SpecificCachedRule extends Rule {
             }
         }
         final long time_pos_entail_done = System.nanoTime();
-        monitor.posEntailQueryCostInNano += time_pos_entail_done - time_all_entail_done;
+        cacheMonitor.posEntailQueryCostInNano += time_pos_entail_done - time_all_entail_done;
 
-        monitor.cacheStats.add(new CachedQueryMonitor.CacheStat(
+        cacheMonitor.cacheStats.add(new CachedQueryMonitor.CacheStat(
                 groundings.size(), groundingsBody.size(), 0
         ));
-        monitor.evalStats.add(new Eval(
+        cacheMonitor.evalStats.add(new Eval(
                 eval, newly_proved.size(), all_entails - already_proved.size(), size()
         ));
 
@@ -831,7 +839,7 @@ public class SpecificCachedRule extends Rule {
             }
         }
         final long time_pre_done = System.nanoTime();
-        monitor.preComputingCostInNano += time_pre_done - time_query_start;
+        cacheMonitor.preComputingCostInNano += time_pre_done - time_query_start;
 
         /* 根据Rule结构找Counter Example */
         if (1 == structure.size()) {
@@ -876,9 +884,9 @@ public class SpecificCachedRule extends Rule {
             }
         }
         final long time_all_entail_done = System.nanoTime();
-        monitor.allEntailQueryCostInNano += time_all_entail_done - time_pre_done;
+        cacheMonitor.allEntailQueryCostInNano += time_all_entail_done - time_pre_done;
 
-        monitor.cacheStats.add(new CachedQueryMonitor.CacheStat(
+        cacheMonitor.cacheStats.add(new CachedQueryMonitor.CacheStat(
                 groundings.size(), groundingsBody.size(), 0
         ));
 
@@ -909,7 +917,7 @@ public class SpecificCachedRule extends Rule {
             }
         }
         final long pos_entail_done = System.nanoTime();
-        monitor.posEntailQueryCostInNano += pos_entail_done - pos_entail_begin;
+        cacheMonitor.posEntailQueryCostInNano += pos_entail_done - pos_entail_begin;
         return grounding_list;
     }
 

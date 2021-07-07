@@ -107,6 +107,9 @@ public class SincWithJpl extends SInC {
     }
 
     @Override
+    protected void recordRuleStatus(Rule rule, Rule.UpdateStatus updateStatus) {}
+
+    @Override
     protected void showMonitor() {
         super.showMonitor();
         JplRule.jplQueryMonitor.show();

@@ -3,6 +3,7 @@ package sinc.impl.cached;
 import sinc.SInC;
 import sinc.SincConfig;
 import sinc.common.*;
+import sinc.impl.cached.recal.RecalculateCachedRule;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -14,6 +15,7 @@ import java.util.Set;
 public abstract class CachedSinc extends SInC {
 
     protected final MemKB kb = new MemKB();
+    protected final CachedQueryMonitor cacheMonitor = new CachedQueryMonitor();
 
     public CachedSinc(SincConfig config, String kbPath, String dumpPath, String logPath) {
         super(
@@ -83,5 +85,33 @@ public abstract class CachedSinc extends SInC {
     @Override
     protected Set<Predicate> getOriginalKb() {
         return kb.getOriginalKB();
+    }
+
+    @Override
+    protected void recordRuleStatus(Rule rule, Rule.UpdateStatus updateStatus) {
+        CachedRule r = (CachedRule) rule;
+        cacheMonitor.totalClones++;
+        cacheMonitor.cloneCostInNano += r.cacheMonitor.cloneCostInNano;
+
+        /* 下列参数只在正常Update的Rule中记录 */
+        if (Rule.UpdateStatus.NORMAL != updateStatus) {
+            return;
+        }
+        cacheMonitor.preComputingCostInNano += r.cacheMonitor.preComputingCostInNano;
+        cacheMonitor.allEntailQueryCostInNano += r.cacheMonitor.allEntailQueryCostInNano;
+        cacheMonitor.posEntailQueryCostInNano += r.cacheMonitor.posEntailQueryCostInNano;
+        cacheMonitor.boundExistVarCostInNano += r.cacheMonitor.boundExistVarCostInNano;
+        cacheMonitor.boundExistVarInNewPredCostInNano += r.cacheMonitor.boundExistVarInNewPredCostInNano;
+        cacheMonitor.boundNewVarCostInNano += r.cacheMonitor.boundNewVarCostInNano;
+        cacheMonitor.boundNewVarInNewPredCostInNano += r.cacheMonitor.boundNewVarInNewPredCostInNano;
+        cacheMonitor.boundConstCostInNano += r.cacheMonitor.boundConstCostInNano;
+        cacheMonitor.cacheStats.addAll(r.cacheMonitor.cacheStats);
+        cacheMonitor.evalStats.addAll(r.cacheMonitor.evalStats);
+    }
+
+    @Override
+    protected void showMonitor() {
+        super.showMonitor();
+        cacheMonitor.show(logger);
     }
 }

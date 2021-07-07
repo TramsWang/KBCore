@@ -42,10 +42,4 @@ public class SincWithRecalculateCache extends CachedSinc {
         RecalculateCachedRule forward_cached_rule = (RecalculateCachedRule) rule;
         return forward_cached_rule.updateInKb();
     }
-
-    @Override
-    protected void showMonitor() {
-        super.showMonitor();
-        RecalculateCachedRule.monitor.show(logger);
-    }
 }

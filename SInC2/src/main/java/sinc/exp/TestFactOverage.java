@@ -15,7 +15,7 @@ public class TestFactOverage {
 
         final String purpose = "Test Fact Coverage";
         final int beam_width = 2;
-        final Dataset dataset = Dataset.ELTI;
+        final Dataset dataset = Dataset.FAMILY_MEDIUM;
         final Eval.EvalMetric eval_metric = Eval.EvalMetric.CompressionCapacity;
 
         for (double fc = 0; fc <= 0.05; fc += 0.01) {
