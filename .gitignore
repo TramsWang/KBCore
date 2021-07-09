@@ -1,7 +1,7 @@
 # Track ONLY source code project and experimental data
 /*
 !/code
-!/SInC2
+!/IKnowS
 !/datasets
 !/doc
 !/README.md
@@ -24,9 +24,9 @@
 !/code/pom.xml
 
 ### Source Code Version 2 ###
-/SInC2/*
-!/SInC2/src/
-!/SInC2/pom.xml
-!/SInC2/TestBeam.sh
+/IKnowS/*
+!/IKnowS/src/
+!/IKnowS/pom.xml
+!/IKnowS/Test*.sh
 
 ### Documents ###
