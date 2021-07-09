@@ -187,6 +187,11 @@ class IKnowSTest {
         }
 
         @Override
+        public Set<String> getAllConstants() {
+            return kb.getAllConstants();
+        }
+
+        @Override
         protected Set<Predicate> getOriginalKb() {
             return kb.getOriginalKB();
         }

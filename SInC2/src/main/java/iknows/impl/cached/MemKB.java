@@ -75,6 +75,10 @@ public class MemKB {
         return constants.size();
     }
 
+    public Set<String> getAllConstants() {
+        return constants;
+    }
+
     public int totalFacts() {
         return originalKB.size();
     }

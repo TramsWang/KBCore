@@ -25,6 +25,7 @@ public abstract class IKnowS {
     private final Map<BaseGraphNode<Predicate>, Set<BaseGraphNode<Predicate>>> dependencyGraph = new HashMap<>();
     private final Set<Predicate> startSet = new HashSet<>();
     private final Set<Predicate> counterExamples = new HashSet<>();
+    private final Set<String> supplementaryConstants = new HashSet<>();
     private final PerformanceMonitor performanceMonitor = new PerformanceMonitor();
 
     /* 终止执行的flag */
@@ -323,9 +324,42 @@ public abstract class IKnowS {
         return result;
     }
 
-    protected boolean validate() {
-        /* Todo: Implement Here */
-        return true;
+    public abstract Set<String> getAllConstants();
+
+    protected void findSupplementaryConstants() {
+        /* 汇总constants(fatcs, counter examples, rules) */
+        final Set<String> occurred_constants = new HashSet<>();
+        for (Predicate fact: startSet) {
+            for (Argument argument: fact.args) {
+                occurred_constants.add(argument.name);
+            }
+        }
+        for (Predicate ce: counterExamples) {
+            for (Argument argument: ce.args) {
+                occurred_constants.add(argument.name);
+            }
+        }
+        for (Rule r: hypothesis) {
+            for (int pred_idx = 0; pred_idx < r.length(); pred_idx++) {
+                final Predicate pred = r.getPredicate(pred_idx);
+                for (Argument argument: pred.args) {
+                    if (null != argument && !argument.isVar) {
+                        occurred_constants.add(argument.name);
+                    }
+                }
+            }
+        }
+        for (String constant: getAllConstants()) {
+            if (!occurred_constants.contains(constant)) {
+                supplementaryConstants.add(constant);
+            }
+        }
+    }
+
+    public boolean validate() {
+        IknowsRecovery recovery = new IknowsRecovery(hypothesis, startSet, counterExamples, supplementaryConstants);
+        final Set<Predicate> recovered_kb = recovery.recover();
+        return getOriginalKb().equals(recovered_kb);
     }
 
     protected void dumpResult() {
@@ -388,6 +422,10 @@ public abstract class IKnowS {
 
     public Set<Predicate> getCounterExamples() {
         return counterExamples;
+    }
+
+    public Set<String> getSupplementaryConstants() {
+        return supplementaryConstants;
     }
 
     public PerformanceMonitor getPerformanceMonitor() {
@@ -471,6 +509,8 @@ public abstract class IKnowS {
             performanceMonitor.sccNumber = graph_analyse_result.sccNumber;
             performanceMonitor.sccVertices = graph_analyse_result.sccVertices;
             performanceMonitor.fvsVertices = graph_analyse_result.fvsVertices;
+            findSupplementaryConstants();
+            performanceMonitor.supplementaryConstants = supplementaryConstants.size();
             final long time_start_set_found = System.currentTimeMillis();
             performanceMonitor.otherMiningTime += time_start_set_found - time_graph_analyse_begin;
 

@@ -59,6 +59,7 @@ class IknowsWithRecalculateCacheTest {
                     null
             );
             sinc.run();
+            assertTrue(sinc.validate());
 
             try {
                 Set<RuleFingerPrint> rule_set_sinc = new HashSet<>();
@@ -158,6 +159,7 @@ class IknowsWithRecalculateCacheTest {
                     null
             );
             sinc.run();
+            assertTrue(sinc.validate());
 
             try {
                 Set<RuleFingerPrint> rule_set_sinc = new HashSet<>();

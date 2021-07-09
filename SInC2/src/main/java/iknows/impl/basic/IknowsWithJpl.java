@@ -97,6 +97,11 @@ public class IknowsWithJpl extends IKnowS {
     }
 
     @Override
+    public Set<String> getAllConstants() {
+        return kb.allConstants();
+    }
+
+    @Override
     protected Set<Predicate> getOriginalKb() {
         return kb.originalKb;
     }

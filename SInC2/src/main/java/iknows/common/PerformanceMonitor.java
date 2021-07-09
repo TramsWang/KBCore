@@ -54,6 +54,7 @@ public class PerformanceMonitor {
     public int startSetSize = 0;
     public int startSetSizeWithoutFvs = 0;
     public int counterExampleSize = 0;
+    public int supplementaryConstants = 0;
     public int sccNumber = 0;
     public int sccVertices = 0;
     public int fvsVertices = 0;
@@ -80,11 +81,11 @@ public class PerformanceMonitor {
 
         writer.println("--- Statistics ---");
         writer.printf(
-                "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
-                "#F", "|C|", "|B|", "#H", "|H|", "|N|", "|A|", "|N/FVS|", "#SCC", "|SCC|", "|FVS|", "Comp(%)"
+                "# %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
+                "#F", "|C|", "|B|", "#H", "|H|", "|N|", "|A|", "|ΔC|", "|N/FVS|", "#SCC", "|SCC|", "|FVS|", "Comp(%)"
         );
         writer.printf(
-                "  %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10.2f\n\n",
+                "  %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10d %10.2f\n\n",
                 kbFunctors,
                 kbConstants,
                 kbSize,
@@ -92,6 +93,7 @@ public class PerformanceMonitor {
                 hypothesisSize,
                 startSetSize,
                 counterExampleSize,
+                supplementaryConstants,
                 startSetSizeWithoutFvs,
                 sccNumber,
                 sccVertices,
