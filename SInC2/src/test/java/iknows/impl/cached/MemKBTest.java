@@ -164,7 +164,7 @@ class MemKBTest {
         father_a1_indices.put("f2", new HashSet<>(Arrays.asList(father2, father3)));
         father_a1_indices.put("f3", new HashSet<>(Arrays.asList(father4)));
         father_a1_indices.put("f4", new HashSet<>(Arrays.asList(father5)));
-        assertEquals(father_a1_indices, kb.getIndices(FUNCTOR_FATHER, 0));
+        assertEquals(father_a1_indices, kb.getArgIndices(FUNCTOR_FATHER, 0));
 
         Predicate parent1 = new Predicate(FUNCTOR_PARENT, ARITY_PARENT);
         parent1.args[0] = new Constant(CONST_ID, "f1");
@@ -218,7 +218,7 @@ class MemKBTest {
         parent_a2_indices.put("f2", new HashSet<>(Arrays.asList(parent7)));
         parent_a2_indices.put("m2", new HashSet<>(Arrays.asList(parent8)));
         parent_a2_indices.put("f3", new HashSet<>(Arrays.asList(parent9)));
-        assertEquals(parent_a2_indices, kb.getIndices(FUNCTOR_PARENT, 1));
+        assertEquals(parent_a2_indices, kb.getArgIndices(FUNCTOR_PARENT, 1));
 
         Predicate grand1 = new Predicate(FUNCTOR_GRANDPARENT, ARITY_GRANDPARENT);
         grand1.args[0] = new Constant(CONST_ID, "g1");

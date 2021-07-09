@@ -81,7 +81,7 @@ public class MemKB {
 
     public int getArity(String functor) {
         /* 这里不做错误处理，有问题直接抛异常 */
-        return functor2ArgIdx.get(functor).length;
+        return functor2ArityMap.get(functor);
     }
 
     public Set<Predicate> getAllFacts(String functor) {
@@ -93,8 +93,12 @@ public class MemKB {
         return functor2ArgIdx.get(functor)[argIdx].keySet();
     }
 
-    public Map<String, Set<Predicate>> getIndices(String functor, int argIdx) {
+    public Map<String, Set<Predicate>> getArgIndices(String functor, int argIdx) {
         return functor2ArgIdx.get(functor)[argIdx];
+    }
+
+    public Map<String, Set<Predicate>>[] getAllArgIndices(String functor) {
+        return functor2ArgIdx.get(functor);
     }
 
     public void proveFact(Predicate fact) {

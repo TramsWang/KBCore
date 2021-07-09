@@ -220,7 +220,7 @@ public class SpecificCachedRule extends CachedRule {
             grounding_list = groundings;
         }
 
-        final Map<String, Set<Predicate>> arg_indices_map = kb.getIndices(newPredicate.functor, argIdx);
+        final Map<String, Set<Predicate>> arg_indices_map = kb.getArgIndices(newPredicate.functor, argIdx);
         boolean found = false;
         final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
         for (int pred_idx = pred_idx_start; pred_idx < structure.size() - 1 && !found; pred_idx++) {  // 不要和刚设置的变量比较
@@ -503,7 +503,7 @@ public class SpecificCachedRule extends CachedRule {
 
         /* 而且在这种情况下，predIdx1 != predIdx2 */
         final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
-        final Map<String, Set<Predicate>> inclusion_map1 = kb.getIndices(newPredicate.functor, argIdx1);
+        final Map<String, Set<Predicate>> inclusion_map1 = kb.getArgIndices(newPredicate.functor, argIdx1);
         if (bodyOnly && HEAD_PRED_IDX == predIdx2) {
             /* 按值直接扩展 */
             while (grounding_itr.hasNext()) {
@@ -661,8 +661,17 @@ public class SpecificCachedRule extends CachedRule {
 
     @Override
     protected double factCoverage() {
-        /* Todo: Implement Here */
-        throw new Error("Not Implemented");
+        final Set<Predicate> entailed_head = new HashSet<>();
+        for (final List<PredicateCache> grounding_cache: groundings) {
+            final PredicateCache head_pred_cache = grounding_cache.get(HEAD_PRED_IDX);
+            for (Predicate head_pred: head_pred_cache.inclusion) {
+                if (!kb.hasProved(head_pred)) {
+                    entailed_head.add(head_pred);
+                }
+            }
+        }
+        return ((double) entailed_head.size()) /
+                kb.getAllFacts(structure.get(HEAD_PRED_IDX).functor).size();
     }
 
     @Override

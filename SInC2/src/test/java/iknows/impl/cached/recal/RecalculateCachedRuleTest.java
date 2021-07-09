@@ -1387,4 +1387,116 @@ class RecalculateCachedRuleTest {
         assertTrue(rule.toString().contains("parent(X0,?):-father(X0,?)"));
         assertTrue(rule.toCompleteRuleString().contains("parent(X0,X1):-father(X0,X2)"));
     }
+
+    @Test
+    void testAnyRule1() {
+        /* h(X, X, Y, Y) :- p(X, Y, +) */
+        final Predicate p1 = new Predicate("p", 3);
+        p1.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "a");
+        p1.args[1] = new Constant(Rule.CONSTANT_ARG_ID, "A");
+        p1.args[2] = new Constant(Rule.CONSTANT_ARG_ID, "+");
+        final Predicate p2 = new Predicate("p", 3);
+        p2.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "b");
+        p2.args[1] = new Constant(Rule.CONSTANT_ARG_ID, "B");
+        p2.args[2] = new Constant(Rule.CONSTANT_ARG_ID, "+");
+        final Predicate p3 = new Predicate("p", 3);
+        p3.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "c");
+        p3.args[1] = new Constant(Rule.CONSTANT_ARG_ID, "C");
+        p3.args[2] = new Constant(Rule.CONSTANT_ARG_ID, "-");
+
+        final Predicate h1 = new Predicate("h", 4);
+        h1.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "a");
+        h1.args[1] = new Constant(Rule.CONSTANT_ARG_ID, "a");
+        h1.args[2] = new Constant(Rule.CONSTANT_ARG_ID, "A");
+        h1.args[3] = new Constant(Rule.CONSTANT_ARG_ID, "A");
+        final Predicate h2 = new Predicate("h", 4);
+        h2.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "b");
+        h2.args[1] = new Constant(Rule.CONSTANT_ARG_ID, "b");
+        h2.args[2] = new Constant(Rule.CONSTANT_ARG_ID, "B");
+        h2.args[3] = new Constant(Rule.CONSTANT_ARG_ID, "B");
+
+        final MemKB kb = new MemKB();
+        kb.addFact(p1);
+        kb.addFact(p2);
+        kb.addFact(p3);
+        kb.addFact(h1);
+        kb.addFact(h2);
+
+        RecalculateCachedRule rule = new RecalculateCachedRule("h", new HashSet<>(), kb);
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar("p", 3, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar(0, 2, 1, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVar2ExistingVar(0, 1, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVar2ExistingVar(0, 3, 1));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVar2Constant(1, 2, "+"));
+        assertTrue(rule.toString().contains("h(X0,X0,X1,X1):-p(X0,X1,+)"));
+        assertEquals(
+                new Eval(null, 2, 2, 5),
+                rule.getEval()
+        );
+        assertEquals(2, rule.usedBoundedVars());
+        assertEquals(2, rule.length());
+        UpdateResult update_result = rule.updateInKb();
+        final Set<List<Predicate>> actual_grounding_set = new HashSet<>();
+        for (Predicate[] grounding: update_result.groundings) {
+            actual_grounding_set.add(new ArrayList<>(Arrays.asList(grounding)));
+        }
+        final Set<List<Predicate>> expected_grounding_set = new HashSet<>();
+        expected_grounding_set.add(new ArrayList<>(Arrays.asList(h1, p1)));
+        expected_grounding_set.add(new ArrayList<>(Arrays.asList(h2, p2)));
+        assertTrue(update_result.counterExamples.isEmpty());
+    }
+
+    @Test
+    void testAnyRule2() {
+        /* h(X) :- p(X, X), q(X) */
+        final Predicate p1 = new Predicate("p", 2);
+        p1.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "A");
+        p1.args[1] = new Constant(Rule.CONSTANT_ARG_ID, "a");
+        final Predicate p2 = new Predicate("p", 2);
+        p2.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "a");
+        p2.args[1] = new Constant(Rule.CONSTANT_ARG_ID, "a");
+        final Predicate p3 = new Predicate("p", 2);
+        p3.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "A");
+        p3.args[1] = new Constant(Rule.CONSTANT_ARG_ID, "A");
+        final Predicate p4 = new Predicate("p", 2);
+        p4.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "b");
+        p4.args[1] = new Constant(Rule.CONSTANT_ARG_ID, "a");
+
+        final Predicate q1 = new Predicate("q", 1);
+        q1.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "b");
+        final Predicate q2 = new Predicate("q", 1);
+        q2.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "a");
+
+        final Predicate h1 = new Predicate("h", 1);
+        h1.args[0] = new Constant(Rule.CONSTANT_ARG_ID, "a");
+
+        final MemKB kb = new MemKB();
+        kb.addFact(p1);
+        kb.addFact(p2);
+        kb.addFact(p3);
+        kb.addFact(p4);
+        kb.addFact(q1);
+        kb.addFact(q2);
+        kb.addFact(h1);
+
+        final RecalculateCachedRule rule = new RecalculateCachedRule("h", new HashSet<>(), kb);
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVars2NewVar("p", 2, 0, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVar2ExistingVar("q", 1, 0, 0));
+        assertEquals(Rule.UpdateStatus.NORMAL, rule.boundFreeVar2ExistingVar(1, 1, 0));
+        assertTrue(rule.toString().contains("h(X0):-p(X0,X0),q(X0)"));
+        assertEquals(
+                new Eval(null, 1, 1, 3),
+                rule.getEval()
+        );
+        assertEquals(1, rule.usedBoundedVars());
+        assertEquals(3, rule.length());
+        UpdateResult update_result = rule.updateInKb();
+        final Set<List<Predicate>> actual_grounding_set = new HashSet<>();
+        for (Predicate[] grounding: update_result.groundings) {
+            actual_grounding_set.add(new ArrayList<>(Arrays.asList(grounding)));
+        }
+        final Set<List<Predicate>> expected_grounding_set = new HashSet<>();
+        expected_grounding_set.add(new ArrayList<>(Arrays.asList(h1, p2, q2)));
+        assertTrue(update_result.counterExamples.isEmpty());
+    }
 }

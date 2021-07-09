@@ -230,7 +230,7 @@ public class RecalculateCachedRule extends CachedRule {
             final BodyFvPos arg_pos = bodyFreeVars.remove(varId);
             boundFreeVars2NewVarUpdateCache(newPredicate, argIdx, arg_pos.bodyPredIdx, arg_pos.bodyArgIdx, true);
         } else {
-            final Map<String, Set<Predicate>> arg_indices_map = kb.getIndices(newPredicate.functor, argIdx);
+            final Map<String, Set<Predicate>> arg_indices_map = kb.getArgIndices(newPredicate.functor, argIdx);
             boolean found = false;
             final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
             for (int pred_idx = pred_idx_start; pred_idx < structure.size() - 1 && !found; pred_idx++) {  // 不要和刚设置的变量比较
@@ -490,7 +490,7 @@ public class RecalculateCachedRule extends CachedRule {
 
         /* 而且在这种情况下，predIdx1 != predIdx2 */
         final ListIterator<List<PredicateCache>> grounding_itr = grounding_list.listIterator();
-        final Map<String, Set<Predicate>> inclusion_map1 = kb.getIndices(newPredicate.functor, argIdx1);
+        final Map<String, Set<Predicate>> inclusion_map1 = kb.getArgIndices(newPredicate.functor, argIdx1);
         if (bodyOnly && HEAD_PRED_IDX == predIdx2) {
             /* body中没有相同的BV，记录一个Body FV */
             bodyFreeVars.put(boundedVars.size() - 1, new BodyFvPos(structure.size() - 1, argIdx1, argIdx2));
@@ -646,7 +646,6 @@ public class RecalculateCachedRule extends CachedRule {
     protected double factCoverage() {
         final Set<Predicate> entailed_head = new HashSet<>();
         for (final List<PredicateCache> grounding_cache: groundings) {
-            /* 构造其所有的head */
             final PredicateCache head_pred_cache = grounding_cache.get(HEAD_PRED_IDX);
             for (Predicate head_pred: head_pred_cache.inclusion) {
                 if (!kb.hasProved(head_pred)) {
@@ -831,30 +830,18 @@ public class RecalculateCachedRule extends CachedRule {
     }
 
     private Set<Predicate> findCounterExamples() {
-        class GVBindingInfo {
-            final int bodyPredIdx;
-            final int bodyArgIdx;
-            final Integer[] headVarLocs;
-
-            public GVBindingInfo(int bodyPredIdx, int bodyArgIdx, Integer[] headVarLocs) {
-                this.bodyPredIdx = bodyPredIdx;
-                this.bodyArgIdx = bodyArgIdx;
-                this.headVarLocs = headVarLocs;
-            }
-        }
         final Set<Predicate> counter_example_set = new HashSet<>();
 
         /* 统计head中的变量信息 */
-        /* 如果是FV，则创建具体变量，方便替换 */
         final long time_query_start = System.nanoTime();
-        final Map<Integer, List<Integer>> head_var_2_loc_map = new HashMap<>();  // Head Only BV Locations
-        int fv_id = boundedVars.size();
+        final Map<Integer, List<Integer>> head_var_2_loc_map = new HashMap<>();  // Head Only LV Locations
+        int uv_id = usedBoundedVars();
         final Predicate head_pred = new Predicate(getHead());
         for (int arg_idx = 0; arg_idx < head_pred.arity(); arg_idx++) {
             final Argument argument = head_pred.args[arg_idx];
             if (null == argument) {
-                head_var_2_loc_map.put(fv_id, new ArrayList<>(Collections.singleton(arg_idx)));
-                fv_id++;
+                head_var_2_loc_map.put(uv_id, new ArrayList<>(Collections.singleton(arg_idx)));
+                uv_id++;
             } else {
                 if (argument.isVar) {
                     final int idx = arg_idx;
@@ -869,140 +856,170 @@ public class RecalculateCachedRule extends CachedRule {
             }
         }
 
-        /* 在body中找出所有generative var 第一次出现的变量位置 */
-        final List<GVBindingInfo> body_gv_pos = new ArrayList<>();
-        for (int pred_idx = FIRST_BODY_PRED_IDX; pred_idx < structure.size(); pred_idx++) {
-            final Predicate body_pred = structure.get(pred_idx);
-            for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
-                final Argument argument = body_pred.args[arg_idx];
-                if (null != argument && argument.isVar) {
-                    List<Integer> head_var_locs = head_var_2_loc_map.remove(argument.id);
-                    if (!bodyFreeVars.containsKey(argument.id) && // Body FV 单独扩展，不算Head FV 也不算 Body GV
-                            null != head_var_locs) {
-                        body_gv_pos.add(new GVBindingInfo(
-                                pred_idx, arg_idx, head_var_locs.toArray(new Integer[0])
-                        ));
-                    }
-                }
+        /* 统计Body中的变量信息 */
+        class PredArgPos {
+            final int predIdx;
+            final int argIdx;
+
+            public PredArgPos(int predIdx, int argIdx) {
+                this.predIdx = predIdx;
+                this.argIdx = argIdx;
             }
         }
-        final Integer[][] head_only_var_locs = new Integer[head_var_2_loc_map.size()][];
-        {
-            int i = 0;
-            for (List<Integer> loc_list: head_var_2_loc_map.values()) {
-                head_only_var_locs[i] = loc_list.toArray(new Integer[0]);
-                i++;
+        final Map<Integer, List<PredArgPos>> body_var_2_loc_map = new HashMap<>();
+        for (int pred_idx = FIRST_BODY_PRED_IDX; pred_idx < structure.size(); pred_idx++) {
+            final Predicate body_pred = getPredicate(pred_idx);
+            for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
+                final Argument argument = body_pred.args[arg_idx];
+                if (null == argument) {
+                    body_var_2_loc_map.put(uv_id, new ArrayList<>(Collections.singleton(
+                            new PredArgPos(pred_idx, arg_idx))
+                    ));
+                    uv_id++;
+                } else {
+                    if (argument.isVar) {
+                        final List<PredArgPos> pos_list = body_var_2_loc_map.computeIfAbsent(
+                                argument.id, k -> new ArrayList<>()
+                        );
+                        pos_list.add(new PredArgPos(pred_idx, arg_idx));
+                    }
+                }
             }
         }
         final long time_pre_done = System.nanoTime();
         cacheMonitor.preComputingCostInNano += time_pre_done - time_query_start;
 
-        /* 根据Rule结构找Counter Example */
-        int cartesian_operations = 0;
-        if (1 == structure.size()) {
-            /* 没有body */
-            if (0 == head_only_var_locs.length) {
-                /* head中全是常量 */
-                if (!kb.containsFact(head_pred)) {
-                    counter_example_set.add(head_pred);
-                }
+        /* 找到HGV,HOV和BUGV的位置 */
+        class BGVLinkInfo {
+            final int bodyPredIdx;
+            final int bodyArgIdx;
+            final Integer[] headVarLocs;
+
+            public BGVLinkInfo(int bodyPredIdx, int bodyArgIdx, Integer[] headVarLocs) {
+                this.bodyPredIdx = bodyPredIdx;
+                this.bodyArgIdx = bodyArgIdx;
+                this.headVarLocs = headVarLocs;
+            }
+        }
+        final List<List<Integer>> head_ov_pos_list = new ArrayList<>();
+        final List<BGVLinkInfo> head_gv_pos_list = new ArrayList<>();
+        final Map<Integer, List<BGVLinkInfo>> body_idx_2_ugv_pos_map = new HashMap<>();
+        for (Map.Entry<Integer, List<Integer>> entry: head_var_2_loc_map.entrySet()) {
+            final int head_var_id = entry.getKey();
+            final List<Integer> head_var_pos_list = entry.getValue();
+            final List<PredArgPos> body_var_pos_list = body_var_2_loc_map.get(head_var_id);
+            if (null == body_var_pos_list) {
+                /* Head OV */
+                head_ov_pos_list.add(head_var_pos_list);
+            } else if (1 >= body_var_pos_list.size()) {
+                /* BUGV(注意这里可能存在多个BUGV在一个pred中的情况，以及一个BUGV对应Head中多个Arg的情况) */
+                final PredArgPos body_pos = body_var_pos_list.get(0);
+                final List<BGVLinkInfo> bugv_link_list = body_idx_2_ugv_pos_map.computeIfAbsent(
+                        body_pos.predIdx, k -> new ArrayList<>()
+                );
+                bugv_link_list.add(new BGVLinkInfo(
+                        body_pos.predIdx, body_pos.argIdx, head_var_pos_list.toArray(new Integer[0])
+                ));
             } else {
-                /* head中有变量，而且全部当做自由变量处理 */
-                iterate4CounterExamples(counter_example_set, head_pred, 0, head_only_var_locs);
+                /* BLGV (HGV) (注意这里可能存在对应Head中多个Arg的情况) */
+                final PredArgPos body_pos = body_var_pos_list.get(0);
+                head_gv_pos_list.add(new BGVLinkInfo(
+                        body_pos.predIdx, body_pos.argIdx, head_var_pos_list.toArray(new Integer[0])
+                ));
+            }
+        }
+        final Integer[][] head_ov_poss = new Integer[head_ov_pos_list.size()][];
+        for (int i = 0; i < head_ov_pos_list.size(); i++) {
+            head_ov_poss[i] = head_ov_pos_list.get(i).toArray(new Integer[0]);
+        }
+
+        /* 将HGV的取值迭代在Head中，并对所有HOV进行迭代 */
+        int cartesian_operations = 0;
+        final Set<Predicate> head_templates = new HashSet<>();
+        if (body_idx_2_ugv_pos_map.isEmpty()) {
+            for (final List<PredicateCache> grounding : groundingsBody) {
+                final Predicate head_template = new Predicate(head_pred);
+                for (final BGVLinkInfo pos : head_gv_pos_list) {
+                    final Predicate body_pred = grounding.get(pos.bodyPredIdx).predicate;
+                    final Argument argument = body_pred.args[pos.bodyArgIdx];
+                    for (int loc : pos.headVarLocs) {
+                        head_template.args[loc] = argument;
+                    }
+                }
+                head_templates.add(head_template);
             }
         } else {
-            /* 找到所有head template */
-            final Set<Predicate> head_templates = new HashSet<>();
-            if (bodyFreeVars.isEmpty()) {
-                for (final List<PredicateCache> grounding_body : groundingsBody) {
-                    final Predicate head_template = new Predicate(head_pred);
-                    for (final GVBindingInfo pos : body_gv_pos) {
-                        final Predicate body_pred = grounding_body.get(pos.bodyPredIdx).predicate;
-                        final Argument argument = body_pred.args[pos.bodyArgIdx];
-                        for (int loc : pos.headVarLocs) {
-                            head_template.args[loc] = argument;
-                        }
-                    }
-                    head_templates.add(head_template);
-                }
-            } else {
-                /* 按predicate组合Body FV */
-                final Map<Integer, List<BodyFvPos>> pred_idx_2_arg_idxs_of_bfv = new HashMap<>();
-                for (final BodyFvPos bfv_pos: bodyFreeVars.values()) {
-                    final List<BodyFvPos> arg_idxs = pred_idx_2_arg_idxs_of_bfv.computeIfAbsent(
-                            bfv_pos.bodyPredIdx, k -> new ArrayList<>()
-                    );
-                    arg_idxs.add(bfv_pos);
-                }
-                final Map.Entry<Integer, List<BodyFvPos>>[] pred_idx_2_arg_idxs_of_bfv_entry_list =
-                        pred_idx_2_arg_idxs_of_bfv.entrySet().toArray(new Map.Entry[0]);
+            /* 按predicate组合Body FV */
+            final Map.Entry<Integer, List<BGVLinkInfo>>[] body_idx_2_ugv_pos_entry_list =
+                    body_idx_2_ugv_pos_map.entrySet().toArray(new Map.Entry[0]);
 
-                for (final List<PredicateCache> grounding_body : groundingsBody) {
-                    /* 给Body GV赋值 */
-                    final Predicate head_template = new Predicate(head_pred);
-                    for (final GVBindingInfo pos : body_gv_pos) {
-                        final Predicate body_pred = grounding_body.get(pos.bodyPredIdx).predicate;
-                        final Argument argument = body_pred.args[pos.bodyArgIdx];
-                        for (int loc : pos.headVarLocs) {
-                            head_template.args[loc] = argument;
-                        }
+            for (final List<PredicateCache> grounding : groundingsBody) {
+                /* 给Body GV赋值 */
+                final Predicate head_template = new Predicate(head_pred);
+                for (final BGVLinkInfo pos : head_gv_pos_list) {
+                    final Predicate body_pred = grounding.get(pos.bodyPredIdx).predicate;
+                    final Argument argument = body_pred.args[pos.bodyArgIdx];
+                    for (int loc : pos.headVarLocs) {
+                        head_template.args[loc] = argument;
                     }
+                }
 
-                    /* 加上Body Fv */
-                    /* Body FV 的取值范围不是全部constant，且要按照pred进行组合 */
-                    final Set<ComparableArray<String>>[] fv_within_pred_bindings =
-                            new Set[pred_idx_2_arg_idxs_of_bfv_entry_list.length];
-                    for (int i = 0; i < pred_idx_2_arg_idxs_of_bfv_entry_list.length; i++) {
-                        final Map.Entry<Integer, List<BodyFvPos>> entry = pred_idx_2_arg_idxs_of_bfv_entry_list[i];
-                        final int body_pred_idx = entry.getKey();
-                        final List<BodyFvPos> body_fv_poss = entry.getValue();
-                        final Set<ComparableArray<String>> values = new HashSet<>();
-                        final PredicateCache pred_cache = grounding_body.get(body_pred_idx);
-                        for (Predicate included_pred : pred_cache.inclusion) {
-                            final String[] fv_within_pred_binding = new String[body_fv_poss.size()];
-                            for (int j = 0; j < fv_within_pred_binding.length; j++) {
-                                fv_within_pred_binding[j] = included_pred.args[body_fv_poss.get(j).bodyArgIdx].name;
-                            }
-                            values.add(new ComparableArray<>(fv_within_pred_binding));
+                /* 加上Body Fv */
+                /* Body FV 的取值范围不是全部constant，且要按照pred进行组合 */
+                final Set<ComparableArray<String>>[] uv_within_pred_bindings =
+                        new Set[body_idx_2_ugv_pos_entry_list.length];
+                for (int i = 0; i < body_idx_2_ugv_pos_entry_list.length; i++) {
+                    final Map.Entry<Integer, List<BGVLinkInfo>> entry = body_idx_2_ugv_pos_entry_list[i];
+                    final int body_pred_idx = entry.getKey();
+                    final List<BGVLinkInfo> bugv_links = entry.getValue();
+                    final Set<ComparableArray<String>> values = new HashSet<>();
+                    final PredicateCache pred_cache = grounding.get(body_pred_idx);
+                    for (Predicate included_pred : pred_cache.inclusion) {
+                        final String[] fv_within_pred_binding = new String[bugv_links.size()];
+                        for (int j = 0; j < fv_within_pred_binding.length; j++) {
+                            fv_within_pred_binding[j] = included_pred.args[bugv_links.get(j).bodyArgIdx].name;
                         }
-                        fv_within_pred_bindings[i] = values;
+                        values.add(new ComparableArray<>(fv_within_pred_binding));
                     }
-                    final Set<ComparableArray<ComparableArray<String>>> fv_bindings = new HashSet<>();
-                    addBodyFvBindings(fv_bindings, fv_within_pred_bindings);
-                    int delta_cartesian_operations = 1;
-                    for (Set<ComparableArray<String>> fv_within_pred_values: fv_within_pred_bindings) {
-                        delta_cartesian_operations *= fv_within_pred_values.size();
-                    }
-                    cartesian_operations += delta_cartesian_operations;
-                    for (ComparableArray<ComparableArray<String>> fv_binding: fv_bindings) {
-                        for (int i = 0; i < pred_idx_2_arg_idxs_of_bfv_entry_list.length; i++) {
-                            final Map.Entry<Integer, List<BodyFvPos>> entry = pred_idx_2_arg_idxs_of_bfv_entry_list[i];
-                            final ComparableArray<String> fv_value_combination = fv_binding.arr[i];
-                            final List<BodyFvPos> body_fv_poss = entry.getValue();
-                            for (int j = 0; j < fv_value_combination.arr.length; j++) {
-                                head_template.args[body_fv_poss.get(j).headArgIdx] = new Constant(
-                                        CONSTANT_ARG_ID, fv_value_combination.arr[j]
+                    uv_within_pred_bindings[i] = values;
+                }
+                final Set<ComparableArray<ComparableArray<String>>> fv_bindings = new HashSet<>();
+                addBodyFvBindings(fv_bindings, uv_within_pred_bindings);
+                int delta_cartesian_operations = 1;
+                for (Set<ComparableArray<String>> fv_within_pred_values: uv_within_pred_bindings) {
+                    delta_cartesian_operations *= fv_within_pred_values.size();
+                }
+                cartesian_operations += delta_cartesian_operations;
+                for (ComparableArray<ComparableArray<String>> fv_binding: fv_bindings) {
+                    for (int i = 0; i < body_idx_2_ugv_pos_entry_list.length; i++) {
+                        final Map.Entry<Integer, List<BGVLinkInfo>> entry =
+                                body_idx_2_ugv_pos_entry_list[i];
+                        final ComparableArray<String> fv_value_combination = fv_binding.arr[i];
+                        final List<BGVLinkInfo> bugv_links = entry.getValue();
+                        for (int j = 0; j < fv_value_combination.arr.length; j++) {
+                            final BGVLinkInfo bugv_link = bugv_links.get(j);
+                            for (int head_arg_idx: bugv_link.headVarLocs) {
+                                head_template.args[head_arg_idx] = new Constant(
+                                        Rule.CONSTANT_ARG_ID, fv_value_combination.arr[j]
                                 );
                             }
                         }
-                        head_templates.add(new Predicate(head_template));
                     }
+                    head_templates.add(new Predicate(head_template));
                 }
             }
-
-            /* 遍历head template 找反例 */
-            if (0 == head_only_var_locs.length) {
-                /* 不需要替换变量 */
-                for (Predicate head_template : head_templates) {
-                    if (!kb.containsFact(head_template)) {
-                        counter_example_set.add(head_template);
-                    }
+        }
+        if (head_ov_pos_list.isEmpty()) {
+            /* 不需要替换变量 */
+            for (Predicate head_template : head_templates) {
+                if (!kb.containsFact(head_template)) {
+                    counter_example_set.add(head_template);
                 }
-            } else {
-                /* 需要替换head中的变量 */
-                for (Predicate head_template: head_templates) {
-                    iterate4CounterExamples(counter_example_set, head_template, 0, head_only_var_locs);
-                }
+            }
+        } else {
+            /* 需要替换head中的变量 */
+            for (Predicate head_template: head_templates) {
+                iterate4CounterExamples(counter_example_set, head_template, 0, head_ov_poss);
             }
         }
         final long time_all_entail_done = System.nanoTime();
