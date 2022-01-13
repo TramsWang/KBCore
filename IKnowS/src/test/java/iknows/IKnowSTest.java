@@ -202,7 +202,7 @@ class IKnowSTest {
 
     @Test
     void testFamily1() {
-        IknowsImpl sinc = new IknowsImpl(new IknowsConfig(
+        IknowsImpl iknows = new IknowsImpl(new IknowsConfig(
                 1,
                 false,
                 false,
@@ -217,8 +217,8 @@ class IKnowSTest {
                 false),
                 null,null,null
         );
-        sinc.run();
-        PerformanceMonitor monitor = sinc.getPerformanceMonitor();
+        iknows.run();
+        PerformanceMonitor monitor = iknows.getPerformanceMonitor();
         List<PerformanceMonitor.BranchInfo> expected_branch_infos = new ArrayList<>();
         expected_branch_infos.add(new PerformanceMonitor.BranchInfo(0, 14, 0));
         expected_branch_infos.add(new PerformanceMonitor.BranchInfo(1, 20, 0));
@@ -235,7 +235,7 @@ class IKnowSTest {
 
     @Test
     void testFamily2() {
-        IknowsImpl sinc = new IknowsImpl(new IknowsConfig(
+        IknowsImpl iknows = new IknowsImpl(new IknowsConfig(
                 1,
                 false,
                 false,
@@ -250,8 +250,8 @@ class IKnowSTest {
                 false),
                 null,null,null
         );
-        sinc.run();
-        PerformanceMonitor monitor = sinc.getPerformanceMonitor();
+        iknows.run();
+        PerformanceMonitor monitor = iknows.getPerformanceMonitor();
         List<PerformanceMonitor.BranchInfo> expected_branch_infos = new ArrayList<>();
         expected_branch_infos.add(new PerformanceMonitor.BranchInfo(0, 7, 0));
         expected_branch_infos.add(new PerformanceMonitor.BranchInfo(1, 8, 0));
@@ -268,7 +268,7 @@ class IKnowSTest {
 
     @Test
     void testFamily3() {
-        IknowsImpl sinc = new IknowsImpl(new IknowsConfig(
+        IknowsImpl iknows = new IknowsImpl(new IknowsConfig(
                 1,
                 false,
                 false,
@@ -283,8 +283,8 @@ class IKnowSTest {
                 false),
                 null,null,null
         );
-        sinc.run();
-        PerformanceMonitor monitor = sinc.getPerformanceMonitor();
+        iknows.run();
+        PerformanceMonitor monitor = iknows.getPerformanceMonitor();
         List<PerformanceMonitor.BranchInfo> expected_branch_infos = new ArrayList<>();
         expected_branch_infos.add(new PerformanceMonitor.BranchInfo(0, 7, 0));
         expected_branch_infos.add(new PerformanceMonitor.BranchInfo(1, 7, 0));

@@ -73,17 +73,17 @@ public class TestSpeedUp {
             System.setErr(ps_err);
             switch (MODEL) {
                 case "basic": {
-                    IKnowS sinc = new IknowsWithJpl(
+                    IKnowS iknows = new IknowsWithJpl(
                             config, DATASET_PATH, dump_path, log_path
                     );
-                    sinc.run();
+                    iknows.run();
                     break;
                 }
                 case "Cr": {
-                    IKnowS sinc = new IknowsWithRecalculateCache(
+                    IKnowS iknows = new IknowsWithRecalculateCache(
                             config, DATASET_PATH, dump_path, log_path
                     );
-                    sinc.run();
+                    iknows.run();
                     break;
                 }
                 default:

@@ -81,10 +81,10 @@ public class TestDataQuality {
                 PrintStream ps_err = new PrintStream(new FileOutputStream(stderr_path));
                 System.setOut(ps_out);
                 System.setErr(ps_err);
-                IknowsWithRecalculateCache sinc = new IknowsWithRecalculateCache(
+                IknowsWithRecalculateCache iknows = new IknowsWithRecalculateCache(
                         config, dataset_path, dump_path, log_path
                 );
-                sinc.run();
+                iknows.run();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

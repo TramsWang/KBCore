@@ -56,18 +56,18 @@ class IknowsWithJplTest {
             );
 
             retractAllKnowledge();
-            IknowsWithJpl sinc = new IknowsWithJpl(
+            IknowsWithJpl iknows = new IknowsWithJpl(
                     config,
                     tmp_bk_file_path,
                     null,
                     null
             );
-            sinc.run();
+            iknows.run();
 
             try {
-                Set<RuleFingerPrint> rule_set_sinc = new HashSet<>();
-                for (Rule r: sinc.getHypothesis()) {
-                    rule_set_sinc.add(r.getFingerPrint());
+                Set<RuleFingerPrint> rule_set_iknows = new HashSet<>();
+                for (Rule r: iknows.getHypothesis()) {
+                    rule_set_iknows.add(r.getFingerPrint());
                 }
                 final Predicate head1 = new Predicate(
                         FamilyRelationGenerator.OtherPredicate.GENDER.getName(),
@@ -106,7 +106,7 @@ class IknowsWithJplTest {
                 final Set<RuleFingerPrint> expected_rules = new HashSet<>();
                 expected_rules.add(new RuleFingerPrint(r1));
                 expected_rules.add(new RuleFingerPrint(r2));
-                assertEquals(expected_rules, rule_set_sinc);
+                assertEquals(expected_rules, rule_set_iknows);
             } catch (Exception e) {
                 e.printStackTrace();
                 fail();
@@ -156,18 +156,18 @@ class IknowsWithJplTest {
             );
 
             retractAllKnowledge();
-            IknowsWithJpl sinc = new IknowsWithJpl(
+            IknowsWithJpl iknows = new IknowsWithJpl(
                     config,
                     tmp_bk_file_path,
                     null,
                     null
             );
-            sinc.run();
+            iknows.run();
 
             try {
-                Set<RuleFingerPrint> rule_set_sinc = new HashSet<>();
-                for (Rule r: sinc.getHypothesis()) {
-                    rule_set_sinc.add(r.getFingerPrint());
+                Set<RuleFingerPrint> rule_set_iknows = new HashSet<>();
+                for (Rule r: iknows.getHypothesis()) {
+                    rule_set_iknows.add(r.getFingerPrint());
                 }
                 final Predicate head1 = new Predicate(
                         FamilyRelationGenerator.OtherPredicate.GENDER.getName(),
@@ -238,7 +238,7 @@ class IknowsWithJplTest {
                 expected_rules.add(new RuleFingerPrint(r2));
                 expected_rules.add(new RuleFingerPrint(r3));
                 expected_rules.add(new RuleFingerPrint(r4));
-                assertEquals(expected_rules, rule_set_sinc);
+                assertEquals(expected_rules, rule_set_iknows);
             } catch (Exception e) {
                 e.printStackTrace();
                 fail();

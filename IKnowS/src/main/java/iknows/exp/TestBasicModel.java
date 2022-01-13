@@ -56,10 +56,10 @@ public class TestBasicModel {
             PrintStream ps_err = new PrintStream(new FileOutputStream(stderr_path));
             System.setOut(ps_out);
             System.setErr(ps_err);
-            IknowsWithJpl sinc = new IknowsWithJpl(
+            IknowsWithJpl iknows = new IknowsWithJpl(
                     config, dataset.getPath(), dump_path, log_path
             );
-            sinc.run();
+            iknows.run();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
