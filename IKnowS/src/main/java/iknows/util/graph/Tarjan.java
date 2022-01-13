@@ -52,6 +52,9 @@ public class Tarjan<T extends BaseGraphNode<?>> {
             /* 只返回非平凡的强连通分量 */
             if (1 < scc.size()) {
                 result.add(scc);
+            } else if (null != neighbours && neighbours.contains(node)) {
+                /* graph中可能包含自环 */
+                result.add(scc);
             }
         }
     }

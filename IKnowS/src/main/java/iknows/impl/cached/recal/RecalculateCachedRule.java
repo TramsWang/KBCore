@@ -355,6 +355,7 @@ public class RecalculateCachedRule extends CachedRule {
                     final Constant constant = new Constant(CONSTANT_ARG_ID, entry.getKey());
                     new_target_pred_cache.predicate.args[argIdx1] = constant;
                     new_target_pred_cache.predicate.args[argIdx2] = constant;
+                    new_target_pred_cache.inclusion = entry.getValue();
                     grounding_itr.add(new_grounding);
                 }
             }

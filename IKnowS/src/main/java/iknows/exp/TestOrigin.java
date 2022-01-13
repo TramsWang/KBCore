@@ -1,6 +1,7 @@
 package iknows.exp;
 
 import iknows.IknowsConfig;
+import iknows.common.Dataset;
 import iknows.common.Eval;
 import iknows.impl.cached.recal.IknowsWithRecalculateCache;
 

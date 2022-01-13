@@ -1,6 +1,7 @@
 package iknows.exp;
 
 import iknows.IknowsConfig;
+import iknows.common.Dataset;
 import iknows.common.Eval;
 import iknows.impl.basic.IknowsWithJpl;
 
@@ -12,7 +13,7 @@ import java.io.PrintStream;
 public class TestBasicModel {
     static void testBeam(int beam_width, Eval.EvalMetric eval_metric, Dataset dataset) {
         final String PURPOSE = "ORIGIN";
-        final String MODEL = "cached";
+        final String MODEL = "basic";
         
         File dir = new File(String.format("%s/%s", PURPOSE, dataset.getName()));
         if (!dir.exists() && !dir.mkdirs()) {

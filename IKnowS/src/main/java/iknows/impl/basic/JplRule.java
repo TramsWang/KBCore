@@ -32,8 +32,81 @@ public class JplRule extends Rule {
 
     @Override
     protected double factCoverage() {
-        /* Todo: Implement Here */
-        throw new Error("Not Implemented");
+        /* 统计Head的参数情况，并将其转成带Free Var的Jpl Arg Array */
+        final long pre_computing_start = System.nanoTime();
+        final Predicate head_pred = getHead();
+        final List<String> bounded_vars_in_head = new ArrayList<>();
+        final Term[] head_args = new Term[head_pred.args.length];
+        int free_var_cnt_in_head = 0;
+        for (int arg_idx = 0; arg_idx < head_args.length; arg_idx++) {
+            Argument argument = head_pred.args[arg_idx];
+            if (null == argument) {
+                head_args[arg_idx] = new Variable(String.format("Y%d", free_var_cnt_in_head));
+                free_var_cnt_in_head++;
+            } else if (argument.isVar) {
+                head_args[arg_idx] = new Variable(argument.name);
+                bounded_vars_in_head.add(argument.name);
+            } else {
+                head_args[arg_idx] = new Atom(argument.name);
+            }
+        }
+        final Set<Predicate> global_facts = kb.getGlobalFactsByFunctor(head_pred.functor);
+        final Set<Predicate> cur_facts = kb.getCurrentFactsByFunctor(head_pred.functor);
+
+        final Set<String> bounded_vars_in_body = new HashSet<>();
+        final StringBuilder query_builder = new StringBuilder();
+        if (2 <= this.length()) {
+            for (int pred_idx = FIRST_BODY_PRED_IDX; pred_idx < this.length(); pred_idx++) {
+                final Predicate body_pred = structure.get(pred_idx);
+                final Term[] args = new Term[body_pred.arity()];
+                for (int arg_idx = 0; arg_idx < body_pred.arity(); arg_idx++) {
+                    Argument argument = body_pred.args[arg_idx];
+                    if (null == argument) {
+                        args[arg_idx] = new Variable("_");
+                    } else if (argument.isVar) {
+                        args[arg_idx] = new Variable(argument.name);
+                        bounded_vars_in_body.add(argument.name);
+                    } else {
+                        args[arg_idx] = new Atom(argument.name);
+                    }
+                }
+                final Compound body_compound = new Compound(body_pred.functor, args);
+                query_builder.append(body_compound).append(',');
+            }
+            query_builder.deleteCharAt(query_builder.length() - 1);
+        }
+        String query_str = query_builder.toString();
+
+        /* 计算positive entailments */
+        final boolean body_is_not_empty = structure.size() > 1;
+        final Compound head_compound = new Compound(head_pred.functor, head_args);
+        query_str = body_is_not_empty ? head_compound.toString() + ',' + query_str :
+                head_compound.toString();
+
+        final Query q = new Query(Term.textToTerm(query_str));
+        final Set<Predicate> head_instances = new HashSet<>();
+        for (Map<String, Term> binding: q) {
+            long substitute_begin = System.nanoTime();
+            head_instances.add(PrologKb.compound2Fact(PrologKb.substitute(head_compound, binding)));
+            long substitute_done = System.nanoTime();
+            final long period = substitute_done - substitute_begin;
+            jplQueryMonitor.substituteCostInNano += period;
+            jplQueryMonitor.jplQueryCostInNano -= period;
+        }
+        q.close();
+
+        int positive_entailments = 0;
+        int already_entailed = 0;
+        for (Predicate head_instance: head_instances) {
+            if (cur_facts.contains(head_instance)) {
+                positive_entailments++;
+            } else if (global_facts.contains(head_instance)) {
+                already_entailed++;
+            }
+        }
+
+        /* 用HC剪枝 */
+        return ((double) positive_entailments) / global_facts.size();
     }
 
     @Override
